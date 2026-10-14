@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
+/* ── Design tokens (ui-ux-pro-max : Dark Mode OLED, accent vert) ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #06080f;
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
+  --surface: #0f172a;
+  --surface-2: #1e293b;
+  --border: #273449;
+  --accent: #22c55e;
+  --accent-strong: #4ade80;
+  --ring: #4ade80;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), system-ui, sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  color-scheme: dark;
+}
+
+/* Les liens d'ancre (« Voir nos projets ») font défiler la page en douceur */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Texte "Glisser pour allumer" : reflet qui balaie de gauche à droite */
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(248, 250, 252, 0.55) 0%,
+    rgba(248, 250, 252, 0.55) 42%,
+    #ffffff 50%,
+    rgba(248, 250, 252, 0.55) 58%,
+    rgba(248, 250, 252, 0.55) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer {
+    animation: none;
+    background: none;
+    color: rgba(248, 250, 252, 0.7);
+  }
+}
+
+/* Les arrière-plans vivent dans src/components/backgrounds (un fichier par variante). */
+
+/* Mot mis en valeur dans les titres : dégradé vert → turquoise */
+.text-glow {
+  background: linear-gradient(100deg, #86efac 0%, #4ade80 40%, #2dd4bf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Halo qui respire derrière un portrait (section À propos) */
+@keyframes aura-breathe {
+  from { transform: scale(0.94); opacity: 0.75; }
+  to { transform: scale(1.05); opacity: 1; }
+}
+.aura-breathe {
+  animation: aura-breathe 8s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aura-breathe { animation: none; }
 }

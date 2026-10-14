@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Modèle de configuration (sans secret)
+!.env.example
+
+# Demandes de contact reçues (voir src/app/api/contact/route.ts)
+/data/
