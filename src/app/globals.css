@@ -75,6 +75,37 @@ body {
   }
 }
 
+/* Chevrons au-dessus du bouton d'allumage : vague qui monte, du bas vers le haut */
+@keyframes chevron-rise {
+  0%, 100% { opacity: 0.16; transform: translateY(4px); }
+  45% { opacity: 0.95; transform: translateY(0); }
+}
+.chevron-rise > * { animation: chevron-rise 1.8s ease-in-out infinite; }
+.chevron-rise > :nth-child(1) { animation-delay: 0.36s; }
+.chevron-rise > :nth-child(2) { animation-delay: 0.18s; }
+
+/* Halo qui pulse autour du bouton d'allumage tant qu'on n'y a pas touché */
+@keyframes knob-halo {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+.knob-halo { animation: knob-halo 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron-rise > * { animation: none; opacity: 0.55; }
+  .knob-halo { animation: none; opacity: 0; }
+}
+
+/* Légendes du globe : onde qui invite à cliquer, tant qu'aucune catégorie n'est choisie */
+@keyframes holo-invite {
+  0% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.55); }
+  70%, 100% { box-shadow: 0 0 0 9px rgba(251, 146, 60, 0); }
+}
+.holo-invite { animation: holo-invite 2.8s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .holo-invite { animation: none; box-shadow: inset 0 0 0 1px rgba(253, 186, 116, 0.45); }
+}
+
 /* Les arrière-plans vivent dans src/components/backgrounds (un fichier par variante). */
 
 /* Mot mis en valeur dans les titres : dégradé vert → turquoise */

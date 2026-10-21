@@ -10,7 +10,7 @@ import { siGithub } from "simple-icons";
 const LINKEDIN_PATH =
   "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z";
 import type { Twin } from "@/lib/team";
-import { TECH, techColor } from "@/lib/tech";
+import { TECH, techColor, techLabel, type TechKey } from "@/lib/tech";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 /** Positions des trois pastilles qui flottent autour du portrait (% du cadre). */
@@ -89,8 +89,8 @@ export default function TwinProfile({ twin, index }: Props) {
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={icon.title}
-                      aria-label={`${icon.title} (site officiel, nouvel onglet)`}
+                      title={techLabel(key)}
+                      aria-label={`${techLabel(key)} (site officiel, nouvel onglet)`}
                       className="twinsHero-chip"
                       style={{ "--tint": techColor(key) } as CSSProperties}
                     >
@@ -123,6 +123,16 @@ export default function TwinProfile({ twin, index }: Props) {
         >
           {twin.name}
         </motion.h3>
+        {(twin.fullName || twin.studies) && (
+          <motion.p
+            {...reveal(0.17)}
+            className="-mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[12.5px] tracking-wide text-white/50"
+          >
+            {twin.fullName && <span>{twin.fullName}</span>}
+            {twin.fullName && twin.studies && <span aria-hidden className="hidden text-white/25 sm:inline">/</span>}
+            {twin.studies && <span>Formation : {twin.studies}</span>}
+          </motion.p>
+        )}
         <motion.div {...reveal(0.2)} className="flex flex-col gap-1">
           <p className="text-[1.05rem] font-medium" style={{ color: twin.accent }}>
             {twin.role}
@@ -147,23 +157,26 @@ export default function TwinProfile({ twin, index }: Props) {
           ))}
         </motion.ul>
 
-        <motion.div {...reveal(0.35)} className="flex flex-wrap items-center justify-between gap-4 pt-1">
-          <ul className="flex flex-wrap gap-1.5" aria-label="Technologies">
-            {twin.stack.map((key) => {
-              const { icon } = TECH[key];
-              return (
-                <li
-                  key={key}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-2 pr-2.5 text-[12px] text-white/75"
-                >
-                  <svg aria-hidden viewBox="0 0 24 24" className="h-3.5 w-3.5" style={{ fill: techColor(key) }}>
-                    <path d={icon.path} />
-                  </svg>
-                  {icon.title}
-                </li>
-              );
-            })}
-          </ul>
+        {twin.skills && (
+          <motion.dl {...reveal(0.35)} className="flex flex-col gap-3 pt-1">
+            {twin.skills.map((group) => (
+              <div key={group.label} className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-4">
+                <dt className="font-mono text-[11.5px] uppercase tracking-wider text-white/45 sm:w-[130px] sm:shrink-0 sm:pt-[5px]">
+                  {group.label}
+                </dt>
+                <dd>
+                  <TechChips keys={group.items} label={group.label} />
+                </dd>
+              </div>
+            ))}
+          </motion.dl>
+        )}
+
+        <motion.div
+          {...reveal(0.4)}
+          className={`flex flex-wrap items-center gap-4 pt-1 ${twin.skills ? "justify-start" : "justify-between"}`}
+        >
+          {!twin.skills && <TechChips keys={twin.stack} label="Technologies" />}
           <div className="flex items-center gap-1">
             {twin.links.linkedin && <Social href={twin.links.linkedin} label="LinkedIn" icon={<Brand path={LINKEDIN_PATH} />} />}
             {twin.links.github && <Social href={twin.links.github} label="GitHub" icon={<Brand path={siGithub.path} />} />}
@@ -172,6 +185,25 @@ export default function TwinProfile({ twin, index }: Props) {
         </motion.div>
       </div>
     </article>
+  );
+}
+
+/** Rangée d'étiquettes de technos : logo à la couleur de la marque + nom. */
+function TechChips({ keys, label }: { keys: TechKey[]; label: string }) {
+  return (
+    <ul className="flex flex-wrap gap-1.5" aria-label={label}>
+      {keys.map((key) => (
+        <li
+          key={key}
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-2 pr-2.5 text-[12px] text-white/75"
+        >
+          <svg aria-hidden viewBox="0 0 24 24" className="h-3.5 w-3.5" style={{ fill: techColor(key) }}>
+            <path d={TECH[key].icon.path} />
+          </svg>
+          {techLabel(key)}
+        </li>
+      ))}
+    </ul>
   );
 }
 

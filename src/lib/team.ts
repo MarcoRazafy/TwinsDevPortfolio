@@ -1,8 +1,14 @@
 import type { TechKey } from "./tech";
 
+export type SkillGroup = { label: string; items: TechKey[] };
+
 export type Twin = {
   slug: string;
   name: string;
+  /** Nom complet, affiché en petit sous le prénom. */
+  fullName?: string;
+  /** Formation, affichée à côté du nom complet. */
+  studies?: string;
   /** Rôle en une ligne, ex. « Développeur front-end & designer ». */
   role: string;
   /** Phrase d'accroche, affichée sous le nom. */
@@ -13,6 +19,8 @@ export type Twin = {
   does: string[];
   /** Spécialités (clés de src/lib/tech.ts). Les 3 premières flottent aussi autour du portrait. */
   stack: TechKey[];
+  /** Compétences rangées par catégorie : si présent, remplace la rangée `stack` sous le texte. */
+  skills?: SkillGroup[];
   links: { linkedin?: string; github?: string; email?: string };
   /** Portrait détouré (chemin public) et ses dimensions. */
   image: { src: string; width: number; height: number };
@@ -44,17 +52,28 @@ export const TEAM: Twin[] = [
   {
     slug: "loic",
     name: "Loïc",
-    role: "Développeur back-end & infrastructure",
-    tagline: "Il construit ce qui tourne derrière : données, serveurs, sécurité.",
+    fullName: "Faneva Loïc RAZAFIMAMONJY",
+    studies: "Intégration et développement",
+    role: "Développeur fullstack · Workflow & DevOps",
+    tagline: "Il automatise, connecte et sécurise ce qui tourne derrière.",
     bio: [
-      "Loïc s'occupe de tout ce qui ne se voit pas mais qui fait fonctionner le site : la base de données, les paiements, les comptes utilisateurs, la mise en ligne et la sécurité.",
-      "Ingénieur IT lui aussi, il veille à ce que chaque projet soit solide et facile à faire évoluer. Quand votre activité grandit, votre site suit sans tout refaire.",
+      "Loïc gère surtout le back-end, mais il sait aussi prendre en main le front-end. Sa spécialité : l'automatisation. Il conçoit les workflows qui font tourner une application ou une plateforme toute seule, et crée des bots pour assister vos utilisateurs.",
+      "Côté infrastructure, il administre les serveurs, les déploie via SSH et sécurise les données. Il relie aussi vos outils entre eux grâce aux API, pour que chaque projet reste solide et facile à faire évoluer.",
     ],
-    does: ["Bases de données et API", "Paiement, comptes, espace admin", "Hébergement, sauvegardes, sécurité"],
-    stack: ["nodejs", "postgresql", "python", "docker", "git"],
-    links: { linkedin: "#apropos", github: "#apropos" },
+    does: [
+      "Automatisation de workflows et bots d'assistance",
+      "Intégration d'API, back-end et front-end",
+      "Serveurs, déploiement SSH et sécurité des données",
+    ],
+    stack: ["n8n", "laravel", "docker"],
+    skills: [
+      { label: "Front-end", items: ["html", "css", "javascript", "react", "nextjs", "tailwind", "uiux"] },
+      { label: "Back-end & données", items: ["nodejs", "php", "laravel", "python", "django", "java", "postgresql", "mysql"] },
+      { label: "DevOps & outils", items: ["git", "github", "docker", "cicd", "cloudflare", "n8n"] },
+      { label: "Systèmes", items: ["debian", "ubuntu", "raspberrypi", "kali"] },
+    ],
+    links: { github: "https://github.com/" },
     image: { src: "/team/loic.webp", width: 1100, height: 1088 },
     accent: "#2dd4bf",
-    example: true,
   },
 ];

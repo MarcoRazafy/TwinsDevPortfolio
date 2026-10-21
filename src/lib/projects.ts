@@ -1,8 +1,20 @@
 import type { TechKey } from "./tech";
 
+export type ProjectCategory = "application" | "site" | "plateforme" | "serveur";
+
+/** Filtres affichés au-dessus du globe, dans cet ordre. */
+export const PROJECT_CATEGORIES: { key: ProjectCategory; label: string }[] = [
+  { key: "application", label: "Application" },
+  { key: "site", label: "Site" },
+  { key: "plateforme", label: "Plateforme" },
+  { key: "serveur", label: "Serveur" },
+];
+
 export type Project = {
   /** Identifiant court, sert de clé et de nom de fichier pour la capture (public/projects/<slug>.webp). */
   slug: string;
+  /** Filtres sous lesquels le projet apparaît autour du globe (un projet peut en avoir plusieurs). */
+  categories: ProjectCategory[];
   /** Secteur du client et type de projet, ex. « Restauration · site vitrine ». */
   kind: string;
   title: string;
@@ -20,51 +32,127 @@ export type Project = {
   example?: boolean;
 };
 
-/* Projets affichés dans la section « Projets ». Les quatre ci-dessous sont des exemples : remplace-les
-   par tes réalisations (titre, problème, livrables, technos, liens, et une capture dans public/projects). */
+/* Projets affichés dans la section « Projets », dans l'ordre du carrousel. Les visuels (public/projects/<slug>.webp)
+   sont des mises en scène des captures du site. À compléter : `stack` (technos utilisées) et `links` (URL publiques). */
 export const PROJECTS: Project[] = [
   {
-    slug: "restaurant",
+    slug: "la-canopee",
+    categories: ["site"],
     kind: "Restauration · site vitrine",
-    title: "Site d'un restaurant avec réservation",
-    problem: "Toutes les réservations passaient par téléphone et la carte n'était visible nulle part en ligne.",
-    delivered: ["Carte du jour modifiable par le gérant", "Réservation en ligne avec confirmation", "Référencement local"],
-    stack: ["nextjs", "tailwind", "postgresql"],
-    links: { site: "#projets" },
-    accent: "#e0893f",
-    example: true,
+    title: "La Canopée, restaurant & rooftop",
+    problem: "Restaurant, bar et rooftop au 9e étage du Delta Hotel by Marriott Antananarivo, avec vue panoramique sur la ville.",
+    delivered: ["Carte, chef, événements et galerie", "Réservation de table, aussi via WhatsApp", "Demandes de privatisation"],
+    stack: [],
+    links: {},
+    accent: "#e2ad62",
+    image: "/projects/la-canopee.webp",
   },
   {
-    slug: "boutique",
-    kind: "Commerce · boutique en ligne",
-    title: "Boutique en ligne pour une marque de vêtements",
-    problem: "Une créatrice vendait uniquement sur les réseaux sociaux et gérait ses commandes à la main.",
-    delivered: ["Catalogue, panier et paiement sécurisé", "Suivi des stocks et des commandes", "Pages produits rapides sur mobile"],
-    stack: ["react", "nodejs", "mongodb"],
-    links: { site: "#projets", code: "#projets" },
-    accent: "#818cf8",
-    example: true,
+    slug: "paon-dor",
+    categories: ["site"],
+    kind: "Hôtellerie · site vitrine",
+    title: "Paon d'Or, hôtel à Ivato",
+    problem: "Un refuge où séjour, gastronomie, bien-être et loisirs se rencontrent, à environ 4 km de l'aéroport d'Ivato.",
+    delivered: ["Hébergement, restaurant, bien-être et expériences", "Pages événements", "Réservation en ligne"],
+    stack: [],
+    links: {},
+    accent: "#e6bd62",
+    image: "/projects/paon-dor.webp",
   },
   {
-    slug: "dashboard",
-    kind: "Entreprise · application web",
-    title: "Tableau de bord de gestion",
-    problem: "Une PME suivait son activité dans plusieurs fichiers Excel que personne ne tenait à jour.",
-    delivered: ["Données centralisées, accès par rôle", "Graphiques mis à jour automatiquement", "Export des rapports en un clic"],
-    stack: ["typescript", "python", "docker"],
-    links: { site: "#projets" },
-    accent: "#34d399",
-    example: true,
+    slug: "uditec",
+    categories: ["site", "plateforme"],
+    kind: "Distribution high-tech · site institutionnel",
+    title: "UDITEC Madagascar, distributeur de grandes marques",
+    problem: "Un distributeur d'électroménager, de téléphonie, d'informatique et d'équipements pour la maison, partout à Madagascar.",
+    delivered: ["Vérification de garantie par numéro de série", "Annuaire des revendeurs", "Espace pro : catalogue B2B et devis"],
+    stack: [],
+    links: {},
+    accent: "#fb923c",
+    image: "/projects/uditec.webp",
   },
   {
-    slug: "reservation",
-    kind: "Association · application mobile",
-    title: "Application de réservation de créneaux",
-    problem: "Les membres d'un club réservaient leurs séances dans un groupe de messagerie, sans vue d'ensemble.",
-    delivered: ["Réservation et annulation en deux gestes", "Rappels par notification", "Espace d'administration"],
-    stack: ["react", "nodejs", "postgresql"],
-    links: { site: "#projets", code: "#projets" },
-    accent: "#2dd4bf",
-    example: true,
+    slug: "ia-malagasy",
+    categories: ["application"],
+    kind: "Intelligence artificielle · application web",
+    title: "IA Malagasy, un assistant qui parle malgache",
+    problem: "Discuter, apprendre, écrire et créer en malgache, en respectant les différences entre régions et cultures.",
+    delivered: ["Conversation en malgache, modèle Mistral au choix", "Saisie vocale et pièces jointes", "Génération d'images et historique des échanges"],
+    stack: [],
+    links: {},
+    accent: "#ec8b70",
+    image: "/projects/ia-malagasy.webp",
+  },
+  {
+    slug: "naba-automobile",
+    categories: ["site", "plateforme"],
+    kind: "Pièces auto · catalogue en ligne",
+    title: "Naba Automobile, pièces auto et camions",
+    problem: "Un spécialiste des pièces pour automobiles et camions de marques chinoises, à Antananarivo.",
+    delivered: ["Recherche de pièce compatible par véhicule", "Demande de pièce sans référence", "Catalogue, arrivages et conseils"],
+    stack: [],
+    links: {},
+    accent: "#ef4444",
+    image: "/projects/naba-automobile.webp",
+  },
+  {
+    slug: "panorama",
+    categories: ["site"],
+    kind: "Hôtellerie · site et réservation",
+    title: "Hôtel Panorama, Antananarivo",
+    problem: "Chambres, piscine extérieure, restaurant Le Cassava et salles de réception, au cœur d'Antananarivo.",
+    delivered: ["Recherche de chambre par dates et voyageurs", "Réservation de table et devis événement", "Contact WhatsApp en un clic"],
+    stack: [],
+    links: {},
+    accent: "#ddb95e",
+    image: "/projects/panorama.webp",
+  },
+  {
+    slug: "orchid",
+    categories: ["site"],
+    kind: "Hôtellerie · site vitrine",
+    title: "Orchid, hôtel à Ivato",
+    problem: "Chambres et suites, restaurant, week-ends et réunions : chaque offre présentée avec ses détails.",
+    delivered: ["Chambres et suites présentées en carrousel", "Demande de détails et tarifs personnalisés", "Réservation et appel direct"],
+    stack: [],
+    links: {},
+    accent: "#de9a44",
+    image: "/projects/orchid.webp",
+  },
+  {
+    slug: "jiroof",
+    categories: ["site"],
+    kind: "Produits naturels · site vitrine",
+    title: "Ji'ROOF, vanille, girofle et huiles essentielles",
+    problem: "Une sélection de produits naturels de grande qualité, venus directement des meilleurs producteurs.",
+    delivered: ["Catalogue par catégories de produits", "Site en anglais, pour l'international", "Pages produits détaillées"],
+    stack: [],
+    links: {},
+    accent: "#ddb04c",
+    image: "/projects/jiroof.webp",
+  },
+  {
+    slug: "ebene",
+    categories: ["site"],
+    kind: "Mobilier sur mesure · site vitrine",
+    title: "Ébène, mobilier fabriqué sur mesure",
+    problem: "Quelques informations suffisent au client pour recevoir une première estimation personnalisée de son projet.",
+    delivered: ["Formulaire de projet guidé en 3 étapes", "Choix du type de meuble", "Contact direct par téléphone et e-mail"],
+    stack: [],
+    links: {},
+    accent: "#c9ad82",
+    image: "/projects/ebene.webp",
+  },
+  {
+    slug: "raspberry-library",
+    categories: ["serveur", "application"],
+    kind: "Auto-hébergement · application web",
+    title: "Raspberry Library, une vidéothèque maison",
+    problem: "Une vidéothèque auto-hébergée sur un Raspberry Pi, pour regrouper et retrouver ses vidéos.",
+    delivered: ["Recherche, tri et filtres par genre", "Espace d'administration", "Hébergée sur un Raspberry Pi"],
+    stack: ["raspberrypi"],
+    links: {},
+    accent: "#f43f7f",
+    image: "/projects/raspberry-library.webp",
   },
 ];

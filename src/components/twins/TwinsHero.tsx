@@ -4,7 +4,7 @@ import "./TwinsHero.css";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { TECH, techColor, type TechKey } from "@/lib/tech";
+import { TECH, techColor, techLabel, type TechKey } from "@/lib/tech";
 
 const TWINS_SRC = "/twins/twins.webp";
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
@@ -49,8 +49,8 @@ function Badge({ chip, visible, small }: { chip: Chip; visible: boolean; small?:
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      title={icon.title}
-      aria-label={`${icon.title} (site officiel, nouvel onglet)`}
+      title={techLabel(chip.tech)}
+      aria-label={`${techLabel(chip.tech)} (site officiel, nouvel onglet)`}
       tabIndex={visible ? 0 : -1}
       className={small ? "twinsHero-chip twinsHero-chipSmall" : "twinsHero-chip"}
       style={{ "--tint": techColor(chip.tech) } as CSSProperties}
