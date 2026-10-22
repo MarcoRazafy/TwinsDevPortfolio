@@ -8,6 +8,7 @@ import SiteNav from "@/components/sections/SiteNav";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import PhoneStage from "@/components/phone/PhoneStage";
 import ProjectsSection from "@/components/projects/ProjectsSection";
+import TechSection from "@/components/tech/TechSection";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -26,6 +27,7 @@ export default function Home({ searchParams }: Props) {
         <ProjectsSection />
         <ServicesSection />
         <AboutSection />
+        <TechSection />
         <TestimonialsSection />
         <FaqSection />
         <ContactSection />
