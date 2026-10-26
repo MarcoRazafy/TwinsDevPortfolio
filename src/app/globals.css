@@ -106,50 +106,6 @@ body {
   .holo-invite { animation: none; box-shadow: inset 0 0 0 1px rgba(253, 186, 116, 0.45); }
 }
 
-/* Section technologies : anneaux de lumière (portail holographique) avec un éclat qui en fait le tour */
-@property --ring-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-.holo-ring {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 50%;
-  border: 2px solid rgba(125, 211, 252, 0.85);
-  box-shadow: 0 0 24px 3px rgba(56, 189, 248, 0.55), inset 0 0 24px 2px rgba(56, 189, 248, 0.45);
-}
-.holo-ring::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  padding: 2px;
-  border-radius: inherit;
-  background: conic-gradient(from var(--ring-angle), transparent 0 70%, rgba(224, 242, 254, 0.95) 86%, transparent 96%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  filter: drop-shadow(0 0 6px rgba(125, 211, 252, 0.9));
-  animation: ring-spin 5s linear infinite;
-}
-@keyframes ring-spin { to { --ring-angle: 360deg; } }
-
-/* Impulsion qui parcourt une piste du circuit (chemins en pathLength=200) */
-.trace-pulse {
-  stroke-dasharray: 9 191;
-  animation: trace-flow 3.6s linear infinite;
-  filter: drop-shadow(0 0 3px rgba(125, 211, 252, 0.9));
-}
-@keyframes trace-flow {
-  from { stroke-dashoffset: 200; }
-  to { stroke-dashoffset: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .holo-ring::after { animation: none; opacity: 0.4; }
-  .trace-pulse { animation: none; opacity: 0; }
-}
-
 /* Les arrière-plans vivent dans src/components/backgrounds (un fichier par variante). */
 
 /* Mot mis en valeur dans les titres : dégradé vert → turquoise */

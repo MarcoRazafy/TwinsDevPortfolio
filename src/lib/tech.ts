@@ -92,10 +92,3 @@ export const techLabel = (key: TechKey) => {
   const tech: Tech = TECH[key];
   return tech.label ?? tech.icon.title;
 };
-
-/** Rangées de la section « Nos technologies » (cylindre holographique), de haut en bas. */
-export const TECH_ROWS: { label: string; keys: TechKey[] }[] = [
-  { label: "Front-end & design", keys: ["html", "css", "javascript", "typescript", "react", "nextjs", "tailwind", "figma"] },
-  { label: "Back-end & données", keys: ["nodejs", "python", "django", "php", "laravel", "java", "postgresql", "mysql", "mongodb"] },
-  { label: "DevOps & systèmes", keys: ["git", "github", "docker", "cicd", "cloudflare", "n8n", "debian", "ubuntu", "raspberrypi", "kali"] },
-];
