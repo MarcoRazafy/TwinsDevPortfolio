@@ -1,8 +1,9 @@
-import { TEAM } from "@/lib/team";
+import { getTeam } from "@/lib/content/store";
 import TwinProfile from "./TwinProfile";
 
 /** Section « À propos » : un bloc par jumeau, en alternance (portrait à gauche, puis à droite). */
-export default function AboutSection() {
+export default async function AboutSection() {
+  const team = await getTeam();
   return (
     <section
       id="apropos"
@@ -26,7 +27,7 @@ export default function AboutSection() {
           </p>
         </div>
 
-        {TEAM.map((twin, index) => (
+        {team.map((twin, index) => (
           <TwinProfile key={twin.slug} twin={twin} index={index} />
         ))}
       </div>

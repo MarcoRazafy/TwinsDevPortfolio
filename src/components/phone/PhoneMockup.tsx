@@ -16,6 +16,7 @@ import {
 import LockScreen from "./LockScreen";
 import BootScreen from "./BootScreen";
 import ChatScreen from "./ChatScreen";
+import AdminLoginScreen from "./AdminLoginScreen";
 import FloatingCards from "./FloatingCards";
 import PhoneBack from "./PhoneBack";
 import PhoneSides from "./PhoneSides";
@@ -36,6 +37,8 @@ type Props = {
 
 export default function PhoneMockup({ state, onStateChange }: Props) {
   const [isBack, setIsBack] = useState(false);
+  // Écran de connexion admin, ouvert par le bouton retour du chat (par-dessus la conversation, qui reste en mémoire)
+  const [adminOpen, setAdminOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
   // Position du pointeur normalisée : -1 (gauche/haut) → 1 (droite/bas)
@@ -194,15 +197,25 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
                     <BootScreen key="boot" onDone={() => onStateChange("on")} />
                   )}
                   {state === "on" && (
-                    <ChatScreen key="chat" onPowerOff={() => onStateChange("locked")} />
+                    <ChatScreen
+                      key="chat"
+                      onPowerOff={() => {
+                        setAdminOpen(false);
+                        onStateChange("locked");
+                      }}
+                      onBack={() => setAdminOpen(true)}
+                    />
                   )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {state === "on" && adminOpen && <AdminLoginScreen key="admin" onClose={() => setAdminOpen(false)} />}
                 </AnimatePresence>
               </div>
             </div>
           </div>
 
           {/* ── Cartes de messagerie qui sortent de l'écran une fois allumé ── */}
-          <FloatingCards visible={state === "on"} />
+          <FloatingCards visible={state === "on" && !adminOpen} />
 
           {/* ── Volume : tranches, coins, boutons ── */}
           <PhoneSides />

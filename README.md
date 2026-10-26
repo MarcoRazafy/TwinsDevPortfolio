@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Espace d'administration
+
+L'admin sert à ajouter / modifier / supprimer les projets et à modifier les profils de la section « À propos ».
+
+- **Accès** : sur le site, téléphone allumé, bouton retour (‹) en haut du chat → écran de connexion. Accès direct : `/admin/login`.
+- **Configuration** (dans `.env.local`, jamais commité) :
+  ```bash
+  npm run admin:password -- "un mot de passe solide"
+  ```
+  La commande affiche `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` (empreinte scrypt, le mot de passe n'est jamais stocké en clair) et `ADMIN_SESSION_SECRET` à coller dans `.env.local`, puis redémarrer le serveur.
+- **Données** : `data/content.json` (projets et profils) et `data/uploads/` (images envoyées, servies par `/media/…`). Le dossier `data/` est ignoré par git : tant qu'il n'existe pas, le contenu vient de `src/lib/projects.ts` et `src/lib/team.ts`. Sur le serveur de production, ce dossier doit être persistant et sauvegardé.
+- **Hébergement** : le stockage sur disque convient à un serveur (VPS, Raspberry Pi, Docker avec volume). Il ne fonctionne pas sur un hébergement serverless au disque en lecture seule (ex. Vercel).
+- **Sécurité** : session par cookie signé `httpOnly`, 8 h ; blocage de 10 min après 5 échecs de connexion ; chaque action revérifie la session.

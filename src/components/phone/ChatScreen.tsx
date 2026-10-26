@@ -35,10 +35,14 @@ function TypingDots() {
   );
 }
 
-type Props = { onPowerOff: () => void };
+type Props = {
+  onPowerOff: () => void;
+  /** Bouton retour de l'en-tête : ouvre la connexion à l'espace d'administration. */
+  onBack: () => void;
+};
 
 /** Écran allumé : messagerie avec l'assistant TwinsDev (réponses générées via /api/chat). */
-export default function ChatScreen({ onPowerOff }: Props) {
+export default function ChatScreen({ onPowerOff, onBack }: Props) {
   const clock = useClock();
   const reduce = useReducedMotion() ?? false;
   const [messages, setMessages] = useState<Message[]>([]);
@@ -190,7 +194,15 @@ export default function ChatScreen({ onPowerOff }: Props) {
 
       {/* En-tête : contact + bouton d'extinction */}
       <header className="relative mt-3 flex items-center gap-2 border-b border-white/10 px-3 pb-2.5">
-        <ChevronLeft size={22} className="shrink-0 text-accent-strong" aria-hidden />
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Espace administrateur"
+          title="Espace administrateur"
+          className="-ml-1 flex h-9 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-accent-strong transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ChevronLeft size={22} aria-hidden />
+        </button>
         <span
           aria-hidden
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15"
