@@ -15,7 +15,14 @@ import {
 } from "@/lib/admin/auth";
 import { CONTENT_TAG, updateContent } from "@/lib/content/store";
 import { deleteUpload, saveUpload } from "@/lib/content/uploads";
-import { PROJECT_CATEGORIES, type Project, type ProjectCategory } from "@/lib/projects";
+import {
+  GALLERY_MAX,
+  GALLERY_NEW_PER_SAVE,
+  PROJECT_CATEGORIES,
+  type GalleryImage,
+  type Project,
+  type ProjectCategory,
+} from "@/lib/projects";
 import type { SkillGroup, Twin } from "@/lib/team";
 import { TECH, type TechKey } from "@/lib/tech";
 
@@ -118,15 +125,44 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   if (!SLUG_OK.test(slug)) return fail("Identifiant invalide : lettres minuscules, chiffres et tirets.");
   if ((site && !URL_OK.test(site)) || (code && !URL_OK.test(code))) return fail("Lien invalide : il doit commencer par https://");
 
+  // Galerie : images conservées (dans l'ordre affiché) + nouvelles images, chacune avec sa description
+  const caption = (v: FormDataEntryValue | undefined) => (typeof v === "string" ? v.trim().slice(0, 300) : "");
+  const keptSrc = fd.getAll("galleryKeep").filter((v): v is string => typeof v === "string");
+  const keptCaptions = fd.getAll("galleryCaption");
+  const newCaptions = fd.getAll("galleryNewCaption");
+  const newEntries = fd
+    .getAll("galleryFile")
+    .map((f, i) => ({ file: f instanceof File && f.size > 0 ? f : null, caption: caption(newCaptions[i]) }))
+    .filter((e): e is { file: File; caption: string } => e.file !== null);
+  if (newEntries.length > GALLERY_NEW_PER_SAVE) {
+    return fail(`${GALLERY_NEW_PER_SAVE} nouvelles images au maximum par enregistrement.`);
+  }
+  if (keptSrc.length + newEntries.length > GALLERY_MAX) return fail(`${GALLERY_MAX} images au maximum dans la galerie.`);
+
+  // Envois : en cas d'échec, on supprime ce qui a déjà été enregistré
+  const created: string[] = [];
+  const cleanup = () => Promise.all(created.map((src) => deleteUpload(src)));
   const file = uploadedFile(fd, "image");
   let newImage: string | undefined;
   if (file) {
     const saved = await saveUpload(file, slug);
     if ("error" in saved) return fail(saved.error);
     newImage = saved.src;
+    created.push(saved.src);
+  }
+  const added: GalleryImage[] = [];
+  for (const entry of newEntries) {
+    const saved = await saveUpload(entry.file, `${slug}-galerie`);
+    if ("error" in saved) {
+      await cleanup();
+      return fail(saved.error);
+    }
+    created.push(saved.src);
+    added.push({ src: saved.src, caption: entry.caption });
   }
 
   let replaced: string | undefined;
+  let droppedGallery: string[] = [];
   let conflict = false;
   let missing = false;
   await updateContent((content) => {
@@ -141,6 +177,13 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
     }
     const previous = index >= 0 ? content.projects[index] : undefined;
     const removeImage = fd.get("removeImage") === "on";
+    // Seules les images qui appartenaient déjà au projet peuvent être conservées (pas d'adresse arbitraire)
+    const before = previous?.gallery ?? [];
+    const kept = keptSrc
+      .map((src, i) => ({ src, caption: caption(keptCaptions[i]) }))
+      .filter((g, i, all) => before.some((b) => b.src === g.src) && all.findIndex((x) => x.src === g.src) === i);
+    const gallery = [...kept, ...added];
+    droppedGallery = before.filter((b) => !gallery.some((g) => g.src === b.src)).map((b) => b.src);
     const project: Project = {
       slug,
       categories,
@@ -152,6 +195,7 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
       links: { ...(site && { site }), ...(code && { code }) },
       accent: COLOR_OK.test(accent) ? accent : "#22c55e",
       image: newImage ?? (removeImage ? undefined : previous?.image),
+      gallery: gallery.length ? gallery : undefined,
     };
     if (previous?.image !== project.image) replaced = previous?.image;
     if (index >= 0) content.projects[index] = project;
@@ -159,22 +203,23 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   });
 
   if (missing || conflict) {
-    await deleteUpload(newImage);
+    await cleanup();
     return fail(missing ? "Ce projet n'existe plus : rechargez la page." : "Un autre projet utilise déjà cet identifiant.");
   }
-  await deleteUpload(replaced);
+  await Promise.all([deleteUpload(replaced), ...droppedGallery.map((src) => deleteUpload(src))]);
   updateTag(CONTENT_TAG);
   return { ok: true, message: original ? "Projet mis à jour." : "Projet ajouté." };
 }
 
 export async function deleteProject(slug: string): Promise<ActionState> {
   if (!(await getAdmin())) return SESSION_EXPIRED;
-  let image: string | undefined;
+  let images: (string | undefined)[] = [];
   await updateContent((content) => {
-    image = content.projects.find((p) => p.slug === slug)?.image;
+    const project = content.projects.find((p) => p.slug === slug);
+    images = [project?.image, ...(project?.gallery ?? []).map((g) => g.src)];
     content.projects = content.projects.filter((p) => p.slug !== slug);
   });
-  await deleteUpload(image);
+  await Promise.all(images.map((src) => deleteUpload(src)));
   updateTag(CONTENT_TAG);
   return { ok: true, message: "Projet supprimé." };
 }

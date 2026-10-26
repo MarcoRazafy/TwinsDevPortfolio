@@ -19,6 +19,7 @@ import {
 import { PROJECT_CATEGORIES, type Project, type ProjectCategory } from "@/lib/projects";
 import { TECH, techColor, techLabel } from "@/lib/tech";
 import { anchorPoints, drawAnchor, drawBeam, drawGlobe, drawOrbit, type AnchorPoints } from "./hologram/globe";
+import ProjectGallery from "./ProjectGallery";
 
 const ICONS: Record<ProjectCategory, LucideIcon> = {
   application: AppWindow,
@@ -85,6 +86,10 @@ export default function ProjectsHologram({ projects }: Props) {
   const globe = useRef({ spin: 1.2, velocity: 0, tween: null as null | { from: number; to: number; start: number } });
   const drag = useRef<null | { id: number; x: number; spin: number; lastX: number }>(null);
   const hovered = useRef(false);
+  // Panneau de détail survolé / utilisé, ou grande vue de la galerie ouverte : l'anneau s'arrête
+  const panelHovered = useRef(false);
+  const panelFocused = useRef(false);
+  const viewerOpen = useRef(false);
   const labelHovered = useRef(false); // une légende survolée : le globe s'arrête pour qu'on puisse cliquer
 
   useEffect(() => {
@@ -245,7 +250,14 @@ export default function ProjectsHologram({ projects }: Props) {
         const t = still ? 1 : clamp01((ts - o.tween.start) / FOCUS_MS);
         o.angle = o.tween.from + (o.tween.to - o.tween.from) * easeInOutCubic(t);
         if (t >= 1) o.tween = null;
-      } else if (moving && !hovered.current && ts > o.holdUntil) {
+      } else if (
+        moving &&
+        !hovered.current &&
+        !panelHovered.current &&
+        !panelFocused.current &&
+        !viewerOpen.current &&
+        ts > o.holdUntil
+      ) {
         o.angle += (ORBIT_SPEED * dt) / 1000;
       }
 
@@ -450,7 +462,18 @@ export default function ProjectsHologram({ projects }: Props) {
       </div>
 
       {/* ── Détail du projet placé devant ── */}
-      <div className="relative z-40 -mt-6 w-full max-w-[780px] px-1 sm:-mt-10">
+      <div
+        className="relative z-40 -mt-6 w-full max-w-[780px] px-1 sm:-mt-10"
+        onPointerEnter={() => (panelHovered.current = true)}
+        onPointerLeave={() => (panelHovered.current = false)}
+        onFocus={(e) => {
+          // Focus clavier seulement : un clic de souris ne doit pas figer la rotation
+          if ((e.target as HTMLElement).matches(":focus-visible")) panelFocused.current = true;
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) panelFocused.current = false;
+        }}
+      >
         <div className="relative overflow-hidden rounded-[26px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.75),rgba(5,11,24,0.85))] p-6 shadow-[0_30px_80px_-30px_rgba(2,132,199,0.55)] backdrop-blur-md sm:p-7">
           <div aria-hidden className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
           <AnimatePresence mode="wait" initial={false}>
@@ -477,6 +500,7 @@ export default function ProjectsHologram({ projects }: Props) {
                     </li>
                   ))}
                 </ul>
+                <ProjectGallery project={activeProject} onViewerChange={(open) => (viewerOpen.current = open)} />
                 {(activeProject.stack.length > 0 || activeProject.links.site) && (
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <ul className="flex flex-wrap gap-1.5" aria-label="Technologies utilisées">

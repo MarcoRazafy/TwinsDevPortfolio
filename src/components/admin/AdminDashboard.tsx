@@ -130,6 +130,7 @@ function ProjectsPanel({ projects }: { projects: Project[] }) {
                 <p className="truncate text-[14px] font-medium">{p.title}</p>
                 <p className="truncate text-[12px] text-white/45">
                   {p.categories.map((c) => PROJECT_CATEGORIES.find((x) => x.key === c)?.label).join(" · ")}
+                  {p.gallery?.length ? ` — ${p.gallery.length} image${p.gallery.length > 1 ? "s" : ""}` : ""}
                 </p>
               </div>
               <div className="flex shrink-0 items-center">

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { LoaderCircle, Save, X } from "lucide-react";
 import { saveProject, type ActionState } from "@/app/admin/actions";
 import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
+import GalleryEditor from "./GalleryEditor";
 import { ChipCheckbox, Field, Fieldset, ImageInput, Status, TechPicker, inputClass } from "./ui";
 
 type Props = {
@@ -72,6 +73,7 @@ export default function ProjectEditor({ project, onClose, onSaved }: Props) {
 
       <Fieldset legend="Visuel et liens">
         <ImageInput name="image" current={p?.image} label="Visuel du projet (16:10 conseillé)" removable />
+        <GalleryEditor initial={p?.gallery ?? []} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Lien du site" htmlFor="p-site">
             <input id="p-site" name="site" type="url" maxLength={300} defaultValue={p?.links.site} className={inputClass} placeholder="https://…" />

@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   experimental: {
-    // Envoi d'images depuis l'administration (5 Mo maximum, plus la marge du formulaire)
-    serverActions: { bodySizeLimit: "6mb" },
+    // Envoi d'images depuis l'administration : visuel + 4 images de galerie par enregistrement, 5 Mo chacune
+    serverActions: { bodySizeLimit: "26mb" },
   },
   turbopack: {
     rules: {
