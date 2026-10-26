@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
+import { RESTORE_SCRIPT } from "@/components/phone/remember";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,6 +33,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr" className={`${inter.variable} ${sora.variable} h-full antialiased`}>
+      <head>
+        {/* Avant le premier affichage : masque la scène si le téléphone était allumé (voir phone/remember.ts) */}
+        <script dangerouslySetInnerHTML={{ __html: RESTORE_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, use, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, use, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import type { BackgroundChoice } from "@/components/backgrounds/names";
 import { BACKGROUNDS } from "@/components/backgrounds/registry";
 import TwinsHero from "@/components/twins/TwinsHero";
 import PhoneMockup from "./PhoneMockup";
+import { RESTORE_STYLE_ID, readPhoneOn, readScroll, saveScroll, subscribePhoneOn, writePhoneOn } from "./remember";
 import type { PhoneState } from "./types";
 
 type ChosenProps = { choice: Promise<BackgroundChoice>; state: PhoneState };
@@ -30,11 +31,46 @@ type Props = {
  * prennent la place de gauche, le téléphone glisse vers la droite, et le reste du site apparaît en dessous.
  */
 export default function PhoneStage({ background, children }: Props) {
-  const [state, setState] = useState<PhoneState>("locked");
+  // Téléphone déjà allumé lors d'une visite précédente ? (faux côté serveur et pendant l'hydratation)
+  const remembered = useSyncExternalStore(subscribePhoneOn, readPhoneOn, () => false);
+  // État choisi par le visiteur pendant cette visite ; tant qu'il n'a rien fait, on suit la mémoire
+  const [chosen, setChosen] = useState<PhoneState | null>(null);
+  const state: PhoneState = chosen ?? (remembered ? "on" : "locked");
+  // Rallumé depuis la mémoire : on arrive directement sur le site, sans animation de mise en place
+  const restored = chosen === null && remembered;
+  const setState = (next: PhoneState) => {
+    setChosen(next);
+    if (next === "on") writePhoneOn(true);
+    if (next === "locked") writePhoneOn(false);
+  };
   const reduce = useReducedMotion() ?? false;
   const anchorRef = useRef<HTMLDivElement>(null);
   const shifted = state !== "locked";
   const on = state === "on";
+
+  // Mémorise la position de défilement en quittant la page (actualisation comprise)
+  useEffect(() => {
+    window.addEventListener("pagehide", saveScroll);
+    return () => window.removeEventListener("pagehide", saveScroll);
+  }, []);
+
+  // Rallumé depuis la mémoire : la scène réapparaît, et on revient là où l'on était dans la page
+  useEffect(() => {
+    if (!restored) return;
+    document.getElementById(RESTORE_STYLE_ID)?.remove();
+    const top = readScroll();
+    if (!top) return;
+    // Le reste du site vient d'être rendu : on attend sa mise en page avant de défiler
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => window.scrollTo({ top, behavior: "instant" }));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [restored]);
+
+  // Sécurité : la feuille de masquage ne doit jamais rester si le téléphone est éteint
+  useEffect(() => {
+    if (state === "locked") document.getElementById(RESTORE_STYLE_ID)?.remove();
+  }, [state]);
 
   // Publie le décalage du téléphone par rapport au centre de la scène (utilisé par l'arrière-plan « faisceaux »)
   useEffect(() => {
@@ -84,7 +120,7 @@ export default function PhoneStage({ background, children }: Props) {
           <motion.div
             ref={anchorRef}
             data-phone-anchor
-            layout={reduce ? false : "position"}
+            layout={reduce || restored ? false : "position"}
             transition={{ layout: { type: "spring", stiffness: 70, damping: 16 } }}
             className={shifted ? "lg:mr-[230px]" : undefined}
           >
