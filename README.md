@@ -48,3 +48,23 @@ L'admin sert à ajouter / modifier / supprimer les projets et à modifier les pr
 - **Données** : `data/content.json` (projets et profils) et `data/uploads/` (images envoyées, servies par `/media/…`). Le dossier `data/` est ignoré par git : tant qu'il n'existe pas, le contenu vient de `src/lib/projects.ts` et `src/lib/team.ts`. Sur le serveur de production, ce dossier doit être persistant et sauvegardé.
 - **Hébergement** : le stockage sur disque convient à un serveur (VPS, Raspberry Pi, Docker avec volume). Il ne fonctionne pas sur un hébergement serverless au disque en lecture seule (ex. Vercel).
 - **Sécurité** : session par cookie signé `httpOnly`, 8 h ; blocage de 10 min après 5 échecs de connexion ; chaque action revérifie la session.
+
+## Assistant du téléphone (chat)
+
+- **Sans clé d'IA, ou si le fournisseur refuse** (limite atteinte, panne) : un assistant local, gratuit, répond à partir des contenus du site (FAQ, services, projets) et oriente vers le formulaire de contact. Aucune erreur n'est montrée au visiteur. Code : `src/lib/local-assistant.ts`.
+- **Avec une IA** : n'importe quel fournisseur compatible « chat completions » (format OpenAI). Dans `.env.local`, renseigner les trois variables ensemble :
+  ```bash
+  AI_BASE_URL=https://api.groq.com/openai/v1   # adresse de l'API, version comprise
+  AI_MODEL=nom-du-modele                       # nom exact du modèle chez ce fournisseur
+  AI_API_KEY=la-cle
+  ```
+  Fournisseurs avec une offre gratuite (conditions et noms de modèles à vérifier dans leur console au moment de l'inscription) :
+
+  | Fournisseur | `AI_BASE_URL` |
+  |---|---|
+  | Groq | `https://api.groq.com/openai/v1` |
+  | Google Gemini (AI Studio) | `https://generativelanguage.googleapis.com/v1beta/openai` |
+  | OpenRouter (modèles suffixés `:free`) | `https://openrouter.ai/api/v1` |
+  | Mistral (par défaut, sans `AI_*`) | `https://api.mistral.ai/v1` via `MISTRAL_API_KEY` |
+
+  Les variables sont relues à chaque message : pas besoin de redémarrer. Le serveur journalise `[api/chat] assistant local utilisé : …` quand l'IA est contournée, avec la raison.

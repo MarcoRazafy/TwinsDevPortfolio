@@ -1,6 +1,15 @@
 import "server-only";
 
-/** Client minimal pour l'API Mistral (chat completions, en streaming). Aucune dépendance. */
+/**
+ * Client minimal pour une API de chat au format « chat completions » en streaming (Mistral, Groq,
+ * Google Gemini, OpenRouter… parlent tous ce format). Aucune dépendance.
+ *
+ * Configuration (.env.local) — les trois ensemble pour changer de fournisseur :
+ *   AI_BASE_URL  adresse de l'API, version comprise (ex. https://api.groq.com/openai/v1)
+ *   AI_MODEL     nom du modèle chez ce fournisseur
+ *   AI_API_KEY   clé du fournisseur
+ * Sans AI_*, les anciennes variables MISTRAL_API_KEY / MISTRAL_MODEL / MISTRAL_BASE_URL restent prises en compte.
+ */
 
 export type ChatRole = "user" | "assistant";
 export type ChatMessage = { role: ChatRole; content: string };
@@ -8,10 +17,14 @@ export type ChatMessage = { role: ChatRole; content: string };
 const MAX_TOKENS = 300;
 
 /* Variables lues à chaque appel : un changement de .env.local est pris en compte sans redémarrage. */
-const baseUrl = () => (process.env.MISTRAL_BASE_URL ?? "https://api.mistral.ai").replace(/\/$/, "");
-const model = () => process.env.MISTRAL_MODEL ?? "mistral-small-latest";
+const apiKey = () => process.env.AI_API_KEY || process.env.MISTRAL_API_KEY || "";
+const endpoint = () => {
+  const base = process.env.AI_BASE_URL || `${(process.env.MISTRAL_BASE_URL || "https://api.mistral.ai").replace(/\/$/, "")}/v1`;
+  return `${base.replace(/\/$/, "")}/chat/completions`;
+};
+const model = () => process.env.AI_MODEL || process.env.MISTRAL_MODEL || "mistral-small-latest";
 
-export class MistralError extends Error {
+export class AiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
@@ -21,22 +34,22 @@ export class MistralError extends Error {
 }
 
 export function hasApiKey(): boolean {
-  return Boolean(process.env.MISTRAL_API_KEY);
+  return Boolean(apiKey());
 }
 
 /**
  * Lance une complétion en streaming et renvoie un flux de texte brut (UTF-8) : seuls les morceaux de
- * réponse sont transmis, le format SSE de Mistral est décodé ici.
+ * réponse sont transmis, le format SSE du fournisseur est décodé ici.
  */
 export async function streamChat(
   system: string,
   messages: ChatMessage[],
   signal?: AbortSignal,
 ): Promise<ReadableStream<Uint8Array>> {
-  const key = process.env.MISTRAL_API_KEY;
-  if (!key) throw new MistralError("Clé MISTRAL_API_KEY absente", 503);
+  const key = apiKey();
+  if (!key) throw new AiError("Clé d'API absente", 503);
 
-  const upstream = await fetch(`${baseUrl()}/v1/chat/completions`, {
+  const upstream = await fetch(endpoint(), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
@@ -55,10 +68,10 @@ export async function streamChat(
 
   if (!upstream.ok || !upstream.body) {
     const detail = await upstream.text().catch(() => "");
-    console.error(`[mistral] ${upstream.status} ${detail.slice(0, 300)}`);
-    if (upstream.status === 401) throw new MistralError("Clé Mistral refusée", 503);
-    if (upstream.status === 429) throw new MistralError("Trop de demandes en ce moment, réessaie dans un instant", 429);
-    throw new MistralError("Le service de réponse est indisponible", 502);
+    console.error(`[ai-chat] ${upstream.status} ${detail.slice(0, 300)}`);
+    if (upstream.status === 401 || upstream.status === 403) throw new AiError("Clé d'API refusée", 503);
+    if (upstream.status === 429) throw new AiError("Limite de requêtes atteinte", 429);
+    throw new AiError("Le service de réponse est indisponible", 502);
   }
 
   return upstream.body.pipeThrough(sseToText());

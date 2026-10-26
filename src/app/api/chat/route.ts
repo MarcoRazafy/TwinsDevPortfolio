@@ -1,5 +1,7 @@
+import { AiError, hasApiKey, streamChat, type ChatMessage } from "@/lib/ai-chat";
 import { ASSISTANT_PROMPT } from "@/lib/assistant-prompt";
-import { MistralError, hasApiKey, streamChat, type ChatMessage } from "@/lib/mistral";
+import { getProjects } from "@/lib/content/store";
+import { localReply } from "@/lib/local-assistant";
 
 /** Garde-fous : taille de l'historique envoyé au modèle et longueur d'un message. */
 const MAX_MESSAGES = 24;
@@ -23,30 +25,32 @@ function parseMessages(body: unknown): ChatMessage[] | null {
   return recent;
 }
 
-/** POST /api/chat — { messages: [{ role: "user" | "assistant", content }] } → réponse en texte, streamée. */
+const TEXT_HEADERS = { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" };
+
+/** Réponse de l'assistant de secours (gratuit, sans service externe) à partir des contenus du site. */
+async function fallback(messages: ChatMessage[], reason: string) {
+  console.warn(`[api/chat] assistant local utilisé : ${reason}`);
+  const reply = localReply(messages, await getProjects());
+  return new Response(reply, { headers: { ...TEXT_HEADERS, "X-Assistant": "local" } });
+}
+
+/**
+ * POST /api/chat — { messages: [{ role: "user" | "assistant", content }] } → réponse en texte, streamée.
+ * Modèle d'IA si une clé est configurée ; sinon, ou s'il est indisponible (limite, panne), assistant local.
+ */
 export async function POST(request: Request) {
   const messages = parseMessages(await request.json().catch(() => null));
   if (!messages) return Response.json({ error: "Message invalide" }, { status: 400 });
 
-  if (!hasApiKey()) {
-    return Response.json(
-      { error: "L'assistant n'est pas configuré : ajoute MISTRAL_API_KEY dans .env.local" },
-      { status: 503 },
-    );
-  }
+  if (!hasApiKey()) return fallback(messages, "aucune clé d'API");
 
   try {
     const stream = await streamChat(ASSISTANT_PROMPT, messages, request.signal);
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store",
-        "X-Accel-Buffering": "no",
-      },
-    });
+    return new Response(stream, { headers: { ...TEXT_HEADERS, "X-Assistant": "ai" } });
   } catch (error) {
-    if (error instanceof MistralError) return Response.json({ error: error.message }, { status: error.status });
+    if (request.signal.aborted) return new Response(null, { status: 499 });
+    if (error instanceof AiError) return fallback(messages, `${error.status} ${error.message}`);
     console.error("[api/chat]", error);
-    return Response.json({ error: "Le service de réponse est indisponible" }, { status: 502 });
+    return fallback(messages, "erreur réseau");
   }
 }
