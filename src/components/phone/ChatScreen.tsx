@@ -183,10 +183,10 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
         <Image
           src="/brand/twinsdev-logo.webp"
           alt=""
-          width={720}
-          height={904}
-          sizes="200px"
-          className="w-[58%] opacity-90 drop-shadow-[0_0_28px_rgba(34,197,94,0.25)]"
+          width={1000}
+          height={761}
+          sizes="240px"
+          className="w-[70%] opacity-90 drop-shadow-[0_0_28px_rgba(255,255,255,0.18)]"
         />
       </div>
 
@@ -207,7 +207,7 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
           aria-hidden
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15"
         >
-          <Image src={CONTACT.avatar} alt="" width={360} height={308} sizes="24px" className="h-auto w-[22px]" />
+          <Image src={CONTACT.avatar} alt="" width={480} height={244} sizes="24px" className="h-auto w-[22px]" />
         </span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[14px] font-semibold">{CONTACT.name}</p>

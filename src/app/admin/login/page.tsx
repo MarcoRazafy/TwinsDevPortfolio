@@ -13,7 +13,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-[380px]">
         <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 shadow-[0_40px_100px_-40px_rgba(34,197,94,0.35)]">
           <div className="mb-6 flex flex-col items-center text-center">
-            <Image src="/brand/twinsdev-mark.webp" alt="" width={360} height={308} className="mb-4 h-auto w-11" />
+            <Image src="/brand/twinsdev-mark.webp" alt="" width={480} height={244} className="mb-4 h-auto w-11" />
             <h1 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em]">
               Espace admin
             </h1>

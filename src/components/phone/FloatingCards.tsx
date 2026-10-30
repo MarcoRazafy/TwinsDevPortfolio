@@ -73,7 +73,7 @@ export default function FloatingCards({ visible }: Props) {
       <Card visible={visible} reduce={reduce} index={0} depth={70} className="left-[88%] top-[16.5%] w-[78%]">
         <div className={`${SURFACE} flex items-center gap-3 px-3.5 py-3`}>
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15">
-            <Image src="/brand/twinsdev-mark.webp" alt="" width={360} height={308} sizes="24px" className="h-auto w-[22px]" />
+            <Image src="/brand/twinsdev-mark.webp" alt="" width={480} height={244} sizes="24px" className="h-auto w-[22px]" />
           </span>
           <span className="min-w-0 flex-1 leading-tight">
             <span className="flex items-baseline justify-between gap-2">
