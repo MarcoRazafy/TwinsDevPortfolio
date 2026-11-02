@@ -1,13 +1,23 @@
 import type { TechKey } from "./tech";
 
-export type ProjectCategory = "application" | "site" | "plateforme" | "serveur";
+/** Clé d'une catégorie (identifiant court, ex. « site »). */
+export type ProjectCategory = string;
 
-/** Filtres affichés au-dessus du globe, dans cet ordre. */
-export const PROJECT_CATEGORIES: { key: ProjectCategory; label: string }[] = [
-  { key: "application", label: "Application" },
-  { key: "site", label: "Site" },
-  { key: "plateforme", label: "Plateforme" },
-  { key: "serveur", label: "Serveur" },
+/** Icônes proposées pour une catégorie (légende du globe, filtres de l'administration). */
+export const CATEGORY_ICONS = ["app", "globe", "layers", "server", "cart", "phone", "bot", "database", "shield", "palette", "chart", "tag"] as const;
+export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
+
+export type Category = { key: ProjectCategory; label: string; icon: CategoryIcon };
+
+/** Nombre de catégories au maximum : au-delà, les légendes se chevauchent sur le globe. */
+export const CATEGORY_MAX = 8;
+
+/** Catégories de départ (légendes du globe, dans cet ordre) ; modifiables depuis l'administration. */
+export const PROJECT_CATEGORIES: Category[] = [
+  { key: "application", label: "Application", icon: "app" },
+  { key: "site", label: "Site", icon: "globe" },
+  { key: "plateforme", label: "Plateforme", icon: "layers" },
+  { key: "serveur", label: "Serveur", icon: "server" },
 ];
 
 export type GalleryImage = { src: string; caption: string };

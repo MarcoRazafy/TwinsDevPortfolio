@@ -16,12 +16,13 @@ import {
 import { CONTENT_TAG, updateContent } from "@/lib/content/store";
 import { deleteUpload, saveUpload } from "@/lib/content/uploads";
 import {
+  CATEGORY_ICONS,
+  CATEGORY_MAX,
   GALLERY_MAX,
   GALLERY_NEW_PER_SAVE,
-  PROJECT_CATEGORIES,
+  type CategoryIcon,
   type GalleryImage,
   type Project,
-  type ProjectCategory,
 } from "@/lib/projects";
 import type { SkillGroup, Twin } from "@/lib/team";
 import { TESTIMONIAL_MAX, type Testimonial } from "@/lib/testimonials";
@@ -114,10 +115,8 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   const problem = text(fd, "problem", 400);
   const delivered = lines(fd, "delivered", 3, 120);
   const slug = text(fd, "slug", 60) || slugify(title);
-  const categoryKeys = new Set(PROJECT_CATEGORIES.map((c) => c.key));
-  const categories = [...new Set(fd.getAll("categories"))].filter((c): c is ProjectCategory =>
-    categoryKeys.has(c as ProjectCategory),
-  );
+  // Catégories cochées : vérifiées plus bas contre la liste enregistrée
+  const requested = [...new Set(fd.getAll("categories"))].filter((c): c is string => typeof c === "string");
   const stack = techList(fd.getAll("stack"), 12);
   const site = text(fd, "site", 300);
   const code = text(fd, "code", 300);
@@ -127,7 +126,7 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   if (!kind) return fail("Le secteur et le type de projet sont obligatoires.");
   if (!problem) return fail("La description est obligatoire.");
   if (!delivered.length) return fail("Indiquez au moins un point livré.");
-  if (!categories.length) return fail("Choisissez au moins une catégorie.");
+  if (!requested.length) return fail("Choisissez au moins une catégorie.");
   if (!SLUG_OK.test(slug)) return fail("Identifiant invalide : lettres minuscules, chiffres et tirets.");
   if ((site && !URL_OK.test(site)) || (code && !URL_OK.test(code))) return fail("Lien invalide : il doit commencer par https://");
 
@@ -171,10 +170,16 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   let droppedGallery: string[] = [];
   let conflict = false;
   let missing = false;
+  let noCategory = false;
   await updateContent((content) => {
     const index = original ? content.projects.findIndex((p) => p.slug === original) : -1;
     if (original && index < 0) {
       missing = true;
+      return;
+    }
+    const categories = requested.filter((k) => content.categories.some((c) => c.key === k));
+    if (!categories.length) {
+      noCategory = true;
       return;
     }
     if (content.projects.some((p, i) => p.slug === slug && i !== index)) {
@@ -208,9 +213,15 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
     else content.projects.push(project);
   });
 
-  if (missing || conflict) {
+  if (missing || conflict || noCategory) {
     await cleanup();
-    return fail(missing ? "Ce projet n'existe plus : rechargez la page." : "Un autre projet utilise déjà cet identifiant.");
+    return fail(
+      missing
+        ? "Ce projet n'existe plus : rechargez la page."
+        : conflict
+          ? "Un autre projet utilise déjà cet identifiant."
+          : "Ces catégories n'existent plus : rechargez la page.",
+    );
   }
   await Promise.all([deleteUpload(replaced), ...droppedGallery.map((src) => deleteUpload(src))]);
   updateTag(CONTENT_TAG);
@@ -230,17 +241,83 @@ export async function deleteProject(slug: string): Promise<ActionState> {
   return { ok: true, message: "Projet supprimé." };
 }
 
-/** Déplace un projet dans la liste (l'ordre est celui de l'orbite autour du globe). */
-export async function moveProject(slug: string, direction: -1 | 1): Promise<ActionState> {
+/**
+ * Déplace un projet dans la liste (l'ordre est celui de l'orbite autour du globe). Avec `category`,
+ * il échange sa place avec le projet voisin de la même catégorie (liste filtrée de l'administration).
+ */
+export async function moveProject(slug: string, direction: -1 | 1, category?: string): Promise<ActionState> {
   if (!(await getAdmin())) return SESSION_EXPIRED;
   await updateContent((content) => {
-    const i = content.projects.findIndex((p) => p.slug === slug);
-    const j = i + (direction === 1 ? 1 : -1);
-    if (i < 0 || j < 0 || j >= content.projects.length) return;
-    [content.projects[i], content.projects[j]] = [content.projects[j], content.projects[i]];
+    const list = content.projects;
+    const i = list.findIndex((p) => p.slug === slug);
+    if (i < 0) return;
+    let j = i + direction;
+    while (category && j >= 0 && j < list.length && !list[j].categories.includes(category)) j += direction;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
   });
   updateTag(CONTENT_TAG);
   return { ok: true, message: "Ordre mis à jour." };
+}
+
+/* ── Catégories ── */
+
+const ICON_KEYS = new Set<string>(CATEGORY_ICONS);
+
+/** Crée une catégorie, ou la renomme (champ `originalKey`) : sa clé ne change pas, les projets la gardent. */
+export async function saveCategory(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  if (!(await getAdmin())) return SESSION_EXPIRED;
+  const original = text(fd, "originalKey", 40);
+  const label = text(fd, "label", 24);
+  const iconValue = text(fd, "icon", 20);
+  const icon = (ICON_KEYS.has(iconValue) ? iconValue : "tag") as CategoryIcon;
+  const key = original || slugify(label).slice(0, 40);
+  if (!label || !key) return fail("Donnez un nom à la catégorie.");
+
+  let error = "";
+  await updateContent((content) => {
+    const sameName = content.categories.find((c) => c.label.toLowerCase() === label.toLowerCase() && c.key !== original);
+    if (sameName) {
+      error = `La catégorie « ${sameName.label} » existe déjà.`;
+      return;
+    }
+    if (original) {
+      const category = content.categories.find((c) => c.key === original);
+      if (!category) error = "Cette catégorie n'existe plus : rechargez la page.";
+      else Object.assign(category, { label, icon });
+      return;
+    }
+    if (content.categories.length >= CATEGORY_MAX) {
+      error = `${CATEGORY_MAX} catégories au maximum : au-delà, les légendes se chevauchent sur le globe.`;
+      return;
+    }
+    // Clé unique, même si le nom ressemble à celui d'une ancienne catégorie
+    let unique = key;
+    for (let n = 2; content.categories.some((c) => c.key === unique); n++) unique = `${key}-${n}`;
+    content.categories.push({ key: unique, label, icon });
+  });
+  if (error) return fail(error);
+  updateTag(CONTENT_TAG);
+  return { ok: true, message: original ? "Catégorie modifiée." : `Catégorie « ${label} » créée.` };
+}
+
+/** Supprime une catégorie et la retire des projets ; refusé si un projet n'avait que celle-là. */
+export async function deleteCategory(key: string): Promise<ActionState> {
+  if (!(await getAdmin())) return SESSION_EXPIRED;
+  let error = "";
+  await updateContent((content) => {
+    const alone = content.projects.filter((p) => p.categories.length === 1 && p.categories[0] === key);
+    if (alone.length) {
+      const names = alone.slice(0, 2).map((p) => `« ${p.title.split(",")[0]} »`).join(", ");
+      error = `${alone.length > 1 ? `${alone.length} projets n'ont` : "Un projet n'a"} que cette catégorie (${names}${alone.length > 2 ? "…" : ""}) : donnez-leur-en une autre d'abord.`;
+      return;
+    }
+    content.categories = content.categories.filter((c) => c.key !== key);
+    for (const p of content.projects) p.categories = p.categories.filter((c) => c !== key);
+  });
+  if (error) return fail(error);
+  updateTag(CONTENT_TAG);
+  return { ok: true, message: "Catégorie supprimée." };
 }
 
 /* ── Profils ── */

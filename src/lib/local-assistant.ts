@@ -1,6 +1,6 @@
 import "server-only";
 import { FAQ } from "@/lib/faq";
-import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
+import type { Category, Project } from "@/lib/projects";
 import { SERVICES, SPECIALTIES } from "@/lib/services";
 
 /*
@@ -32,7 +32,7 @@ const service = (slug: string) => SERVICES.find((s) => s.slug === slug);
 const CONTACT = "Le plus simple : laisse-nous ton besoin dans le formulaire de contact en bas de page, on te répond rapidement.";
 
 /** Réponse au dernier message du visiteur. */
-export function localReply(messages: Message[], projects: Project[]): string {
+export function localReply(messages: Message[], projects: Project[], categories: Category[]): string {
   const last = messages.at(-1)?.content ?? "";
   const text = normalize(last);
   const firstTurn = messages.filter((m) => m.role === "user").length <= 1;
@@ -69,7 +69,7 @@ export function localReply(messages: Message[], projects: Project[]): string {
 
   if (has(text, ["realisation*", "portfolio", "exemple*", "reference*", "vos projets", "deja fait", "travaux"])) {
     const names = projects.slice(0, 3).map((p) => p.title.split(",")[0]);
-    const cats = PROJECT_CATEGORIES.map((c) => c.label.toLowerCase()).join(", ");
+    const cats = categories.map((c) => c.label.toLowerCase()).join(", ");
     return `On a notamment réalisé ${names.join(", ")}. Tu peux tous les voir autour du globe dans la section Projets (${cats}). Ton projet ressemble à l'un d'eux ?`;
   }
 

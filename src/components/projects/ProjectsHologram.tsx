@@ -3,38 +3,16 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import {
-  AppWindow,
-  ChevronLeft,
-  ChevronRight,
-  Globe2,
-  Layers,
-  Maximize2,
-  Minimize2,
-  MousePointerClick,
-  Pause,
-  Play,
-  Server,
-  type LucideIcon,
-} from "lucide-react";
-import { PROJECT_CATEGORIES, type Project, type ProjectCategory } from "@/lib/projects";
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, MousePointerClick, Pause, Play } from "lucide-react";
+import type { Category, Project, ProjectCategory } from "@/lib/projects";
+import { categoryIcon } from "./category-icons";
 import { anchorPoints, drawAnchor, drawBeam, drawGlobe, drawOrbit, type AnchorPoints } from "./hologram/globe";
 import ProjectScreen from "./ProjectScreen";
 
-const ICONS: Record<ProjectCategory, LucideIcon> = {
-  application: AppWindow,
-  site: Globe2,
-  plateforme: Layers,
-  serveur: Server,
-};
-
-/** Point d'ancrage (latitude, longitude) de chaque légende sur le globe : répartis pour qu'il y en ait toujours devant. */
-const ANCHORS: Record<ProjectCategory, [number, number]> = {
-  application: [40, -100],
-  site: [14, -5],
-  plateforme: [48, 78],
-  serveur: [-25, 138],
-};
+/** Latitudes des légendes, dans l'ordre : alternées pour qu'elles ne s'alignent pas. */
+const ANCHOR_LATS = [40, 14, 48, -25, 28, -8, 56, -40];
+/** Point d'ancrage (latitude, longitude) de la légende n° i sur n : réparties tout autour du globe, pour qu'il y en ait toujours devant. */
+const anchorOf = (i: number, n: number): [number, number] => [ANCHOR_LATS[i % ANCHOR_LATS.length], -100 + (i * 360) / Math.max(n, 1)];
 const SPIN_MS = 1300; // rotation du globe vers la légende choisie
 
 const GLOBE_SPEED = 0.07; // rad/s, rotation du globe
@@ -56,14 +34,14 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2
 /** Écart d'angle ramené dans ]-π, π]. */
 const angleDiff = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
-type Props = { projects: Project[] };
+type Props = { projects: Project[]; categories: Category[] };
 
 /**
  * Section projets en hologramme : un globe terrestre qui tourne, et au choix d'une catégorie,
  * les visuels des projets sortent du globe et tournent autour en boucle. L'image passée devant
  * est détaillée sous le globe ; un clic sur une image (ou les flèches) l'amène devant.
  */
-export default function ProjectsHologram({ projects }: Props) {
+export default function ProjectsHologram({ projects, categories }: Props) {
   const reduce = useReducedMotion() ?? false;
 
   const [category, setCategory] = useState<ProjectCategory | null>(null);
@@ -92,13 +70,19 @@ export default function ProjectsHologram({ projects }: Props) {
   const viewerOpen = useRef(false);
   const labelHovered = useRef(false); // une légende survolée : le globe s'arrête pour qu'on puisse cliquer
 
+  const counts = Object.fromEntries(
+    categories.map(({ key }) => [key, projects.filter((p) => p.categories.includes(key)).length]),
+  ) as Record<ProjectCategory, number>;
+  // Légendes du globe : les catégories qui ont au moins un projet, avec leur point d'ancrage
+  const legends = categories
+    .filter((c) => counts[c.key] > 0)
+    .map((c, i, all) => ({ ...c, anchor: anchorOf(i, all.length) }));
+  const legendsRef = useRef(legends);
+
   useEffect(() => {
     live.current = { autoplay, reduce, category };
-  }, [autoplay, reduce, category]);
-
-  const counts = Object.fromEntries(
-    PROJECT_CATEGORIES.map(({ key }) => [key, projects.filter((p) => p.categories.includes(key)).length]),
-  ) as Record<ProjectCategory, number>;
+    legendsRef.current = legends;
+  });
 
   const activeProject = orbiters.find((o) => o.key === activeKey)?.project ?? null;
   const currentList = orbiters.filter((o) => currentKeys.includes(o.key));
@@ -142,7 +126,7 @@ export default function ProjectsHologram({ projects }: Props) {
 
     // Le globe pivote pour amener la légende choisie devant, légèrement décalée sur la droite
     const g = globe.current;
-    const target = -ANCHORS[next][1] * (Math.PI / 180) + 0.45;
+    const target = -(legends.find((l) => l.key === next)?.anchor[1] ?? 0) * (Math.PI / 180) + 0.45;
     g.velocity = 0;
     g.tween = { from: g.spin, to: g.spin + angleDiff(target - g.spin), start: now };
 
@@ -251,8 +235,8 @@ export default function ProjectsHologram({ projects }: Props) {
 
       // Légendes : pied sur le globe, étiquette au bout de la tige, du côté extérieur
       const anchors: [ProjectCategory, AnchorPoints][] = [];
-      for (const { key } of PROJECT_CATEGORIES) {
-        const a = anchorPoints(view, ANCHORS[key][0], ANCHORS[key][1], r < 140 ? 1.3 : 1.36);
+      for (const { key, anchor } of legendsRef.current) {
+        const a = anchorPoints(view, anchor[0], anchor[1], r < 140 ? 1.3 : 1.36);
         anchors.push([key, a]);
         const el = labelEls.current.get(key);
         if (!el) continue;
@@ -371,7 +355,7 @@ export default function ProjectsHologram({ projects }: Props) {
           <MousePointerClick size={14} aria-hidden className="shrink-0" />
           {category ? (
             <span>
-              {PROJECT_CATEGORIES.find((c) => c.key === category)?.label} · {counts[category]} projet{counts[category] > 1 ? "s" : ""}
+              {categories.find((c) => c.key === category)?.label} · {counts[category]} projet{counts[category] > 1 ? "s" : ""}
               <span className="hidden sm:inline"> — touchez une autre légende pour changer</span>
             </span>
           ) : (
@@ -404,8 +388,8 @@ export default function ProjectsHologram({ projects }: Props) {
 
         {/* Légendes : une par catégorie, accrochées à un point du globe (position mise à jour à chaque image) */}
         <div role="group" aria-label="Type de projet">
-          {PROJECT_CATEGORIES.map(({ key, label }) => {
-            const Icon = ICONS[key];
+          {legends.map(({ key, label, icon }) => {
+            const Icon = categoryIcon(icon);
             const active = category === key;
             return (
               <button

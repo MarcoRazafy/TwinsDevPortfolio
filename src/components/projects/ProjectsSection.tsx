@@ -1,9 +1,9 @@
-import { getProjects } from "@/lib/content/store";
+import { getContent } from "@/lib/content/store";
 import ProjectsHologram from "./ProjectsHologram";
 
 /** Section « Projets » : en-tête, puis le globe en hologramme autour duquel tournent les réalisations. */
 export default async function ProjectsSection() {
-  const projects = await getProjects();
+  const { projects, categories } = await getContent();
   return (
     <section
       id="projets"
@@ -24,7 +24,7 @@ export default async function ProjectsSection() {
           </p>
         </div>
 
-        <ProjectsHologram projects={projects} />
+        <ProjectsHologram projects={projects} categories={categories} />
       </div>
     </section>
   );

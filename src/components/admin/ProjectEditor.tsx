@@ -3,19 +3,23 @@
 import { useActionState } from "react";
 import { LoaderCircle, Save, X } from "lucide-react";
 import { saveProject, type ActionState } from "@/app/admin/actions";
-import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
+import type { Category, Project } from "@/lib/projects";
 import GalleryEditor from "./GalleryEditor";
 import { ChipCheckbox, Field, Fieldset, ImageInput, Status, TechPicker, inputClass } from "./ui";
 
 type Props = {
   /** Projet modifié, ou `null` pour un nouveau projet. */
   project: Project | null;
+  /** Catégories enregistrées (pastilles à cocher). */
+  categories: Category[];
+  /** Catégorie cochée d'office pour un nouveau projet (filtre actif de la liste). */
+  defaultCategory?: string;
   onClose: () => void;
   onSaved: (message: string) => void;
 };
 
 /** Formulaire d'ajout / de modification d'un projet. */
-export default function ProjectEditor({ project, onClose, onSaved }: Props) {
+export default function ProjectEditor({ project, categories, defaultCategory, onClose, onSaved }: Props) {
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, fd) => {
     const result = await saveProject(prev, fd);
     if (result?.ok) onSaved(result.message);
@@ -61,8 +65,8 @@ export default function ProjectEditor({ project, onClose, onSaved }: Props) {
       <Fieldset legend="Classement">
         <Field label="Catégories * (légendes du globe)">
           <div className="flex flex-wrap gap-2">
-            {PROJECT_CATEGORIES.map((c) => (
-              <ChipCheckbox key={c.key} name="categories" value={c.key} label={c.label} defaultChecked={p?.categories.includes(c.key) ?? false} />
+            {categories.map((c) => (
+              <ChipCheckbox key={c.key} name="categories" value={c.key} label={c.label} defaultChecked={p ? p.categories.includes(c.key) : c.key === defaultCategory} />
             ))}
           </div>
         </Field>

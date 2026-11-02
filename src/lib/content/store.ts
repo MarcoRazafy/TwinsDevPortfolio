@@ -2,12 +2,12 @@ import "server-only";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cacheLife, cacheTag } from "next/cache";
-import { PROJECTS, type Project } from "@/lib/projects";
+import { PROJECT_CATEGORIES, PROJECTS, type Category, type Project } from "@/lib/projects";
 import { TEAM, type Twin } from "@/lib/team";
 import { TESTIMONIALS, type Testimonial } from "@/lib/testimonials";
 
-/** Contenu modifiable depuis l'administration : projets, profils et avis. */
-export type Content = { projects: Project[]; team: Twin[]; testimonials: Testimonial[] };
+/** Contenu modifiable depuis l'administration : projets (et leurs catégories), profils et avis. */
+export type Content = { projects: Project[]; categories: Category[]; team: Twin[]; testimonials: Testimonial[] };
 
 /** Étiquette de cache du contenu : à invalider (updateTag) après chaque modification. */
 export const CONTENT_TAG = "content";
@@ -21,14 +21,18 @@ async function readContent(): Promise<Content> {
   try {
     const data = JSON.parse(await readFile(FILE, "utf8")) as Partial<Content>;
     if (Array.isArray(data.projects) && Array.isArray(data.team)) {
-      // Fichiers créés avant l'ajout des avis : on complète avec les avis de départ
-      return { ...data, testimonials: Array.isArray(data.testimonials) ? data.testimonials : TESTIMONIALS } as Content;
+      // Fichiers créés avant l'ajout des avis ou des catégories : on complète avec le contenu de départ
+      return {
+        ...data,
+        categories: Array.isArray(data.categories) ? data.categories : PROJECT_CATEGORIES,
+        testimonials: Array.isArray(data.testimonials) ? data.testimonials : TESTIMONIALS,
+      } as Content;
     }
     console.error("[content] data/content.json invalide : contenu de départ utilisé");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") console.error("[content] lecture impossible", error);
   }
-  return { projects: PROJECTS, team: TEAM, testimonials: TESTIMONIALS };
+  return { projects: PROJECTS, categories: PROJECT_CATEGORIES, team: TEAM, testimonials: TESTIMONIALS };
 }
 
 /** Contenu du site, mis en cache jusqu'à la prochaine modification. */

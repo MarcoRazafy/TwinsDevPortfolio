@@ -1,6 +1,6 @@
 import { AiError, hasApiKey, streamChat, type ChatMessage } from "@/lib/ai-chat";
 import { ASSISTANT_PROMPT } from "@/lib/assistant-prompt";
-import { getProjects } from "@/lib/content/store";
+import { getContent } from "@/lib/content/store";
 import { localReply } from "@/lib/local-assistant";
 
 /** Garde-fous : taille de l'historique envoyé au modèle et longueur d'un message. */
@@ -30,7 +30,8 @@ const TEXT_HEADERS = { "Content-Type": "text/plain; charset=utf-8", "Cache-Contr
 /** Réponse de l'assistant de secours (gratuit, sans service externe) à partir des contenus du site. */
 async function fallback(messages: ChatMessage[], reason: string) {
   console.warn(`[api/chat] assistant local utilisé : ${reason}`);
-  const reply = localReply(messages, await getProjects());
+  const { projects, categories } = await getContent();
+  const reply = localReply(messages, projects, categories);
   return new Response(reply, { headers: { ...TEXT_HEADERS, "X-Assistant": "local" } });
 }
 

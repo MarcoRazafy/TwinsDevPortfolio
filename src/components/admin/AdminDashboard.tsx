@@ -3,10 +3,24 @@
 import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, ExternalLink, FolderKanban, LogOut, MessageSquareQuote, Pencil, Plus, Trash2, UserRound } from "lucide-react";
-import { deleteProject, logout, moveProject, type ActionState } from "@/app/admin/actions";
+import {
+  ArrowDown,
+  ArrowUp,
+  ExternalLink,
+  FolderKanban,
+  LayoutGrid,
+  LogOut,
+  MessageSquareQuote,
+  Pencil,
+  Plus,
+  Trash2,
+  UserRound,
+} from "lucide-react";
+import { deleteCategory, deleteProject, logout, moveProject, type ActionState } from "@/app/admin/actions";
+import { categoryIcon } from "@/components/projects/category-icons";
 import type { Content } from "@/lib/content/store";
-import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
+import { CATEGORY_MAX, type Category, type Project } from "@/lib/projects";
+import CategoryForm from "./CategoryForm";
 import ProfileEditor from "./ProfileEditor";
 import TestimonialsPanel from "./TestimonialsPanel";
 import ProjectEditor from "./ProjectEditor";
@@ -75,7 +89,7 @@ export default function AdminDashboard({ username, content }: { username: string
       </div>
 
       <section role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-        {tab === "projets" && <ProjectsPanel projects={content.projects} />}
+        {tab === "projets" && <ProjectsPanel projects={content.projects} categories={content.categories} />}
         {tab === "profils" && <ProfilesPanel team={content.team} />}
         {tab === "avis" && <TestimonialsPanel testimonials={content.testimonials} />}
       </section>
@@ -85,12 +99,19 @@ export default function AdminDashboard({ username, content }: { username: string
 
 /* ── Projets ── */
 
-function ProjectsPanel({ projects }: { projects: Project[] }) {
+function ProjectsPanel({ projects, categories }: { projects: Project[]; categories: Category[] }) {
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [status, setStatus] = useState<ActionState>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const current = editing && editing !== "new" ? (projects.find((p) => p.slug === editing) ?? null) : null;
+  // Onglet de catégorie (`null` : tous les projets) et formulaire de catégorie ouvert
+  const [filterKey, setFilter] = useState<string | null>(null);
+  const [categoryForm, setCategoryForm] = useState<"new" | "edit" | null>(null);
+  const filter = categories.find((c) => c.key === filterKey) ?? null;
+  const visible = filter ? projects.filter((p) => p.categories.includes(filter.key)) : projects;
+  const countOf = (key: string) => projects.filter((p) => p.categories.includes(key)).length;
+  const labelOf = (key: string) => categories.find((c) => c.key === key)?.label;
 
   // La confirmation de suppression s'annule d'elle-même au bout de 4 s
   useEffect(() => {
@@ -118,9 +139,103 @@ function ProjectsPanel({ projects }: { projects: Project[] }) {
             Nouveau projet
           </button>
         </div>
+
+        {/* Onglets de catégorie : filtrent la liste ; « + Catégorie » en crée une nouvelle */}
+        <div className="flex flex-col gap-3">
+          <div role="group" aria-label="Filtrer par catégorie" className="flex flex-wrap gap-1.5">
+            <CategoryTab active={!filter} onClick={() => setFilter(null)} label="Tous" count={projects.length} Icon={LayoutGrid} />
+            {categories.map((c) => (
+              <CategoryTab
+                key={c.key}
+                active={filter?.key === c.key}
+                onClick={() => {
+                  setFilter(c.key);
+                  if (categoryForm === "edit") setCategoryForm(null);
+                }}
+                label={c.label}
+                count={countOf(c.key)}
+                Icon={categoryIcon(c.icon)}
+              />
+            ))}
+            {categories.length < CATEGORY_MAX && (
+              <button
+                type="button"
+                aria-expanded={categoryForm === "new"}
+                onClick={() => setCategoryForm((f) => (f === "new" ? null : "new"))}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-accent/45 px-3 text-[13px] font-medium text-accent-strong transition-colors hover:border-accent hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Plus size={14} aria-hidden />
+                Catégorie
+              </button>
+            )}
+          </div>
+
+          {/* Catégorie choisie : nombre de projets, renommer, supprimer */}
+          {filter && categoryForm !== "edit" && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.02] py-1.5 pl-3.5 pr-1.5 text-[13px] text-white/55">
+              <span>
+                Catégorie <span className="font-medium text-white">{filter.label}</span> · {visible.length} projet{visible.length > 1 ? "s" : ""}
+              </span>
+              <span className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setCategoryForm("edit")}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Pencil size={13} aria-hidden />
+                  Modifier
+                </button>
+                {confirm === `cat:${filter.key}` ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(async () => {
+                        const r = await deleteCategory(filter.key);
+                        setConfirm(null);
+                        if (r?.ok) setFilter(null);
+                        return r;
+                      })
+                    }
+                    className="h-8 rounded-lg bg-red-500/90 px-2.5 text-[12.5px] font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                  >
+                    Confirmer la suppression
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirm(`cat:${filter.key}`)}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-white/70 transition-colors hover:bg-red-500/15 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Trash2 size={13} aria-hidden />
+                    Supprimer
+                  </button>
+                )}
+              </span>
+            </div>
+          )}
+
+          {categoryForm && (
+            <CategoryForm
+              key={categoryForm === "edit" ? filter?.key : "new"}
+              category={categoryForm === "edit" ? filter : null}
+              onClose={() => setCategoryForm(null)}
+              onSaved={(message) => {
+                setCategoryForm(null);
+                setStatus({ ok: true, message });
+              }}
+            />
+          )}
+        </div>
+
         <Status state={status} />
+        {visible.length === 0 && (
+          <p className="rounded-2xl border border-dashed border-white/12 p-6 text-center text-[13.5px] text-white/45">
+            Aucun projet dans cette catégorie pour l&apos;instant : elle n&apos;apparaît pas sur le globe.
+          </p>
+        )}
         <ul className="flex flex-col gap-2" aria-busy={pending}>
-          {projects.map((p, i) => (
+          {visible.map((p, i) => (
             <li
               key={p.slug}
               className={`flex items-center gap-3 rounded-2xl border p-2.5 transition-colors ${
@@ -133,15 +248,19 @@ function ProjectsPanel({ projects }: { projects: Project[] }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-medium">{p.title}</p>
                 <p className="truncate text-[12px] text-white/45">
-                  {p.categories.map((c) => PROJECT_CATEGORIES.find((x) => x.key === c)?.label).join(" · ")}
+                  {p.categories.map(labelOf).filter(Boolean).join(" · ")}
                   {p.gallery?.length ? ` — ${p.gallery.length} image${p.gallery.length > 1 ? "s" : ""}` : ""}
                 </p>
               </div>
               <div className="flex shrink-0 items-center">
-                <IconAction label={`Monter ${p.title}`} disabled={i === 0 || pending} onClick={() => run(() => moveProject(p.slug, -1))}>
+                <IconAction label={`Monter ${p.title}`} disabled={i === 0 || pending} onClick={() => run(() => moveProject(p.slug, -1, filter?.key))}>
                   <ArrowUp size={15} aria-hidden />
                 </IconAction>
-                <IconAction label={`Descendre ${p.title}`} disabled={i === projects.length - 1 || pending} onClick={() => run(() => moveProject(p.slug, 1))}>
+                <IconAction
+                  label={`Descendre ${p.title}`}
+                  disabled={i === visible.length - 1 || pending}
+                  onClick={() => run(() => moveProject(p.slug, 1, filter?.key))}
+                >
                   <ArrowDown size={15} aria-hidden />
                 </IconAction>
                 <IconAction label={`Modifier ${p.title}`} onClick={() => setEditing(p.slug)}>
@@ -180,6 +299,8 @@ function ProjectsPanel({ projects }: { projects: Project[] }) {
             <ProjectEditor
               key={editing}
               project={current}
+              categories={categories}
+              defaultCategory={filter?.key}
               onClose={() => setEditing(null)}
               onSaved={(message) => {
                 setEditing(null);
@@ -194,6 +315,36 @@ function ProjectsPanel({ projects }: { projects: Project[] }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Onglet de filtre de la liste des projets : icône, nom et nombre de projets. */
+function CategoryTab({
+  active,
+  onClick,
+  label,
+  count,
+  Icon,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+  Icon: React.ComponentType<{ size?: number; "aria-hidden"?: boolean }>;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        active ? "border-accent/60 bg-accent/15 text-white" : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/25 hover:text-white"
+      }`}
+    >
+      <Icon size={14} aria-hidden />
+      {label}
+      <span className={`rounded-full px-1.5 font-mono text-[11px] ${active ? "bg-accent/25 text-white" : "bg-white/10 text-white/60"}`}>{count}</span>
+    </button>
   );
 }
 
