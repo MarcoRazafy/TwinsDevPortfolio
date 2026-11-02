@@ -16,6 +16,8 @@ import {
 import LockScreen from "./LockScreen";
 import BootScreen from "./BootScreen";
 import ChatScreen from "./ChatScreen";
+import { useRouter } from "next/navigation";
+import { hasAdminSession } from "@/app/admin/actions";
 import AdminLoginScreen from "./AdminLoginScreen";
 import FloatingCards from "./FloatingCards";
 import PhoneBack from "./PhoneBack";
@@ -39,6 +41,25 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
   const [isBack, setIsBack] = useState(false);
   // Écran de connexion admin, ouvert par le bouton retour du chat (par-dessus la conversation, qui reste en mémoire)
   const [adminOpen, setAdminOpen] = useState(false);
+  const router = useRouter();
+  const checkingSession = useRef(false);
+
+  /** Bouton retour du chat : session admin déjà ouverte → tableau de bord ; sinon → écran de connexion. */
+  const openAdmin = async () => {
+    if (checkingSession.current) return;
+    checkingSession.current = true;
+    try {
+      if (await hasAdminSession()) {
+        router.push("/admin");
+        return;
+      }
+    } catch {
+      // Serveur injoignable : on affiche simplement l'écran de connexion
+    } finally {
+      checkingSession.current = false;
+    }
+    setAdminOpen(true);
+  };
   const reduceMotion = useReducedMotion();
 
   // Position du pointeur normalisée : -1 (gauche/haut) → 1 (droite/bas)
@@ -203,7 +224,7 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
                         setAdminOpen(false);
                         onStateChange("locked");
                       }}
-                      onBack={() => setAdminOpen(true)}
+                      onBack={openAdmin}
                     />
                   )}
                 </AnimatePresence>

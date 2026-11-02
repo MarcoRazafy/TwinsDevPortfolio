@@ -194,21 +194,19 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
 
       {/* En-tête : contact + bouton d'extinction */}
       <header className="relative mt-3 flex items-center gap-2 border-b border-white/10 px-3 pb-2.5">
+        {/* Flèche retour + icône TwinsDev : espace administrateur (directement si une session admin est ouverte) */}
         <button
           type="button"
           onClick={onBack}
           aria-label="Espace administrateur"
           title="Espace administrateur"
-          className="-ml-1 flex h-9 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-accent-strong transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="-ml-1 flex shrink-0 cursor-pointer items-center gap-1 rounded-full py-0.5 pr-0.5 text-accent-strong transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ChevronLeft size={22} aria-hidden />
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15">
+            <Image src={CONTACT.avatar} alt="" width={480} height={244} sizes="24px" className="h-auto w-[22px]" />
+          </span>
         </button>
-        <span
-          aria-hidden
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15"
-        >
-          <Image src={CONTACT.avatar} alt="" width={480} height={244} sizes="24px" className="h-auto w-[22px]" />
-        </span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[14px] font-semibold">{CONTACT.name}</p>
           <p className="flex items-center gap-1 text-[11px] text-white/60">

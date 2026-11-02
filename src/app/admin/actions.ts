@@ -92,6 +92,11 @@ export async function login(_prev: ActionState, fd: FormData): Promise<ActionSta
   redirect("/admin");
 }
 
+/** Une session admin est-elle ouverte ? (le cookie est httpOnly : seul le serveur peut le lire) */
+export async function hasAdminSession(): Promise<boolean> {
+  return (await getAdmin()) !== null;
+}
+
 export async function logout() {
   await destroySession();
   redirect("/");
