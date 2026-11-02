@@ -55,6 +55,8 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const nextId = useRef(1);
   const abortRef = useRef<AbortController | null>(null);
+  // Messages d'accueil déjà affichés : si l'effet est relancé (rechargement à chaud en développement), pas de doublon
+  const greeted = useRef(0);
 
   const push = (message: Omit<Message, "id">) => {
     const id = nextId.current++;
@@ -72,13 +74,15 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
       });
 
     (async () => {
-      await wait(500);
-      for (const text of GREETING) {
+      if (greeted.current < GREETING.length) await wait(500);
+      // On reprend là où l'accueil s'était arrêté : chaque message n'est affiché qu'une fois
+      for (const text of GREETING.slice(greeted.current)) {
         if (cancelled) return;
         setTyping(true);
         await wait(600 + Math.min(1000, text.length * 20));
         if (cancelled) return;
         setTyping(false);
+        greeted.current += 1;
         push({ from: "them", text });
         await wait(400);
       }
@@ -238,10 +242,10 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
               key={m.id}
               className={`max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[13px] leading-snug ${
                 m.error
-                  ? "self-start rounded-bl-md border border-red-400/40 bg-red-500/15 text-red-100"
+                  ? "self-start rounded-bl-md border border-red-400/40 bg-[#3a151b]/95 text-red-100 backdrop-blur-md"
                   : m.from === "me"
-                    ? "self-end rounded-br-md bg-accent text-[#052e16]"
-                    : "self-start rounded-bl-md bg-white/10 text-white"
+                    ? "self-end rounded-br-md bg-accent text-[#052e16] shadow-[0_4px_14px_-6px_rgba(34,197,94,0.6)]"
+                    : "self-start rounded-bl-md bg-[#1b2420]/95 text-white shadow-[0_4px_14px_-8px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/10 backdrop-blur-md"
               }`}
               initial={reduce ? false : { opacity: 0, y: 10, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -255,7 +259,7 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
             <motion.li
               key="typing"
               aria-label={`${CONTACT.name} est en train d'écrire`}
-              className="self-start rounded-2xl rounded-bl-md bg-white/10 px-3.5 py-3"
+              className="self-start rounded-2xl rounded-bl-md bg-[#1b2420]/95 px-3.5 py-3 ring-1 ring-inset ring-white/10 backdrop-blur-md"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
