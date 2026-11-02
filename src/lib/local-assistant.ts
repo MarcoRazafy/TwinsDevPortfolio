@@ -1,7 +1,7 @@
 import "server-only";
 import { FAQ } from "@/lib/faq";
 import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
-import { SERVICES } from "@/lib/services";
+import { SERVICES, SPECIALTIES } from "@/lib/services";
 
 /*
  * Assistant de secours, gratuit et sans service externe : répond à partir des contenus du site
@@ -47,7 +47,7 @@ export function localReply(messages: Message[], projects: Project[]): string {
     return "Avec plaisir ! Si tu veux avancer sur ton projet, le formulaire de contact en bas de page est là pour ça.";
   }
 
-  if (has(text, ["prix", "cout*", "tarif*", "combien", "budget*", "devis", "cher*"]) && !has(text, ["temps", "delai"])) {
+  if (has(text, ["prix", "cout*", "tarif*", "combien", "budget*", "devis", "cher", "chere"]) && !has(text, ["temps", "delai"])) {
     return `${faq("Combien coûte")} Tu as déjà une idée du type de projet ?`;
   }
 
@@ -55,7 +55,7 @@ export function localReply(messages: Message[], projects: Project[]): string {
     return `${faq("Combien de temps")} Pour quand aimerais-tu que ce soit prêt ?`;
   }
 
-  if (has(text, ["maintenance", "apres", "mise a jour", "maj", "heberg*", "sauvegarde*", "support"])) {
+  if (has(text, ["maintenance", "apres", "mise a jour", "maj", "sauvegarde*", "support"])) {
     return `${faq("Et après")} Tu as déjà un site existant ?`;
   }
 
@@ -77,19 +77,33 @@ export function localReply(messages: Message[], projects: Project[]): string {
     return "On travaille surtout avec React, Next.js et Tailwind côté interface, et Node.js, Laravel, Python et PostgreSQL côté serveur, selon ce qui convient le mieux au projet. Tu as une contrainte technique particulière ?";
   }
 
-  const boutique = service("boutique");
-  if (boutique && has(text, ["boutique*", "e commerce", "ecommerce", "vendre", "vente*", "produit*", "paiement*", "panier*"])) {
-    return `${boutique.title} : ${boutique.pitch} Tu vends déjà ailleurs, sur les réseaux par exemple ?`;
+  // Spécialités (plus précises que les services : testées d'abord)
+  const specialties: [string, string[], string][] = [
+    ["Paiement en ligne", ["stripe", "paiement*", "payer", "abonnement*", "facture*", "paypal"], "Tu veux encaisser en une fois, ou par abonnement ?"],
+    ["API & intégrations", ["api", "webhook*", "integration*", "connecter", "synchronis*"], "Quels outils aimerais-tu relier entre eux ?"],
+    ["Noms de domaine", ["domaine*", "dns", "nom de domaine"], "Tu as déjà un nom de domaine, ou il faut le choisir ?"],
+    ["Automatisation", ["automatis*", "n8n", "workflow*", "bot*", "zapier", "repetiti*"], "Quelle tâche te prend le plus de temps aujourd'hui ?"],
+    ["ERP & CRM", ["erp", "crm", "gestion client*", "stock*", "facturation"], "Tu utilises déjà un outil, ou on part de zéro ?"],
+    ["SaaS", ["saas", "abonne*", "logiciel en ligne"], "Tu as déjà une idée précise de ton produit ?"],
+    ["Accès à distance", ["distance", "a distance", "vpn", "teletravail", "bureau a distance"], "C'est pour accéder à un serveur, ou aux postes de ton équipe ?"],
+  ];
+  for (const [title, words, question] of specialties) {
+    const s = SPECIALTIES.find((x) => x.title === title);
+    if (s && has(text, words)) return `${s.title} : ${s.text} ${question}`;
   }
 
-  const app = service("application");
-  if (app && has(text, ["application*", "appli*", "app", "mobile*", "android", "ios", "plateforme*", "logiciel*", "dashboard*", "tableau de bord"])) {
-    return `${app.title} : ${app.pitch} Qui va l'utiliser, tes clients ou ton équipe ?`;
-  }
-
-  const vitrine = service("vitrine");
-  if (vitrine && has(text, ["site*", "vitrine*", "web", "page*", "google", "referencement*", "refonte*"])) {
-    return `${vitrine.title} : ${vitrine.pitch} Tu as déjà un site, ou on part de zéro ?`;
+  // Services
+  const services: [string, string[], string][] = [
+    ["serveurs-vps", ["vps", "serveur*", "ssh", "linux", "debian", "ubuntu", "configur*"], "Tu as déjà un serveur, ou il faut le choisir ?"],
+    ["hebergement", ["heberg*", "mettre en ligne", "mise en ligne", "en ligne"], "C'est pour un site existant, ou un nouveau projet ?"],
+    ["cloud", ["cloud", "aws", "google cloud", "azure", "cdn", "stockage"], "Tu utilises déjà un fournisseur cloud ?"],
+    ["plateformes", ["plateforme*", "espace membre*", "portail*", "marketplace", "place de marche"], "Qui va s'y connecter, tes clients ou ton équipe ?"],
+    ["applications", ["application*", "appli*", "app", "mobile*", "android", "ios", "logiciel*", "dashboard*", "tableau de bord"], "Qui va l'utiliser, tes clients ou ton équipe ?"],
+    ["sites-web", ["site*", "vitrine*", "web", "page*", "google", "referencement*", "refonte*", "boutique*", "e commerce", "ecommerce", "vendre", "vente*", "produit*"], "Tu as déjà un site, ou on part de zéro ?"],
+  ];
+  for (const [slug, words, question] of services) {
+    const s = service(slug);
+    if (s && has(text, words)) return `${s.title} : ${s.pitch} ${question}`;
   }
 
   if (has(text, ["contact*", "email*", "mail*", "joindre", "appeler", "telephone*", "rdv", "rendez vous", "parler"])) {
@@ -97,7 +111,7 @@ export function localReply(messages: Message[], projects: Project[]): string {
   }
 
   if (firstTurn && has(text, ["bonjour", "salut", "hello", "hi", "hey", "coucou", "bonsoir", "yo", "slt", "bjr"])) {
-    return "Salut ! Tu as un projet en tête : un site vitrine, une boutique en ligne, une application ? Dis-m'en un peu plus.";
+    return "Salut ! Tu as un projet en tête : un site web, une plateforme, une application, un serveur à configurer ? Dis-m'en un peu plus.";
   }
   if (has(text, ["bonjour", "salut", "hello", "hi", "hey", "coucou", "bonsoir"])) {
     return "Re-salut ! Dis-moi ce que tu aimerais faire, et je te dis comment on peut t'aider.";
