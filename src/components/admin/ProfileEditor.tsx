@@ -51,7 +51,7 @@ export default function ProfileEditor({ twin }: { twin: Twin }) {
 
       <Fieldset legend="Compétences">
         <Field label="Spécialités" hint="Les 3 premières tournent autour du portrait.">
-          <TechPicker name="stack" initial={twin.stack} label="Spécialités" />
+          <TechPicker name="stack" initial={twin.stack} max={Infinity} label="Spécialités" />
         </Field>
         <div className="flex flex-col gap-3">
           <p className="text-[13px] font-medium text-white/75">Compétences par catégorie</p>
@@ -77,7 +77,7 @@ export default function ProfileEditor({ twin }: { twin: Twin }) {
               </div>
               <TechPicker
                 initial={g.items}
-                max={16}
+                max={Infinity}
                 label={g.label || "Catégorie"}
                 onChange={(items) => setGroups((all) => all.map((x) => (x.id === g.id ? { ...x, items } : x)))}
               />
@@ -85,7 +85,6 @@ export default function ProfileEditor({ twin }: { twin: Twin }) {
           ))}
           <button
             type="button"
-            disabled={groups.length >= 6}
             onClick={() => {
               setGroups((all) => [...all, { id: nextId, label: "", items: [] }]);
               setNextId((n) => n + 1);

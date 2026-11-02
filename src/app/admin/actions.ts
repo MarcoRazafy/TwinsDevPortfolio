@@ -249,11 +249,11 @@ function parseSkills(raw: string): SkillGroup[] | null {
   try {
     const data = JSON.parse(raw || "[]") as unknown;
     if (!Array.isArray(data)) return null;
+    // Pas de limite de nombre : seule borne, les technologies connues (sans doublon)
     return data
-      .slice(0, 6)
       .map((g) => ({
         label: typeof g?.label === "string" ? g.label.trim().slice(0, 40) : "",
-        items: techList(Array.isArray(g?.items) ? g.items : [], 16),
+        items: techList(Array.isArray(g?.items) ? g.items : [], TECH_KEYS.size),
       }))
       .filter((g) => g.label && g.items.length);
   } catch {
@@ -274,8 +274,8 @@ export async function saveProfile(_prev: ActionState, fd: FormData): Promise<Act
     .filter(Boolean)
     .slice(0, 4);
   const does = lines(fd, "does", 3, 120);
-  const stack = techList(fd.getAll("stack"), 12);
-  const skills = parseSkills(text(fd, "skills", 4000));
+  const stack = techList(fd.getAll("stack"), TECH_KEYS.size);
+  const skills = parseSkills(text(fd, "skills", 20000));
   const linkedin = text(fd, "linkedin", 300);
   const github = text(fd, "github", 300);
   const email = text(fd, "email", 200);
