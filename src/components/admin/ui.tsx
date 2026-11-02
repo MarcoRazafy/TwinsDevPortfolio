@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { startTransition, useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { CheckCircle2, ImagePlus, Search, TriangleAlert, X } from "lucide-react";
 import { TECH, TECH_GROUPS, techColor, techLabel, type TechKey } from "@/lib/tech";
@@ -248,3 +248,13 @@ export function ChipCheckbox({ name, value, label, defaultChecked }: { name: str
     </label>
   );
 }
+
+/**
+ * Envoi d'un formulaire sans la remise à zéro automatique de React 19 (`<form action>`) :
+ * si l'enregistrement est refusé, les saisies restent en place pour être corrigées.
+ */
+export const keepValuesOnSubmit = (action: (fd: FormData) => void) => (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const fd = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
+  startTransition(() => action(fd));
+};

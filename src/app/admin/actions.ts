@@ -123,9 +123,6 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   const accent = text(fd, "accent", 7);
 
   if (!title) return fail("Le titre est obligatoire.");
-  if (!kind) return fail("Le secteur et le type de projet sont obligatoires.");
-  if (!problem) return fail("La description est obligatoire.");
-  if (!delivered.length) return fail("Indiquez au moins un point livré.");
   if (!requested.length) return fail("Choisissez au moins une catégorie.");
   if (!SLUG_OK.test(slug)) return fail("Identifiant invalide : lettres minuscules, chiffres et tirets.");
   if ((site && !URL_OK.test(site)) || (code && !URL_OK.test(code))) return fail("Lien invalide : il doit commencer par https://");

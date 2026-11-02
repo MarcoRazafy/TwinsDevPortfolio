@@ -496,9 +496,11 @@ export default function ProjectsHologram({ projects, categories }: Props) {
             >
               {activeProject ? (
                 <>
-                  <p className="truncate font-mono text-[10.5px] uppercase tracking-[0.14em]" style={{ color: activeProject.accent }}>
-                    {activeProject.kind}
-                  </p>
+                  {activeProject.kind && (
+                    <p className="truncate font-mono text-[10.5px] uppercase tracking-[0.14em]" style={{ color: activeProject.accent }}>
+                      {activeProject.kind}
+                    </p>
+                  )}
                   <p className="truncate font-[family-name:var(--font-display)] text-[1.02rem] font-semibold">{activeProject.title}</p>
                 </>
               ) : (

@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { LoaderCircle, Plus, Save, Trash2 } from "lucide-react";
 import { saveProfile, type ActionState } from "@/app/admin/actions";
 import type { SkillGroup, Twin } from "@/lib/team";
-import { Field, Fieldset, ImageInput, Status, TechPicker, inputClass } from "./ui";
+import { Field, Fieldset, ImageInput, Status, TechPicker, inputClass, keepValuesOnSubmit } from "./ui";
 
 /** Formulaire de modification d'un profil (section « À propos »). */
 export default function ProfileEditor({ twin }: { twin: Twin }) {
@@ -14,7 +14,7 @@ export default function ProfileEditor({ twin }: { twin: Twin }) {
   const [nextId, setNextId] = useState(groups.length);
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="flex flex-col gap-5">
       <input type="hidden" name="slug" value={twin.slug} />
       <input type="hidden" name="skills" value={JSON.stringify(groups.map(({ label, items }) => ({ label, items })))} />
 

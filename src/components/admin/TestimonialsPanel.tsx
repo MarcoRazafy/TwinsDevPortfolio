@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowDown, ArrowUp, LoaderCircle, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { deleteTestimonial, moveTestimonial, saveTestimonial, type ActionState } from "@/app/admin/actions";
 import { TESTIMONIAL_MAX, initials, type Testimonial } from "@/lib/testimonials";
-import { Field, Fieldset, ImageInput, Status, inputClass } from "./ui";
+import { Field, Fieldset, ImageInput, Status, inputClass, keepValuesOnSubmit } from "./ui";
 
 /** Onglet « Avis » : liste (ordre d'affichage, modification, suppression) + éditeur. */
 export default function TestimonialsPanel({ testimonials }: { testimonials: Testimonial[] }) {
@@ -142,7 +142,7 @@ function TestimonialEditor({
   }, null);
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold">
           {t ? `Modifier l'avis de ${t.company}` : "Nouvel avis"}

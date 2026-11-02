@@ -171,20 +171,25 @@ function ScreenContent({
         className="relative w-full max-w-[760px] overflow-hidden rounded-[24px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.8),rgba(5,11,24,0.9))] p-5 shadow-[0_30px_80px_-30px_rgba(2,132,199,0.6)] sm:p-6"
       >
         <div aria-hidden className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: project.accent }}>
-          {project.kind}
-        </p>
-        <h2 id="ecran-projet-titre" className="mt-1.5 font-[family-name:var(--font-display)] text-[1.3rem] font-semibold leading-tight tracking-[-0.015em] sm:text-[1.5rem]">
+        {/* Seul le titre est obligatoire : secteur, description et points livrés n'apparaissent que s'ils sont remplis */}
+        {project.kind && (
+          <p className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: project.accent }}>
+            {project.kind}
+          </p>
+        )}
+        <h2 id="ecran-projet-titre" className="font-[family-name:var(--font-display)] text-[1.3rem] font-semibold leading-tight tracking-[-0.015em] sm:text-[1.5rem]">
           {project.title}
         </h2>
-        <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{project.problem}</p>
-        <ul className="mt-3 flex flex-wrap gap-1.5">
-          {project.delivered.map((line) => (
-            <li key={line} className="rounded-full border border-sky-300/15 bg-sky-300/[0.06] px-2.5 py-1 text-[12.5px] text-sky-50/90">
-              {line}
-            </li>
-          ))}
-        </ul>
+        {project.problem && <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{project.problem}</p>}
+        {project.delivered.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-1.5">
+            {project.delivered.map((line) => (
+              <li key={line} className="rounded-full border border-sky-300/15 bg-sky-300/[0.06] px-2.5 py-1 text-[12.5px] text-sky-50/90">
+                {line}
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-sky-300/10 pt-4">
           <div className="flex items-center gap-1.5">
             <RoundButton label="Projet précédent" onClick={() => onStep(-1)}>

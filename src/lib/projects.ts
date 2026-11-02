@@ -31,12 +31,12 @@ export type Project = {
   slug: string;
   /** Filtres sous lesquels le projet apparaît autour du globe (un projet peut en avoir plusieurs). */
   categories: ProjectCategory[];
-  /** Secteur du client et type de projet, ex. « Restauration · site vitrine ». */
+  /** Secteur du client et type de projet, ex. « Restauration · site vitrine » (facultatif : chaîne vide). */
   kind: string;
   title: string;
-  /** Le problème du client, en une phrase. */
+  /** Le problème du client, en une phrase (facultatif : chaîne vide). */
   problem: string;
-  /** Ce qui a été livré, 3 points maximum. */
+  /** Ce qui a été livré, 3 points maximum (facultatif : liste vide). */
   delivered: string[];
   stack: TechKey[];
   links: { site?: string; code?: string };

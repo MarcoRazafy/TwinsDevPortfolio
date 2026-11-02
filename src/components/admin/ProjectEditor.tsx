@@ -5,7 +5,7 @@ import { LoaderCircle, Save, X } from "lucide-react";
 import { saveProject, type ActionState } from "@/app/admin/actions";
 import type { Category, Project } from "@/lib/projects";
 import GalleryEditor from "./GalleryEditor";
-import { ChipCheckbox, Field, Fieldset, ImageInput, Status, TechPicker, inputClass } from "./ui";
+import { ChipCheckbox, Field, Fieldset, ImageInput, Status, TechPicker, inputClass, keepValuesOnSubmit } from "./ui";
 
 type Props = {
   /** Projet modifié, ou `null` pour un nouveau projet. */
@@ -28,7 +28,7 @@ export default function ProjectEditor({ project, categories, defaultCategory, on
   const p = project;
 
   return (
-    <form action={action} className="flex flex-col gap-5" aria-labelledby="editeur-projet">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="flex flex-col gap-5" aria-labelledby="editeur-projet">
       <div className="flex items-center justify-between gap-3">
         <h2 id="editeur-projet" className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold">
           {p ? `Modifier « ${p.title.split(",")[0]} »` : "Nouveau projet"}
@@ -49,13 +49,13 @@ export default function ProjectEditor({ project, categories, defaultCategory, on
         <Field label="Titre *" htmlFor="p-title">
           <input id="p-title" name="title" required maxLength={120} defaultValue={p?.title} className={inputClass} placeholder="La Canopée, restaurant & rooftop" />
         </Field>
-        <Field label="Secteur · type de projet *" htmlFor="p-kind">
-          <input id="p-kind" name="kind" required maxLength={80} defaultValue={p?.kind} className={inputClass} placeholder="Restauration · site vitrine" />
+        <Field label="Secteur · type de projet" htmlFor="p-kind">
+          <input id="p-kind" name="kind" maxLength={80} defaultValue={p?.kind} className={inputClass} placeholder="Restauration · site vitrine" />
         </Field>
-        <Field label="Description *" htmlFor="p-problem" hint="Une ou deux phrases : le besoin du client ou ce que fait le projet.">
-          <textarea id="p-problem" name="problem" required maxLength={400} rows={3} defaultValue={p?.problem} className={inputClass} />
+        <Field label="Description" htmlFor="p-problem" hint="Une ou deux phrases : le besoin du client ou ce que fait le projet.">
+          <textarea id="p-problem" name="problem" maxLength={400} rows={3} defaultValue={p?.problem} className={inputClass} />
         </Field>
-        <Field label="Ce qui a été livré *" hint="Jusqu'à 3 points, affichés en pastilles.">
+        <Field label="Ce qui a été livré" hint="Jusqu'à 3 points, affichés en pastilles.">
           {[0, 1, 2].map((i) => (
             <input key={i} name="delivered" maxLength={120} defaultValue={p?.delivered[i]} aria-label={`Point livré ${i + 1}`} className={inputClass} />
           ))}

@@ -5,7 +5,7 @@ import { LoaderCircle } from "lucide-react";
 import { saveCategory, type ActionState } from "@/app/admin/actions";
 import { CATEGORY_ICON } from "@/components/projects/category-icons";
 import { CATEGORY_ICONS, type Category } from "@/lib/projects";
-import { Status, inputClass } from "./ui";
+import { Status, inputClass, keepValuesOnSubmit } from "./ui";
 
 type Props = {
   /** Catégorie modifiée, ou `null` pour en créer une. */
@@ -27,6 +27,7 @@ export default function CategoryForm({ category, onClose, onSaved }: Props) {
   return (
     <form
       action={action}
+      onSubmit={keepValuesOnSubmit(action)}
       onKeyDown={(e) => e.key === "Escape" && onClose()}
       aria-label={category ? `Modifier la catégorie ${category.label}` : "Nouvelle catégorie"}
       className="flex flex-col gap-4 rounded-2xl border border-accent/30 bg-accent/[0.04] p-4"
