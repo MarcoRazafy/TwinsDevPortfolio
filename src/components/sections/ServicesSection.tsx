@@ -150,8 +150,8 @@ export default function ServicesSection() {
                   Ce qui fait la <span className="text-glow">différence</span>
                 </h3>
                 <p className="text-[15px] leading-relaxed text-muted">
-                  Au-delà du site ou de l&apos;application, on s&apos;occupe des briques techniques qui font tourner votre
-                  activité au quotidien.
+                  Ces compétences, ce sont nos clients qui nous les ont apportées : chaque projet confié nous a fait
+                  grandir. Aujourd&apos;hui, c&apos;est tout ce savoir-faire qu&apos;on met au service du vôtre.
                 </p>
                 <a
                   href="#contact"
