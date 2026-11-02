@@ -143,18 +143,8 @@ export default function SloganSection() {
           </span>
         </h2>
 
-        <motion.p
-          className="mt-10 max-w-[34em] text-[clamp(1.05rem,1.7vw,1.3rem)] leading-relaxed text-muted text-balance"
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={inView}
-          transition={{ duration: 0.8, ease: EXPO_OUT, delay: 0.9 }}
-        >
-          On ne livre pas seulement ce que vous avez demandé&nbsp;: on va plus loin que ce que vous imaginiez.
-        </motion.p>
-
         <motion.div
-          className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          className="mt-14 flex flex-wrap items-center justify-center gap-3"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={inView}
