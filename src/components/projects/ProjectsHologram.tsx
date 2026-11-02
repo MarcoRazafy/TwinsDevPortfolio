@@ -5,11 +5,11 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   AppWindow,
-  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   Globe2,
   Layers,
+  Maximize2,
   MousePointerClick,
   Pause,
   Play,
@@ -17,9 +17,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PROJECT_CATEGORIES, type Project, type ProjectCategory } from "@/lib/projects";
-import { TECH, techColor, techLabel } from "@/lib/tech";
 import { anchorPoints, drawAnchor, drawBeam, drawGlobe, drawOrbit, type AnchorPoints } from "./hologram/globe";
-import ProjectGallery from "./ProjectGallery";
+import ProjectScreen from "./ProjectScreen";
 
 const ICONS: Record<ProjectCategory, LucideIcon> = {
   application: AppWindow,
@@ -103,6 +102,14 @@ export default function ProjectsHologram({ projects }: Props) {
   const activeProject = orbiters.find((o) => o.key === activeKey)?.project ?? null;
   const currentList = orbiters.filter((o) => currentKeys.includes(o.key));
   const activeIndex = currentList.findIndex((o) => o.key === activeKey);
+  // Écran virtuel : projet ouvert (index dans la catégorie affichée), ou `null`
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const openProject = (key: string | null) => {
+    const i = currentList.findIndex((o) => o.key === key);
+    if (i < 0) return;
+    viewerOpen.current = true;
+    setOpenIndex(i);
+  };
 
   /* ── Choix d'une catégorie : les images actuelles rentrent dans le globe, les nouvelles en sortent ── */
   const select = (next: ProjectCategory) => {
@@ -430,11 +437,15 @@ export default function ProjectsHologram({ projects }: Props) {
               else cardEls.current.delete(key);
             }}
             type="button"
-            onClick={() => focusKey(key)}
+            onClick={() => {
+              focusKey(key);
+              openProject(key);
+            }}
             onFocus={() => focusKey(key)}
             onPointerEnter={() => (hovered.current = true)}
             onPointerLeave={() => (hovered.current = false)}
-            aria-label={`${project.title} : afficher les détails`}
+            aria-label={`${project.title} : ouvrir l'écran du projet`}
+            aria-haspopup="dialog"
             aria-current={key === activeKey || undefined}
             tabIndex={currentKeys.includes(key) ? 0 : -1}
             style={{ opacity: 0 }}
@@ -461,9 +472,9 @@ export default function ProjectsHologram({ projects }: Props) {
         ))}
       </div>
 
-      {/* ── Détail du projet placé devant ── */}
+      {/* ── Barre compacte : projet placé devant, ouverture de l'écran, navigation ── */}
       <div
-        className="relative z-40 -mt-6 w-full max-w-[780px] px-1 sm:-mt-10"
+        className="relative z-40 -mt-4 w-full max-w-[780px] px-1 sm:-mt-8"
         onPointerEnter={() => (panelHovered.current = true)}
         onPointerLeave={() => (panelHovered.current = false)}
         onFocus={(e) => {
@@ -474,100 +485,78 @@ export default function ProjectsHologram({ projects }: Props) {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) panelFocused.current = false;
         }}
       >
-        <div className="relative overflow-hidden rounded-[26px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.75),rgba(5,11,24,0.85))] p-6 shadow-[0_30px_80px_-30px_rgba(2,132,199,0.55)] backdrop-blur-md sm:p-7">
+        <div className="relative flex flex-wrap items-center gap-3 overflow-hidden rounded-[22px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.75),rgba(5,11,24,0.85))] p-3 pl-4 shadow-[0_24px_60px_-30px_rgba(2,132,199,0.55)] backdrop-blur-md sm:flex-nowrap sm:p-3.5 sm:pl-5">
           <div aria-hidden className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
           <AnimatePresence mode="wait" initial={false}>
-            {activeProject ? (
-              <motion.div
-                key={activeProject.slug}
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, filter: "blur(6px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, filter: "blur(6px)" }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col gap-3"
-              >
-                <p className="font-mono text-[11.5px] uppercase tracking-[0.14em]" style={{ color: activeProject.accent }}>
-                  {activeProject.kind}
+            <motion.div
+              key={activeProject?.slug ?? "vide"}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.25 }}
+              className="min-w-0 flex-1"
+            >
+              {activeProject ? (
+                <>
+                  <p className="truncate font-mono text-[10.5px] uppercase tracking-[0.14em]" style={{ color: activeProject.accent }}>
+                    {activeProject.kind}
+                  </p>
+                  <p className="truncate font-[family-name:var(--font-display)] text-[1.02rem] font-semibold">{activeProject.title}</p>
+                </>
+              ) : (
+                <p className="text-[14px] leading-snug text-muted">
+                  {category
+                    ? "Projection en cours…"
+                    : "Choisissez une catégorie sur le globe, puis touchez un projet pour l'ouvrir."}
                 </p>
-                <h3 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.015em] text-balance sm:text-[1.6rem]">
-                  {activeProject.title}
-                </h3>
-                <p className="text-[15px] leading-relaxed text-muted">{activeProject.problem}</p>
-                <ul className="flex flex-wrap gap-2 pt-1">
-                  {activeProject.delivered.map((line) => (
-                    <li key={line} className="rounded-full border border-sky-300/15 bg-sky-300/[0.06] px-3 py-1.5 text-[13px] text-sky-50/90">
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-                <ProjectGallery project={activeProject} onViewerChange={(open) => (viewerOpen.current = open)} />
-                {(activeProject.stack.length > 0 || activeProject.links.site) && (
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                    <ul className="flex flex-wrap gap-1.5" aria-label="Technologies utilisées">
-                      {activeProject.stack.map((key) => (
-                        <li
-                          key={key}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-2 pr-2.5 text-[12px] text-white/75"
-                        >
-                          <svg aria-hidden viewBox="0 0 24 24" className="h-3.5 w-3.5" style={{ fill: techColor(key) }}>
-                            <path d={TECH[key].icon.path} />
-                          </svg>
-                          {techLabel(key)}
-                        </li>
-                      ))}
-                    </ul>
-                    {activeProject.links.site && (
-                      <a
-                        href={activeProject.links.site}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[13.5px] font-semibold text-sky-300 transition-colors hover:bg-sky-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-                      >
-                        Voir le site
-                        <ArrowUpRight size={15} aria-hidden />
-                      </a>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.p
-                key="vide"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="py-3 text-center text-[15px] leading-relaxed text-muted"
-              >
-                {category
-                  ? "Projection en cours…"
-                  : "Application, site, plateforme ou serveur : choisissez une catégorie, nos réalisations se projettent autour du globe."}
-              </motion.p>
-            )}
+              )}
+            </motion.div>
           </AnimatePresence>
 
-          {/* Navigation : précédent / suivant, compteur, pause */}
           {category && (
-            <div className="mt-5 flex items-center justify-between gap-3 border-t border-sky-300/10 pt-4">
-              <div className="flex items-center gap-1">
-                <IconButton label="Projet précédent" onClick={() => step(-1)}>
-                  <ChevronLeft size={18} aria-hidden />
-                </IconButton>
-                <IconButton label="Projet suivant" onClick={() => step(1)}>
-                  <ChevronRight size={18} aria-hidden />
-                </IconButton>
-                <span aria-hidden className="ml-2 font-mono text-[12px] tabular-nums tracking-wider text-sky-100/50">
-                  {String(Math.max(activeIndex, 0) + 1).padStart(2, "0")} <span className="text-sky-100/25">/</span>{" "}
-                  {String(currentList.length).padStart(2, "0")}
-                </span>
-              </div>
-              <IconButton
-                label={autoplay ? "Mettre en pause la rotation" : "Lancer la rotation"}
-                onClick={() => setChoice(!autoplay)}
-              >
+            <div className="flex shrink-0 items-center gap-1.5">
+              <IconButton label="Projet précédent" onClick={() => step(-1)}>
+                <ChevronLeft size={18} aria-hidden />
+              </IconButton>
+              <span aria-hidden className="px-1 font-mono text-[12px] tabular-nums tracking-wider text-sky-100/50">
+                {String(Math.max(activeIndex, 0) + 1).padStart(2, "0")}
+                <span className="text-sky-100/25">/</span>
+                {String(currentList.length).padStart(2, "0")}
+              </span>
+              <IconButton label="Projet suivant" onClick={() => step(1)}>
+                <ChevronRight size={18} aria-hidden />
+              </IconButton>
+              <IconButton label={autoplay ? "Mettre en pause la rotation" : "Lancer la rotation"} onClick={() => setChoice(!autoplay)}>
                 {autoplay ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden className="translate-x-[1px]" />}
               </IconButton>
+              <button
+                type="button"
+                disabled={!activeProject}
+                onClick={() => openProject(activeKey)}
+                aria-haspopup="dialog"
+                className="ml-1 inline-flex h-9 items-center gap-1.5 rounded-full bg-sky-300/15 px-4 text-[13px] font-semibold text-sky-100 ring-1 ring-inset ring-sky-300/40 transition-colors hover:bg-sky-300/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+              >
+                <Maximize2 size={14} aria-hidden />
+                Ouvrir
+              </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Écran virtuel du projet ouvert */}
+      <ProjectScreen
+        projects={currentList.map((o) => o.project)}
+        index={openIndex}
+        onIndexChange={(i) => {
+          setOpenIndex(i);
+          focusSlot(i);
+        }}
+        onClose={() => {
+          viewerOpen.current = false;
+          setOpenIndex(null);
+        }}
+      />
     </div>
   );
 }
