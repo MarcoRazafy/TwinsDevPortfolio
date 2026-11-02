@@ -78,7 +78,12 @@ function ScreenContent({
   onStep: (dir: 1 | -1) => void;
 }) {
   const reduce = useReducedMotion() ?? false;
-  const images: GalleryImage[] = [...(project.image ? [{ src: project.image, caption: "" }] : []), ...(project.gallery ?? [])];
+  // L'écran montre les photos ajoutées au projet (sa galerie) ; sans galerie, le visuel principal à défaut
+  const images: GalleryImage[] = project.gallery?.length
+    ? project.gallery
+    : project.image
+      ? [{ src: project.image, caption: "" }]
+      : [];
   const [shown, setShown] = useState(0);
   const current = images[shown];
 
