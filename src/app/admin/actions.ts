@@ -24,6 +24,7 @@ import {
   type ProjectCategory,
 } from "@/lib/projects";
 import type { SkillGroup, Twin } from "@/lib/team";
+import { TESTIMONIAL_MAX, type Testimonial } from "@/lib/testimonials";
 import { TECH, type TechKey } from "@/lib/tech";
 
 /** Résultat renvoyé aux formulaires (useActionState). */
@@ -339,4 +340,92 @@ export async function saveProfile(_prev: ActionState, fd: FormData): Promise<Act
   await deleteUpload(replaced);
   updateTag(CONTENT_TAG);
   return { ok: true, message: `Profil de ${name} mis à jour.` };
+}
+
+/* ── Avis clients ── */
+
+export async function saveTestimonial(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  if (!(await getAdmin())) return SESSION_EXPIRED;
+
+  const original = text(fd, "originalId", 80);
+  const company = text(fd, "company", 80);
+  const quote = text(fd, "quote", 600);
+  const author = text(fd, "author", 80);
+  const role = text(fd, "role", 100);
+  const website = text(fd, "website", 300);
+
+  if (!company) return fail("Le nom de l'entreprise est obligatoire.");
+  if (!quote) return fail("Le texte de l'avis est obligatoire.");
+  if (!author) return fail("Le nom du responsable est obligatoire.");
+  if (website && !/^https?:\/\/[^\s]+$/.test(website)) return fail("Le site doit commencer par https://");
+
+  const file = uploadedFile(fd, "logo");
+  let newLogo: string | undefined;
+  if (file) {
+    const saved = await saveUpload(file, `logo-${slugify(company) || "entreprise"}`);
+    if ("error" in saved) return fail(saved.error);
+    newLogo = saved.src;
+  }
+
+  let replaced: string | undefined;
+  let missing = false;
+  let full = false;
+  await updateContent((content) => {
+    const index = original ? content.testimonials.findIndex((t) => t.id === original) : -1;
+    if (original && index < 0) {
+      missing = true;
+      return;
+    }
+    if (index < 0 && content.testimonials.length >= TESTIMONIAL_MAX) {
+      full = true;
+      return;
+    }
+    const previous = index >= 0 ? content.testimonials[index] : undefined;
+    const logo = newLogo ?? (fd.get("removeImage") === "on" ? undefined : previous?.logo);
+    if (previous?.logo !== logo) replaced = previous?.logo;
+    const testimonial: Testimonial = {
+      id: previous?.id ?? `${slugify(company) || "avis"}-${Date.now().toString(36)}`,
+      company,
+      logo,
+      website: website || undefined,
+      quote,
+      author,
+      role,
+    };
+    if (index >= 0) content.testimonials[index] = testimonial;
+    else content.testimonials.push(testimonial);
+  });
+
+  if (missing || full) {
+    await deleteUpload(newLogo);
+    return fail(missing ? "Cet avis n'existe plus : rechargez la page." : `${TESTIMONIAL_MAX} avis au maximum.`);
+  }
+  await deleteUpload(replaced);
+  updateTag(CONTENT_TAG);
+  return { ok: true, message: original ? "Avis mis à jour." : "Avis ajouté." };
+}
+
+export async function deleteTestimonial(id: string): Promise<ActionState> {
+  if (!(await getAdmin())) return SESSION_EXPIRED;
+  let logo: string | undefined;
+  await updateContent((content) => {
+    logo = content.testimonials.find((t) => t.id === id)?.logo;
+    content.testimonials = content.testimonials.filter((t) => t.id !== id);
+  });
+  await deleteUpload(logo);
+  updateTag(CONTENT_TAG);
+  return { ok: true, message: "Avis supprimé." };
+}
+
+/** Déplace un avis (l'ordre est celui de l'affichage sur le site). */
+export async function moveTestimonial(id: string, direction: -1 | 1): Promise<ActionState> {
+  if (!(await getAdmin())) return SESSION_EXPIRED;
+  await updateContent((content) => {
+    const i = content.testimonials.findIndex((t) => t.id === id);
+    const j = i + (direction === 1 ? 1 : -1);
+    if (i < 0 || j < 0 || j >= content.testimonials.length) return;
+    [content.testimonials[i], content.testimonials[j]] = [content.testimonials[j], content.testimonials[i]];
+  });
+  updateTag(CONTENT_TAG);
+  return { ok: true, message: "Ordre mis à jour." };
 }

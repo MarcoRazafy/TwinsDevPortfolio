@@ -3,15 +3,16 @@
 import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, ExternalLink, FolderKanban, LogOut, Pencil, Plus, Trash2, UserRound } from "lucide-react";
+import { ArrowDown, ArrowUp, ExternalLink, FolderKanban, LogOut, MessageSquareQuote, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import { deleteProject, logout, moveProject, type ActionState } from "@/app/admin/actions";
 import type { Content } from "@/lib/content/store";
 import { PROJECT_CATEGORIES, type Project } from "@/lib/projects";
 import ProfileEditor from "./ProfileEditor";
+import TestimonialsPanel from "./TestimonialsPanel";
 import ProjectEditor from "./ProjectEditor";
 import { Status } from "./ui";
 
-type Tab = "projets" | "profils";
+type Tab = "projets" | "profils" | "avis";
 
 /** Tableau de bord : projets (ajout, modification, ordre, suppression) et profils de la section « À propos ». */
 export default function AdminDashboard({ username, content }: { username: string; content: Content }) {
@@ -52,6 +53,7 @@ export default function AdminDashboard({ username, content }: { username: string
           [
             ["projets", "Projets", FolderKanban, content.projects.length],
             ["profils", "Profils", UserRound, content.team.length],
+            ["avis", "Avis", MessageSquareQuote, content.testimonials.length],
           ] as const
         ).map(([key, label, Icon, count]) => (
           <button
@@ -73,7 +75,9 @@ export default function AdminDashboard({ username, content }: { username: string
       </div>
 
       <section role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-        {tab === "projets" ? <ProjectsPanel projects={content.projects} /> : <ProfilesPanel team={content.team} />}
+        {tab === "projets" && <ProjectsPanel projects={content.projects} />}
+        {tab === "profils" && <ProfilesPanel team={content.team} />}
+        {tab === "avis" && <TestimonialsPanel testimonials={content.testimonials} />}
       </section>
     </div>
   );
