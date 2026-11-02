@@ -84,10 +84,10 @@ export default function ServicesSection() {
 
                 <div className="relative flex items-start justify-between">
                   <span
-                    className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_0_30px_-10px_var(--accent-card)] transition-transform duration-300 group-hover:scale-105"
-                    style={{ color: service.accent }}
+                    className="grid h-12 w-12 place-items-center rounded-2xl text-[#05070c] shadow-[0_8px_26px_-8px_var(--accent-card)] ring-1 ring-inset ring-white/25 transition-transform duration-300 group-hover:scale-105"
+                    style={{ background: service.accent }}
                   >
-                    <Icon size={22} strokeWidth={1.9} aria-hidden />
+                    <Icon size={22} strokeWidth={2.2} aria-hidden />
                   </span>
                   <span aria-hidden className="font-mono text-[12px] text-white/25">
                     {String(i + 1).padStart(2, "0")}
