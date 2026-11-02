@@ -41,6 +41,8 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
   const [isBack, setIsBack] = useState(false);
   // Écran de connexion admin, ouvert par le bouton retour du chat (par-dessus la conversation, qui reste en mémoire)
   const [adminOpen, setAdminOpen] = useState(false);
+  // Conversation commencée : les cartes décoratives s'écartent pour ne plus masquer les messages
+  const [chatStarted, setChatStarted] = useState(false);
   const router = useRouter();
   const checkingSession = useRef(false);
 
@@ -222,9 +224,11 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
                       key="chat"
                       onPowerOff={() => {
                         setAdminOpen(false);
+                        setChatStarted(false);
                         onStateChange("locked");
                       }}
                       onBack={openAdmin}
+                      onConversationStart={() => setChatStarted(true)}
                     />
                   )}
                 </AnimatePresence>
@@ -236,7 +240,7 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
           </div>
 
           {/* ── Cartes de messagerie qui sortent de l'écran une fois allumé ── */}
-          <FloatingCards visible={state === "on" && !adminOpen} />
+          <FloatingCards visible={state === "on" && !adminOpen && !chatStarted} />
 
           {/* ── Volume : tranches, coins, boutons ── */}
           <PhoneSides />
