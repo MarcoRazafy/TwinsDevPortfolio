@@ -141,7 +141,13 @@ function ScreenContent({
       />
 
       {/* Points + légende de l'image */}
-      {images.length > 1 && (
+      {/* Beaucoup d'images : un compteur plutôt qu'une rangée de points */}
+      {images.length > 12 && (
+        <p className="font-mono text-[12px] tabular-nums tracking-[0.12em] text-sky-100/70" aria-live="polite">
+          {String(shown + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+        </p>
+      )}
+      {images.length > 1 && images.length <= 12 && (
         <div className="flex items-center gap-1.5" role="group" aria-label="Images du projet">
           {images.map((img, i) => (
             <button

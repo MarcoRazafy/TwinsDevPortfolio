@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useRef, useState } from "react";
 import { LoaderCircle, Save, X } from "lucide-react";
-import { saveProject, type ActionState } from "@/app/admin/actions";
+import { discardGalleryUploads, saveProject, uploadGalleryImage, type ActionState } from "@/app/admin/actions";
 import type { Category, Project } from "@/lib/projects";
 import GalleryEditor from "./GalleryEditor";
 import { ChipCheckbox, Field, Fieldset, ImageInput, Status, TechPicker, inputClass, keepValuesOnSubmit } from "./ui";
@@ -20,8 +20,38 @@ type Props = {
 
 /** Formulaire d'ajout / de modification d'un projet. */
 export default function ProjectEditor({ project, categories, defaultCategory, onClose, onSaved }: Props) {
+  // Nouvelles images de galerie (choisies dans GalleryEditor), envoyées une par une avant l'enregistrement
+  const newFiles = useRef<File[]>([]);
+  const setNewFiles = useCallback((files: File[]) => {
+    newFiles.current = files;
+  }, []);
+  const [progress, setProgress] = useState<string | null>(null);
+
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, fd) => {
+    const files = newFiles.current;
+    if (files.length) {
+      // Inutile d'envoyer les images si l'enregistrement sera refusé de toute façon
+      if (!fd.getAll("categories").length) return { ok: false, message: "Choisissez au moins une catégorie." };
+      const slug = String(fd.get("slug") || fd.get("title") || "");
+      const sent: string[] = [];
+      for (const [i, file] of files.entries()) {
+        setProgress(`Envoi des images ${i + 1} / ${files.length}…`);
+        const body = new FormData();
+        body.append("file", file);
+        body.append("slug", slug);
+        const r = await uploadGalleryImage(body).catch(() => ({ error: "envoi interrompu." }));
+        if ("error" in r) {
+          setProgress(null);
+          await discardGalleryUploads(sent).catch(() => undefined);
+          return { ok: false, message: `Image ${i + 1} (${file.name}) : ${r.error}` };
+        }
+        sent.push(r.src);
+        fd.append("galleryUploaded", r.src);
+      }
+    }
+    setProgress(files.length ? "Enregistrement…" : null);
     const result = await saveProject(prev, fd);
+    setProgress(null);
     if (result?.ok) onSaved(result.message);
     return result;
   }, null);
@@ -77,7 +107,7 @@ export default function ProjectEditor({ project, categories, defaultCategory, on
 
       <Fieldset legend="Visuel et liens">
         <ImageInput name="image" current={p?.image} label="Visuel du projet (16:10 conseillé)" removable />
-        <GalleryEditor initial={p?.gallery ?? []} />
+        <GalleryEditor initial={p?.gallery ?? []} onNewFiles={setNewFiles} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Lien du site" htmlFor="p-site">
             <input id="p-site" name="site" type="url" maxLength={300} defaultValue={p?.links.site} className={inputClass} placeholder="https://…" />
@@ -104,7 +134,7 @@ export default function ProjectEditor({ project, categories, defaultCategory, on
           className="inline-flex h-11 items-center gap-2 rounded-xl bg-accent px-5 text-[14px] font-semibold text-[#052e16] transition-opacity disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070c]"
         >
           {pending ? <LoaderCircle size={17} className="animate-spin" aria-hidden /> : <Save size={17} aria-hidden />}
-          {pending ? "Enregistrement…" : p ? "Enregistrer" : "Ajouter le projet"}
+          {pending ? (progress ?? "Enregistrement…") : p ? "Enregistrer" : "Ajouter le projet"}
         </button>
       </div>
     </form>

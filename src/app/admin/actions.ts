@@ -13,13 +13,11 @@ import {
   lockedMinutes,
   recordFailure,
 } from "@/lib/admin/auth";
-import { CONTENT_TAG, updateContent } from "@/lib/content/store";
-import { deleteUpload, saveUpload } from "@/lib/content/uploads";
+import { CONTENT_TAG, getContent, updateContent } from "@/lib/content/store";
+import { deleteUpload, MEDIA_PREFIX, saveUpload } from "@/lib/content/uploads";
 import {
   CATEGORY_ICONS,
   CATEGORY_MAX,
-  GALLERY_MAX,
-  GALLERY_NEW_PER_SAVE,
   type CategoryIcon,
   type GalleryImage,
   type Project,
@@ -106,8 +104,37 @@ export async function logout() {
 
 /* ── Projets ── */
 
+/**
+ * Envoie une image de galerie seule, avant l'enregistrement du projet : chaque envoi reste léger,
+ * le nombre d'images n'est donc pas limité. Renvoie l'adresse à transmettre ensuite à saveProject.
+ */
+export async function uploadGalleryImage(fd: FormData): Promise<{ src: string } | { error: string }> {
+  if (!(await getAdmin())) return { error: "Session expirée : reconnectez-vous." };
+  const file = uploadedFile(fd, "file");
+  if (!file) return { error: "Image vide." };
+  const slug = slugify(text(fd, "slug", 60)) || "projet";
+  return saveUpload(file, `${slug}-galerie`);
+}
+
+/** Supprime des images envoyées mais jamais enregistrées (envoi interrompu) ; celles d'un projet sont gardées. */
+export async function discardGalleryUploads(srcs: string[]) {
+  if (!(await getAdmin()) || !Array.isArray(srcs)) return;
+  const { projects } = await getContent();
+  const used = new Set(projects.flatMap((p) => [p.image, ...(p.gallery ?? []).map((g) => g.src)]));
+  await Promise.all(srcs.filter((src) => typeof src === "string" && !used.has(src)).map((src) => deleteUpload(src)));
+}
+
 export async function saveProject(_prev: ActionState, fd: FormData): Promise<ActionState> {
   if (!(await getAdmin())) return SESSION_EXPIRED;
+
+  // Images de galerie déjà envoyées (uploadGalleryImage) : supprimées si l'enregistrement échoue
+  const uploaded = fd
+    .getAll("galleryUploaded")
+    .filter((v): v is string => typeof v === "string" && v.startsWith(MEDIA_PREFIX));
+  const discard = async (message: string) => {
+    await Promise.all(uploaded.map((src) => deleteUpload(src)));
+    return fail(message);
+  };
 
   const original = text(fd, "originalSlug", 60);
   const title = text(fd, "title", 120);
@@ -122,46 +149,27 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   const code = text(fd, "code", 300);
   const accent = text(fd, "accent", 7);
 
-  if (!title) return fail("Le titre est obligatoire.");
-  if (!requested.length) return fail("Choisissez au moins une catégorie.");
-  if (!SLUG_OK.test(slug)) return fail("Identifiant invalide : lettres minuscules, chiffres et tirets.");
-  if ((site && !URL_OK.test(site)) || (code && !URL_OK.test(code))) return fail("Lien invalide : il doit commencer par https://");
+  if (!title) return discard("Le titre est obligatoire.");
+  if (!requested.length) return discard("Choisissez au moins une catégorie.");
+  if (!SLUG_OK.test(slug)) return discard("Identifiant invalide : lettres minuscules, chiffres et tirets.");
+  if ((site && !URL_OK.test(site)) || (code && !URL_OK.test(code))) return discard("Lien invalide : il doit commencer par https://");
 
-  // Galerie : images conservées (dans l'ordre affiché) + nouvelles images, chacune avec sa description
+  // Galerie : images conservées (dans l'ordre affiché) + nouvelles images déjà envoyées, chacune avec sa description
   const caption = (v: FormDataEntryValue | undefined) => (typeof v === "string" ? v.trim().slice(0, 300) : "");
   const keptSrc = fd.getAll("galleryKeep").filter((v): v is string => typeof v === "string");
   const keptCaptions = fd.getAll("galleryCaption");
   const newCaptions = fd.getAll("galleryNewCaption");
-  const newEntries = fd
-    .getAll("galleryFile")
-    .map((f, i) => ({ file: f instanceof File && f.size > 0 ? f : null, caption: caption(newCaptions[i]) }))
-    .filter((e): e is { file: File; caption: string } => e.file !== null);
-  if (newEntries.length > GALLERY_NEW_PER_SAVE) {
-    return fail(`${GALLERY_NEW_PER_SAVE} nouvelles images au maximum par enregistrement.`);
-  }
-  if (keptSrc.length + newEntries.length > GALLERY_MAX) return fail(`${GALLERY_MAX} images au maximum dans la galerie.`);
+  const added: GalleryImage[] = uploaded.map((src, i) => ({ src, caption: caption(newCaptions[i]) }));
 
-  // Envois : en cas d'échec, on supprime ce qui a déjà été enregistré
-  const created: string[] = [];
-  const cleanup = () => Promise.all(created.map((src) => deleteUpload(src)));
+  // Visuel principal : en cas d'échec plus bas, il est supprimé avec les images de galerie
   const file = uploadedFile(fd, "image");
   let newImage: string | undefined;
   if (file) {
     const saved = await saveUpload(file, slug);
-    if ("error" in saved) return fail(saved.error);
+    if ("error" in saved) return discard(saved.error);
     newImage = saved.src;
-    created.push(saved.src);
   }
-  const added: GalleryImage[] = [];
-  for (const entry of newEntries) {
-    const saved = await saveUpload(entry.file, `${slug}-galerie`);
-    if ("error" in saved) {
-      await cleanup();
-      return fail(saved.error);
-    }
-    created.push(saved.src);
-    added.push({ src: saved.src, caption: entry.caption });
-  }
+  const cleanup = () => Promise.all([...uploaded, newImage].map((src) => deleteUpload(src)));
 
   let replaced: string | undefined;
   let droppedGallery: string[] = [];
@@ -179,7 +187,9 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
       noCategory = true;
       return;
     }
-    if (content.projects.some((p, i) => p.slug === slug && i !== index)) {
+    // Une nouvelle image ne doit appartenir à aucun projet (sinon la supprimer ici effacerait celle d'un autre)
+    const used = new Set(content.projects.flatMap((p) => [p.image, ...(p.gallery ?? []).map((g) => g.src)]));
+    if (content.projects.some((p, i) => p.slug === slug && i !== index) || uploaded.some((src) => used.has(src))) {
       conflict = true;
       return;
     }

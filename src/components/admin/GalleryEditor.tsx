@@ -1,22 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
-import { GALLERY_MAX, GALLERY_NEW_PER_SAVE, type GalleryImage } from "@/lib/projects";
+import { ArrowDown, ArrowUp, ImagePlus, Trash2, TriangleAlert, Upload } from "lucide-react";
+import type { GalleryImage } from "@/lib/projects";
 import { inputClass } from "./ui";
 
 type Kept = GalleryImage & { id: number };
-type Added = { id: number; preview: string | null };
+type Added = { id: number; file: File; preview: string };
+
+const ACCEPTED = ["image/webp", "image/png", "image/jpeg"];
+const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo par image, comme côté serveur
 
 /**
- * Galerie d'un projet : images existantes (description modifiable, ordre, retrait) et nouvelles images.
- * Champs envoyés : galleryKeep + galleryCaption (existantes, dans l'ordre), galleryFile + galleryNewCaption (nouvelles).
+ * Galerie d'un projet : images existantes (description modifiable, ordre, retrait) et nouvelles images,
+ * sans limite de nombre. Plusieurs fichiers à la fois (sélection multiple ou glisser-déposer).
+ * Champs envoyés : galleryKeep + galleryCaption (existantes, dans l'ordre), galleryNewCaption (nouvelles) ;
+ * les fichiers des nouvelles images remontent au formulaire par `onNewFiles`, dans le même ordre.
  */
-export default function GalleryEditor({ initial }: { initial: GalleryImage[] }) {
+export default function GalleryEditor({ initial, onNewFiles }: { initial: GalleryImage[]; onNewFiles: (files: File[]) => void }) {
   const [kept, setKept] = useState<Kept[]>(() => initial.map((g, id) => ({ ...g, id })));
   const [added, setAdded] = useState<Added[]>([]);
+  const [rejected, setRejected] = useState<string[]>([]);
+  const [dragging, setDragging] = useState(false);
   const nextId = useRef(initial.length);
+  const picker = useRef<HTMLInputElement>(null);
   const previews = useRef(new Set<string>());
 
   // Libère les aperçus à la fermeture de l'éditeur
@@ -25,28 +33,75 @@ export default function GalleryEditor({ initial }: { initial: GalleryImage[] }) 
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
 
-  const total = kept.length + added.length;
-  const canAdd = total < GALLERY_MAX && added.length < GALLERY_NEW_PER_SAVE;
-  const move = (id: number, dir: -1 | 1) =>
-    setKept((all) => {
-      const i = all.findIndex((k) => k.id === id);
-      const j = i + dir;
-      if (j < 0 || j >= all.length) return all;
-      const next = [...all];
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
+  useEffect(() => {
+    onNewFiles(added.map((a) => a.file));
+  }, [added, onNewFiles]);
+
+  const addFiles = (list: FileList | null) => {
+    const files = [...(list ?? [])];
+    const ok = files.filter((f) => ACCEPTED.includes(f.type) && f.size <= MAX_SIZE);
+    setRejected(
+      files
+        .filter((f) => !ok.includes(f))
+        .map((f) => `${f.name} (${ACCEPTED.includes(f.type) ? "plus de 5 Mo" : "format non pris en charge"})`),
+    );
+    const items = ok.map((file) => {
+      const preview = URL.createObjectURL(file);
+      previews.current.add(preview);
+      return { id: nextId.current++, file, preview };
+    });
+    setAdded((all) => [...all, ...items]);
+  };
+
+  const removeAdded = (id: number) =>
+    setAdded((all) => {
+      const gone = all.find((a) => a.id === id);
+      if (gone) {
+        URL.revokeObjectURL(gone.preview);
+        previews.current.delete(gone.preview);
+      }
+      return all.filter((a) => a.id !== id);
     });
 
+  const swap = <T extends { id: number }>(all: T[], id: number, dir: -1 | 1) => {
+    const i = all.findIndex((k) => k.id === id);
+    const j = i + dir;
+    if (j < 0 || j >= all.length) return all;
+    const next = [...all];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  };
+
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    addFiles(e.dataTransfer.files);
+  };
+
+  const total = kept.length + added.length;
+
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className="flex flex-col gap-3"
+      onDragOver={(e) => {
+        if (![...e.dataTransfer.types].includes("Files")) return;
+        e.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+      }}
+      onDrop={onDrop}
+    >
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-[13px] font-medium text-white/75">Galerie</p>
         <p className="font-mono text-[11.5px] text-white/40">
-          {total} / {GALLERY_MAX}
+          {total} image{total > 1 ? "s" : ""}
+          {added.length > 0 && ` · ${added.length} à envoyer`}
         </p>
       </div>
       <p className="-mt-2 text-[12px] text-white/40">
-        Captures et détails du projet, chacun avec sa description. Affichés dans le panneau sous le globe.
+        Captures et détails du projet, chacun avec sa description. Affichés sur l&apos;écran du projet, après le visuel.
       </p>
 
       {kept.map((g, i) => (
@@ -61,14 +116,14 @@ export default function GalleryEditor({ initial }: { initial: GalleryImage[] }) 
             maxLength={300}
             rows={3}
             aria-label={`Description de l'image ${i + 1}`}
-            placeholder="Description de l'image"
+            placeholder="Description de l'image (facultatif)"
             className={`${inputClass} min-h-0 resize-none py-2 text-[13px]`}
           />
           <div className="flex shrink-0 flex-col">
-            <SmallButton label={`Monter l'image ${i + 1}`} disabled={i === 0} onClick={() => move(g.id, -1)}>
+            <SmallButton label={`Monter l'image ${i + 1}`} disabled={i === 0} onClick={() => setKept((all) => swap(all, g.id, -1))}>
               <ArrowUp size={14} aria-hidden />
             </SmallButton>
-            <SmallButton label={`Descendre l'image ${i + 1}`} disabled={i === kept.length - 1} onClick={() => move(g.id, 1)}>
+            <SmallButton label={`Descendre l'image ${i + 1}`} disabled={i === kept.length - 1} onClick={() => setKept((all) => swap(all, g.id, 1))}>
               <ArrowDown size={14} aria-hidden />
             </SmallButton>
             <SmallButton label={`Retirer l'image ${i + 1}`} danger onClick={() => setKept((all) => all.filter((k) => k.id !== g.id))}>
@@ -80,57 +135,73 @@ export default function GalleryEditor({ initial }: { initial: GalleryImage[] }) 
 
       {added.map((a, i) => (
         <div key={a.id} className="flex gap-3 rounded-xl border border-dashed border-accent/40 bg-accent/[0.04] p-2.5">
-          <div className="flex w-28 shrink-0 flex-col gap-1.5">
+          <div className="flex w-28 shrink-0 flex-col gap-1">
             <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-white/5">
-              {a.preview ? (
-                <Image src={a.preview} alt="" fill sizes="112px" unoptimized className="object-cover" />
-              ) : (
-                <span className="absolute inset-0 grid place-items-center text-white/30">
-                  <ImagePlus size={20} aria-hidden />
-                </span>
-              )}
+              <Image src={a.preview} alt="" fill sizes="112px" unoptimized className="object-cover" />
             </div>
-            <input
-              name="galleryFile"
-              type="file"
-              accept="image/webp,image/png,image/jpeg"
-              aria-label={`Nouvelle image ${i + 1}`}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                const url = file ? URL.createObjectURL(file) : null;
-                if (url) previews.current.add(url);
-                setAdded((all) => all.map((x) => (x.id === a.id ? { ...x, preview: url } : x)));
-              }}
-              className="w-full text-[11px] text-white/50 file:mr-2 file:rounded-md file:border-0 file:bg-white/10 file:px-2 file:py-1 file:text-[11px] file:text-white"
-            />
+            <p className="truncate text-[10.5px] text-white/40" title={a.file.name}>
+              {a.file.name}
+            </p>
           </div>
           <textarea
             name="galleryNewCaption"
             maxLength={300}
             rows={3}
             aria-label={`Description de la nouvelle image ${i + 1}`}
-            placeholder="Description de l'image"
+            placeholder="Description de l'image (facultatif)"
             className={`${inputClass} min-h-0 resize-none py-2 text-[13px]`}
           />
-          <SmallButton label={`Annuler la nouvelle image ${i + 1}`} danger onClick={() => setAdded((all) => all.filter((x) => x.id !== a.id))}>
-            <Trash2 size={14} aria-hidden />
-          </SmallButton>
+          <div className="flex shrink-0 flex-col">
+            <SmallButton label={`Monter la nouvelle image ${i + 1}`} disabled={i === 0} onClick={() => setAdded((all) => swap(all, a.id, -1))}>
+              <ArrowUp size={14} aria-hidden />
+            </SmallButton>
+            <SmallButton
+              label={`Descendre la nouvelle image ${i + 1}`}
+              disabled={i === added.length - 1}
+              onClick={() => setAdded((all) => swap(all, a.id, 1))}
+            >
+              <ArrowDown size={14} aria-hidden />
+            </SmallButton>
+            <SmallButton label={`Annuler la nouvelle image ${i + 1}`} danger onClick={() => removeAdded(a.id)}>
+              <Trash2 size={14} aria-hidden />
+            </SmallButton>
+          </div>
         </div>
       ))}
 
+      {/* Zone d'ajout : clic (sélection multiple) ou glisser-déposer */}
+      <input
+        ref={picker}
+        type="file"
+        multiple
+        accept={ACCEPTED.join(",")}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          addFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
       <button
         type="button"
-        disabled={!canAdd}
-        onClick={() => setAdded((all) => [...all, { id: nextId.current++, preview: null }])}
-        className="inline-flex w-fit items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3.5 py-2 text-[13px] text-white/70 transition-colors hover:border-white/40 hover:text-white disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={() => picker.current?.click()}
+        className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed px-4 py-5 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          dragging ? "border-accent bg-accent/10 text-white" : "border-white/20 text-white/65 hover:border-white/40 hover:text-white"
+        }`}
       >
-        <ImagePlus size={15} aria-hidden />
-        Ajouter une image
+        {dragging ? <Upload size={20} aria-hidden /> : <ImagePlus size={20} aria-hidden />}
+        <span className="text-[13.5px] font-medium">{dragging ? "Déposez les images ici" : "Ajouter des images"}</span>
+        <span className="text-[12px] text-white/40">Sélectionnez-en plusieurs d&apos;un coup, ou glissez-les ici · WebP, PNG, JPEG · 5 Mo max chacune</span>
       </button>
-      {added.length >= GALLERY_NEW_PER_SAVE && (
-        <p className="text-[12px] text-white/45">
-          {GALLERY_NEW_PER_SAVE} nouvelles images par enregistrement : enregistrez, puis ajoutez les suivantes.
-        </p>
+
+      {rejected.length > 0 && (
+        <div role="alert" className="flex gap-2 rounded-xl border border-amber-400/30 bg-amber-400/[0.06] p-3 text-[12.5px] text-amber-100/85">
+          <TriangleAlert size={15} aria-hidden className="mt-0.5 shrink-0 text-amber-300" />
+          <p>
+            {rejected.length > 1 ? `${rejected.length} fichiers ignorés` : "Fichier ignoré"} : {rejected.join(", ")}.
+          </p>
+        </div>
       )}
     </div>
   );

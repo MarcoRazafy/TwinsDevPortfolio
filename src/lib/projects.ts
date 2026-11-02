@@ -22,10 +22,6 @@ export const PROJECT_CATEGORIES: Category[] = [
 
 export type GalleryImage = { src: string; caption: string };
 
-/** Limites de la galerie d'un projet. */
-export const GALLERY_MAX = 8;
-export const GALLERY_NEW_PER_SAVE = 4; // nouvelles images par enregistrement (taille de l'envoi)
-
 export type Project = {
   /** Identifiant court, sert de clé et de nom de fichier pour la capture (public/projects/<slug>.webp). */
   slug: string;
