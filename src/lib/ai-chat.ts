@@ -23,6 +23,12 @@ const endpoint = () => {
   return `${base.replace(/\/$/, "")}/chat/completions`;
 };
 const model = () => process.env.AI_MODEL || process.env.MISTRAL_MODEL || "mistral-small-latest";
+/** Modèles de secours (séparés par des virgules), essayés si le modèle principal refuse (limite, offre). */
+const fallbackModels = () =>
+  (process.env.AI_FALLBACK_MODELS || process.env.MISTRAL_FALLBACK_MODELS || "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
 
 export class AiError extends Error {
   constructor(
@@ -49,32 +55,42 @@ export async function streamChat(
   const key = apiKey();
   if (!key) throw new AiError("Clé d'API absente", 503);
 
-  const upstream = await fetch(endpoint(), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
-    body: JSON.stringify({
-      model: model(),
-      messages: [{ role: "system", content: system }, ...messages],
-      max_tokens: MAX_TOKENS,
-      temperature: 0.6,
-      stream: true,
-    }),
-    signal,
-  });
+  // Modèle principal, puis les modèles de secours si le fournisseur refuse (limite atteinte, modèle hors offre)
+  const models = [model(), ...fallbackModels()];
+  let lastError = new AiError("Le service de réponse est indisponible", 502);
+  for (const [i, name] of models.entries()) {
+    const upstream = await fetch(endpoint(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      },
+      body: JSON.stringify({
+        model: name,
+        messages: [{ role: "system", content: system }, ...messages],
+        max_tokens: MAX_TOKENS,
+        temperature: 0.6,
+        stream: true,
+      }),
+      signal,
+    });
 
-  if (!upstream.ok || !upstream.body) {
+    if (upstream.ok && upstream.body) return upstream.body.pipeThrough(sseToText());
+
     const detail = await upstream.text().catch(() => "");
-    console.error(`[ai-chat] ${upstream.status} ${detail.slice(0, 300)}`);
-    if (upstream.status === 401 || upstream.status === 403) throw new AiError("Clé d'API refusée", 503);
-    if (upstream.status === 429) throw new AiError("Limite de requêtes atteinte", 429);
-    throw new AiError("Le service de réponse est indisponible", 502);
+    console.error(`[ai-chat] ${name} : ${upstream.status} ${detail.slice(0, 300)}`);
+    if (upstream.status === 401) throw new AiError("Clé d'API refusée", 503);
+    lastError =
+      upstream.status === 429
+        ? new AiError("Limite de requêtes atteinte", 429)
+        : upstream.status === 403
+          ? new AiError("Modèle non inclus dans l'offre", 503)
+          : new AiError("Le service de réponse est indisponible", 502);
+    // Seuls « limite atteinte » et « modèle hors offre » justifient d'essayer le modèle suivant
+    if (![403, 429].includes(upstream.status) || i === models.length - 1) break;
   }
-
-  return upstream.body.pipeThrough(sseToText());
+  throw lastError;
 }
 
 /** Transforme les événements `data: {...}` de Mistral en texte : on ne garde que `choices[0].delta.content`. */
