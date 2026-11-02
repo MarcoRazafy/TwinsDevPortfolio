@@ -10,6 +10,7 @@ import {
   Globe2,
   Layers,
   Maximize2,
+  Minimize2,
   MousePointerClick,
   Pause,
   Play,
@@ -110,6 +111,17 @@ export default function ProjectsHologram({ projects }: Props) {
     viewerOpen.current = true;
     setOpenIndex(i);
   };
+  const closeScreen = () => {
+    viewerOpen.current = false;
+    setOpenIndex(null);
+  };
+  /** Flèches de la barre : écran ouvert → change le projet affiché ; sinon → fait tourner l'anneau. */
+  const stepBar = (dir: 1 | -1) => {
+    if (openIndex === null) return step(dir);
+    const i = (openIndex + dir + currentList.length) % currentList.length;
+    setOpenIndex(i);
+    focusSlot(i);
+  };
 
   /* ── Choix d'une catégorie : les images actuelles rentrent dans le globe, les nouvelles en sortent ── */
   const select = (next: ProjectCategory) => {
@@ -140,6 +152,8 @@ export default function ProjectsHologram({ projects }: Props) {
     orbit.current.holdUntil = 0;
 
     setCategory(next);
+    viewerOpen.current = false;
+    setOpenIndex(null);
     setCurrentKeys(current.current);
     setActiveKey(null);
     setOrbiters((prev) => [...prev.filter((o) => leaving.includes(o.key)), ...entering]);
@@ -445,7 +459,7 @@ export default function ProjectsHologram({ projects }: Props) {
             onPointerEnter={() => (hovered.current = true)}
             onPointerLeave={() => (hovered.current = false)}
             aria-label={`${project.title} : ouvrir l'écran du projet`}
-            aria-haspopup="dialog"
+            aria-controls="ecran-projet"
             aria-current={key === activeKey || undefined}
             tabIndex={currentKeys.includes(key) ? 0 : -1}
             style={{ opacity: 0 }}
@@ -515,15 +529,15 @@ export default function ProjectsHologram({ projects }: Props) {
 
           {category && (
             <div className="flex shrink-0 items-center gap-1.5">
-              <IconButton label="Projet précédent" onClick={() => step(-1)}>
+              <IconButton label="Projet précédent" onClick={() => stepBar(-1)}>
                 <ChevronLeft size={18} aria-hidden />
               </IconButton>
               <span aria-hidden className="px-1 font-mono text-[12px] tabular-nums tracking-wider text-sky-100/50">
-                {String(Math.max(activeIndex, 0) + 1).padStart(2, "0")}
+                {String((openIndex ?? Math.max(activeIndex, 0)) + 1).padStart(2, "0")}
                 <span className="text-sky-100/25">/</span>
                 {String(currentList.length).padStart(2, "0")}
               </span>
-              <IconButton label="Projet suivant" onClick={() => step(1)}>
+              <IconButton label="Projet suivant" onClick={() => stepBar(1)}>
                 <ChevronRight size={18} aria-hidden />
               </IconButton>
               <IconButton label={autoplay ? "Mettre en pause la rotation" : "Lancer la rotation"} onClick={() => setChoice(!autoplay)}>
@@ -531,13 +545,14 @@ export default function ProjectsHologram({ projects }: Props) {
               </IconButton>
               <button
                 type="button"
-                disabled={!activeProject}
-                onClick={() => openProject(activeKey)}
-                aria-haspopup="dialog"
+                disabled={!activeProject && openIndex === null}
+                onClick={() => (openIndex !== null ? closeScreen() : openProject(activeKey))}
+                aria-expanded={openIndex !== null}
+                aria-controls="ecran-projet"
                 className="ml-1 inline-flex h-9 items-center gap-1.5 rounded-full bg-sky-300/15 px-4 text-[13px] font-semibold text-sky-100 ring-1 ring-inset ring-sky-300/40 transition-colors hover:bg-sky-300/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
               >
-                <Maximize2 size={14} aria-hidden />
-                Ouvrir
+                {openIndex !== null ? <Minimize2 size={14} aria-hidden /> : <Maximize2 size={14} aria-hidden />}
+                {openIndex !== null ? "Fermer" : "Ouvrir"}
               </button>
             </div>
           )}
@@ -552,10 +567,7 @@ export default function ProjectsHologram({ projects }: Props) {
           setOpenIndex(i);
           focusSlot(i);
         }}
-        onClose={() => {
-          viewerOpen.current = false;
-          setOpenIndex(null);
-        }}
+        onClose={closeScreen}
       />
     </div>
   );

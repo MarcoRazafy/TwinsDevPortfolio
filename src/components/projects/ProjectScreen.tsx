@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
-import { motion, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useSpring } from "motion/react";
 import { ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { GalleryImage, Project } from "@/lib/projects";
 
@@ -20,39 +20,47 @@ type Props = {
 };
 
 /**
- * Écran virtuel holographique : à l'ouverture d'un projet, un écran incurvé se matérialise, la photo
- * du projet s'y affiche (puis sa galerie), avec une courte description en dessous.
- * <dialog> natif : Échap ferme, le focus reste dans la fenêtre.
+ * Écran virtuel holographique, affiché dans la page sous le globe : à l'ouverture d'un projet, un écran
+ * incurvé se déploie, la photo du projet s'y affiche (puis sa galerie), avec une courte description dessous.
  */
 export default function ProjectScreen({ projects, index, onClose, onIndexChange }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const reduce = useReducedMotion() ?? false;
+  const ref = useRef<HTMLElement>(null);
   const project = index !== null ? projects[index] : null;
+  const isOpen = project !== null;
 
+  // À l'ouverture (pas en passant d'un projet à l'autre), on fait défiler la page jusqu'à l'écran
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (project && !dialog.open) dialog.showModal();
-    if (!project && dialog.open) dialog.close();
-  }, [project]);
+    if (!isOpen) return;
+    const t = window.setTimeout(() => ref.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 120);
+    return () => window.clearTimeout(t);
+  }, [isOpen, reduce]);
 
   return (
-    <dialog
-      ref={dialogRef}
-      onClose={onClose}
-      aria-labelledby="ecran-projet-titre"
-      className="m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-transparent p-0 text-white backdrop:bg-[#02050c]/85 backdrop:backdrop-blur-md"
-    >
+    <AnimatePresence initial={false}>
       {project && index !== null && (
-        <ScreenContent
-          key={project.slug}
-          project={project}
-          position={index}
-          total={projects.length}
-          onClose={onClose}
-          onStep={(dir) => onIndexChange((index + dir + projects.length) % projects.length)}
-        />
+        <motion.section
+          ref={ref}
+          key="ecran"
+          id="ecran-projet"
+          aria-labelledby="ecran-projet-titre"
+          className="w-full scroll-mt-24 overflow-hidden text-white"
+          initial={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
+          animate={reduce ? { opacity: 1 } : { opacity: 1, height: "auto" }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0, transition: { duration: 0.35, ease: EXPO_OUT } }}
+          transition={{ duration: 0.6, ease: EXPO_OUT }}
+        >
+          <ScreenContent
+            key={project.slug}
+            project={project}
+            position={index}
+            total={projects.length}
+            onClose={onClose}
+            onStep={(dir) => onIndexChange((index + dir + projects.length) % projects.length)}
+          />
+        </motion.section>
       )}
-    </dialog>
+    </AnimatePresence>
   );
 }
 
@@ -88,21 +96,21 @@ function ScreenContent({
 
   return (
     <div
-      className="flex min-h-full flex-col items-center justify-center gap-5 px-4 py-10 sm:gap-6"
+      className="flex flex-col items-center gap-5 px-1 pb-4 pt-10 sm:gap-6"
       onPointerMove={onPointerMove}
       onPointerLeave={() => {
         tiltX.set(0);
         tiltY.set(0);
       }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
       onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
         if (images.length < 2) return;
         if (e.key === "ArrowRight") step(1);
         if (e.key === "ArrowLeft") step(-1);
       }}
     >
       {/* Bandeau HUD au-dessus de l'écran */}
-      <div className="flex w-[min(880px,92vw)] items-center justify-between gap-3">
+      <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
         <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-sky-200/70">
           <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
           Projet {String(position + 1).padStart(2, "0")}
@@ -113,7 +121,6 @@ function ScreenContent({
           type="button"
           onClick={onClose}
           aria-label="Fermer l'écran"
-          autoFocus
           className="grid h-10 w-10 place-items-center rounded-full border border-sky-300/25 bg-[#0b1426]/80 text-sky-50/85 transition-colors hover:border-sky-300/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
         >
           <X size={18} aria-hidden />
@@ -160,7 +167,7 @@ function ScreenContent({
         initial={reduce ? false : { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EXPO_OUT, delay: reduce ? 0 : 0.55 }}
-        className="relative w-[min(760px,92vw)] overflow-hidden rounded-[24px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.8),rgba(5,11,24,0.9))] p-5 shadow-[0_30px_80px_-30px_rgba(2,132,199,0.6)] sm:p-6"
+        className="relative w-full max-w-[760px] overflow-hidden rounded-[24px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.8),rgba(5,11,24,0.9))] p-5 shadow-[0_30px_80px_-30px_rgba(2,132,199,0.6)] sm:p-6"
       >
         <div aria-hidden className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
         <p className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: project.accent }}>
@@ -262,7 +269,7 @@ function CurvedScreen({
   const depth = radius * (1 - Math.cos(arc / 2)); // avancée des bords
 
   return (
-    <div ref={boxRef} className="relative w-[min(880px,92vw)]" style={{ height: H + depth * 0.35 || "55vw" }}>
+    <div ref={boxRef} className="relative w-full max-w-[880px]" style={{ height: H + depth * 0.35 || "55vw" }}>
       <div className="absolute inset-0 [perspective:1700px]" role="img" aria-label={image?.caption || `Aperçu du projet ${title}`}>
         <motion.div
           className="absolute left-1/2 top-0 h-full [transform-style:preserve-3d]"
