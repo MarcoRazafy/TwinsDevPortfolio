@@ -173,8 +173,8 @@ export default function ServicesSection() {
                         last ? "sm:col-span-2" : ""
                       }`}
                     >
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/12 text-accent-strong ring-1 ring-accent/25 transition-shadow duration-300 group-hover/sp:shadow-[0_0_24px_-4px_rgba(34,197,94,0.7)]">
-                        <Icon size={19} strokeWidth={1.9} aria-hidden />
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(150deg,#4ade80,#22c55e)] text-[#05070c] shadow-[0_6px_18px_-8px_rgba(34,197,94,0.8)] ring-1 ring-inset ring-white/25 transition-shadow duration-300 group-hover/sp:shadow-[0_0_24px_-4px_rgba(34,197,94,0.9)]">
+                        <Icon size={19} strokeWidth={2.2} aria-hidden />
                       </span>
                       <span className="min-w-0">
                         <span className="block font-[family-name:var(--font-display)] text-[1rem] font-semibold">{s.title}</span>
