@@ -2,8 +2,8 @@
 
 import { useEffect, useId, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { CheckCircle2, ImagePlus, TriangleAlert, X } from "lucide-react";
-import { TECH, techColor, techLabel, type TechKey } from "@/lib/tech";
+import { CheckCircle2, ImagePlus, Search, TriangleAlert, X } from "lucide-react";
+import { TECH, TECH_GROUPS, techColor, techLabel, type TechKey } from "@/lib/tech";
 import type { ActionState } from "@/app/admin/actions";
 
 export const inputClass =
@@ -64,12 +64,19 @@ export function TechPicker({
   onChange?: (selected: TechKey[]) => void;
 }) {
   const [selected, setSelectedState] = useState<TechKey[]>(initial);
+  const [query, setQuery] = useState("");
   const setSelected = (update: (s: TechKey[]) => TechKey[]) => {
     const next = update(selected);
     setSelectedState(next);
     onChange?.(next);
   };
-  const available = (Object.keys(TECH) as TechKey[]).filter((k) => !selected.includes(k));
+  // Recherche sans accents ni casse, sur le nom affiché et la catégorie
+  const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const q = norm(query.trim());
+  const available = (Object.keys(TECH) as TechKey[]).filter(
+    (k) => !selected.includes(k) && (!q || norm(techLabel(k)).includes(q) || norm(TECH[k].group).includes(q) || k.includes(q)),
+  );
+  const groups = TECH_GROUPS.map((g) => ({ group: g, keys: available.filter((k) => TECH[k].group === g) })).filter((g) => g.keys.length);
   return (
     <div className="flex flex-col gap-3">
       {name && selected.map((k) => <input key={k} type="hidden" name={name} value={k} />)}
@@ -91,18 +98,52 @@ export function TechPicker({
           </li>
         ))}
       </ul>
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label={`${label} : ajouter`}>
-        {available.map((k) => (
-          <button
-            key={k}
-            type="button"
-            disabled={selected.length >= max}
-            onClick={() => setSelected((s) => [...s, k])}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-2 pr-2.5 text-[12px] text-white/65 transition-colors hover:border-white/30 hover:text-white disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <TechIcon k={k} />
-            {techLabel(k)}
-          </button>
+      <div className="relative">
+        <Search size={15} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            // Entrée : ajoute la première technologie trouvée (sans envoyer le formulaire)
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            if (available[0] && selected.length < max) {
+              setSelected((s) => [...s, available[0]]);
+              setQuery("");
+            }
+          }}
+          aria-label={`${label} : rechercher une technologie`}
+          placeholder={`Rechercher parmi ${Object.keys(TECH).length} technologies (Entrée pour ajouter)`}
+          className={`${inputClass} py-2 pl-9 text-[13px]`}
+        />
+      </div>
+      <div
+        role="group"
+        aria-label={`${label} : ajouter`}
+        className="flex max-h-72 flex-col gap-3 overflow-y-auto rounded-xl border border-white/[0.06] bg-white/[0.015] p-3 [scrollbar-width:thin]"
+      >
+        {groups.length === 0 && <p className="text-[12.5px] text-white/40">Aucune technologie ne correspond.</p>}
+        {groups.map(({ group, keys }) => (
+          <div key={group} className="flex flex-col gap-1.5">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-white/40">
+              {group} <span className="text-white/25">· {keys.length}</span>
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {keys.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  disabled={selected.length >= max}
+                  onClick={() => setSelected((s) => [...s, k])}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-2 pr-2.5 text-[12px] text-white/65 transition-colors hover:border-white/30 hover:text-white disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <TechIcon k={k} />
+                  {techLabel(k)}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
