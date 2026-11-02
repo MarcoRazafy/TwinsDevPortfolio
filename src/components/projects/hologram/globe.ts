@@ -369,7 +369,7 @@ export function anchorPoints(v: View, lat: number, lon: number, lift: number): A
   return { bx, by, bz, tx: p[0], ty: p[1], vis: Math.max(0, vis) };
 }
 
-const ANCHOR_RGB = "251, 146, 60";
+const ANCHOR_RGB = "52, 211, 153"; // émeraude (#34d399), dans la palette du site
 
 /** Dessine le repère et la tige d'une légende. `active` : catégorie choisie ; `invite` : rien n'est encore choisi. */
 export function drawAnchor(ctx: CanvasRenderingContext2D, a: AnchorPoints, r: number, time: number, motion: number, active: boolean, invite: boolean) {

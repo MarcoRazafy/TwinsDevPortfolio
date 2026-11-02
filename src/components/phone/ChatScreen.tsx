@@ -16,7 +16,7 @@ type Message = {
   error?: boolean;
 };
 
-const CONTACT = { name: "TwinsDev", avatar: "/brand/twinsdev-mark.webp" };
+const CONTACT = { name: "TwinsDev", avatar: "/brand/twinsdev-mark-v2.webp" };
 const MAX_INPUT = 500;
 
 /** Indicateur « est en train d'écrire » : trois points qui rebondissent. */
@@ -181,7 +181,7 @@ export default function ChatScreen({ onPowerOff, onBack }: Props) {
       {/* Fond d'écran : logo TwinsDev, dans la partie haute (les messages s'empilent en bas) */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[22%] flex justify-center">
         <Image
-          src="/brand/twinsdev-logo.webp"
+          src="/brand/twinsdev-logo-v2.webp"
           alt=""
           width={1000}
           height={761}

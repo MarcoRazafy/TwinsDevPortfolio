@@ -10,7 +10,7 @@ export default function SiteFooter() {
       <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <a href="#accueil" className="flex items-center gap-2.5 font-[family-name:var(--font-display)] text-[17px] font-semibold">
-            <Image src="/brand/twinsdev-mark.webp" alt="" width={480} height={244} className="h-auto w-7" />
+            <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-7" />
             {SITE.name}
           </a>
           <nav aria-label="Pied de page" className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-muted">

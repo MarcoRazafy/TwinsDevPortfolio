@@ -22,7 +22,7 @@ export default function AdminDashboard({ username, content }: { username: string
     <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-8 px-4 pb-16 pt-6 sm:px-8">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3">
-          <Image src="/brand/twinsdev-mark.webp" alt="" width={480} height={244} className="h-auto w-9" />
+          <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-9" />
           <div className="leading-tight">
             <h1 className="font-[family-name:var(--font-display)] text-[1.2rem] font-semibold">Administration</h1>
             <p className="text-[12.5px] text-white/50">Connecté : {username}</p>

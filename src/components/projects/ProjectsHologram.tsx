@@ -345,7 +345,7 @@ export default function ProjectsHologram({ projects }: Props) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.25 }}
-          className="flex min-h-6 items-center gap-2 text-center font-mono text-[12px] uppercase tracking-[0.14em] text-orange-200/85"
+          className="flex min-h-6 items-center gap-2 text-center font-mono text-[12px] uppercase tracking-[0.14em] text-emerald-200/85"
         >
           <MousePointerClick size={14} aria-hidden className="shrink-0" />
           {category ? (
@@ -406,16 +406,16 @@ export default function ProjectsHologram({ projects }: Props) {
                 className="group absolute left-0 top-0 rounded-md transition-[filter] will-change-transform hover:brightness-125 focus-visible:outline-none disabled:cursor-not-allowed"
               >
                 <span
-                  className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.12em] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-orange-300 sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] ${
+                  className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.12em] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-emerald-300 sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] ${
                     active
-                      ? "border-orange-300/80 bg-orange-400/20 text-white shadow-[0_0_28px_-4px_rgba(251,146,60,0.85)]"
-                      : "border-orange-300/30 bg-[#0a0f1f]/70 text-orange-50/90 shadow-[0_0_18px_-8px_rgba(251,146,60,0.7)]"
+                      ? "border-emerald-300/80 bg-emerald-400/15 text-white shadow-[0_0_28px_-4px_rgba(52,211,153,0.85)]"
+                      : "border-emerald-300/30 bg-[#0a0f1f]/70 text-emerald-50/90 shadow-[0_0_18px_-8px_rgba(52,211,153,0.7)]"
                   }`}
                 >
                   {!category && <span aria-hidden className="holo-invite pointer-events-none absolute inset-0 rounded-md" />}
-                  <Icon size={13} aria-hidden className="shrink-0 text-orange-300" />
+                  <Icon size={13} aria-hidden className="shrink-0 text-emerald-300" />
                   {label}
-                  <span className="tabular-nums text-orange-300">{String(counts[key]).padStart(2, "0")}</span>
+                  <span className="tabular-nums text-emerald-300">{String(counts[key]).padStart(2, "0")}</span>
                 </span>
               </button>
             );

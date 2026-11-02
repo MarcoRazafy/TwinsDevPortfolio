@@ -17,7 +17,7 @@ export default function SiteNav() {
     >
       <div className="pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-[#0a0f1a]/80 p-1.5 pl-3 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.9)] backdrop-blur-md [scrollbar-width:none]">
         <a href="#accueil" aria-label="Haut de page" className="mr-1 flex shrink-0 items-center">
-          <Image src="/brand/twinsdev-mark.webp" alt="" width={480} height={244} className="h-auto w-6" />
+          <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-6" />
         </a>
         {SECTIONS.map((s) => (
           <a

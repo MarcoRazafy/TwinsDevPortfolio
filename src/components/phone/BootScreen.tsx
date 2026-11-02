@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 type Props = { onDone: () => void };
 
-const LOGO = { src: "/brand/twinsdev-logo.webp", width: 1000, height: 761 };
+const LOGO = { src: "/brand/twinsdev-logo-v2.webp", width: 1000, height: 761 };
 const REDUCED_HOLD_MS = 900;
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 

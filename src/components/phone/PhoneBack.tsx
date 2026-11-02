@@ -19,8 +19,8 @@ export default function PhoneBack() {
             aria-hidden
             className="h-16 w-[75px] bg-[linear-gradient(170deg,#1a4a30_0%,#0d2b1b_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
             style={{
-              WebkitMaskImage: "url(/brand/twinsdev-mark.webp)",
-              maskImage: "url(/brand/twinsdev-mark.webp)",
+              WebkitMaskImage: "url(/brand/twinsdev-mark-v2.webp)",
+              maskImage: "url(/brand/twinsdev-mark-v2.webp)",
               WebkitMaskSize: "contain",
               maskSize: "contain",
               WebkitMaskRepeat: "no-repeat",
