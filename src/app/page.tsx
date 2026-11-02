@@ -5,6 +5,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import ServicesSection from "@/components/sections/ServicesSection";
 import SiteFooter from "@/components/sections/SiteFooter";
 import SiteNav from "@/components/sections/SiteNav";
+import SloganSection from "@/components/sections/SloganSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import PhoneStage from "@/components/phone/PhoneStage";
 import ProjectsSection from "@/components/projects/ProjectsSection";
@@ -23,6 +24,7 @@ export default function Home({ searchParams }: Props) {
       {/* À l'arrivée : le téléphone seul. Les sections passées en enfants n'apparaissent qu'une fois allumé. */}
       <PhoneStage background={background}>
         <SiteNav />
+        <SloganSection />
         <ProjectsSection />
         <ServicesSection />
         <AboutSection />
