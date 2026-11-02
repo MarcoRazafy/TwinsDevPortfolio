@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Lato, Sora } from "next/font/google";
 import { RESTORE_SCRIPT } from "@/components/phone/remember";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+/* Police du texte (Lato n'existe qu'en graisses fixes : 500 et 600 prennent la plus proche) */
+const lato = Lato({
+  variable: "--font-lato",
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "700", "900"],
   display: "swap",
 });
 
@@ -32,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${sora.variable} h-full antialiased`}>
+    <html lang="fr" className={`${lato.variable} ${sora.variable} h-full antialiased`}>
       <head>
         {/* Avant le premier affichage : masque la scène si le téléphone était allumé (voir phone/remember.ts) */}
         <script dangerouslySetInnerHTML={{ __html: RESTORE_SCRIPT }} />

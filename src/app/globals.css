@@ -23,8 +23,8 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-ring: var(--ring);
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-sora), var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-lato), system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-lato), system-ui, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
