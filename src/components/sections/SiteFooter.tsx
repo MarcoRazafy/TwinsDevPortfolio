@@ -21,9 +21,9 @@ export default function SiteFooter() {
                 rel="noopener noreferrer"
                 aria-label={`${SITE.name} sur LinkedIn (nouvel onglet)`}
                 title="LinkedIn"
-                className="block overflow-hidden rounded-xl border border-white/10 shadow-[0_10px_30px_-14px_rgba(10,102,194,0.8)] transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-[#0A66C2]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex min-h-11 items-center rounded-lg px-1 opacity-85 transition-[opacity,transform] duration-200 hover:-translate-y-0.5 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Image src="/brand/linkedin.webp" alt="" width={597} height={335} className="h-12 w-auto" />
+                <Image src="/brand/linkedin.webp" alt="" width={466} height={118} className="h-6 w-auto" />
               </a>
             )}
           </div>
