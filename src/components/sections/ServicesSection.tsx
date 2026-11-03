@@ -163,7 +163,7 @@ export default function ServicesSection() {
         {/* ── 03 · Déroulé d'un projet ── */}
         <div className="mt-20 lg:mt-28">
           <Kicker index="03">Comment se passe un projet</Kicker>
-          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
             {STEPS.map((step, i) => (
               <motion.li key={step.title} {...reveal(0.1 + i * 0.1)} className="relative flex flex-col gap-3 border-t-2 border-white/15 pt-5">
                 <span

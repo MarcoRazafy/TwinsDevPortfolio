@@ -103,8 +103,12 @@ export type Step = { title: string; text: string };
 
 /* Déroulé d'un projet, dans l'ordre. */
 export const STEPS: Step[] = [
-  { title: "Premier échange", text: "Vous nous expliquez votre besoin, on pose les bonnes questions et on vous envoie un devis." },
-  { title: "Maquette", text: "On dessine les pages principales. Vous validez avant qu'on écrive la moindre ligne de code." },
-  { title: "Développement", text: "On construit le site et on vous le montre au fur et à mesure, sur une adresse de test." },
-  { title: "Mise en ligne", text: "On publie, on vérifie que tout fonctionne et on vous apprend à gérer votre contenu." },
+  { title: "Échange", text: "Vous nous donnez les détails de votre projet : vos objectifs, vos besoins et vos contraintes." },
+  {
+    title: "Analyse et plan",
+    text: "On étudie votre demande et on choisit les bonnes solutions techniques. Vous recevez un plan clair, avec les étapes, les délais et le devis.",
+  },
+  { title: "Exécution", text: "On développe votre projet, étape par étape, en suivant le plan validé ensemble." },
+  { title: "Reporting", text: "On vous montre le projet au fur et à mesure, pour que vous puissiez réagir et ajuster." },
+  { title: "Livraison", text: "On met en ligne, on vérifie que tout fonctionne et on vous remet les accès." },
 ];
