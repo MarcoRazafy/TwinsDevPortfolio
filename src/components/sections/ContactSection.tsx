@@ -172,23 +172,25 @@ function MenuBar() {
 
 /** Dock du bureau (décoratif) : l'application Messages est ouverte. */
 function Dock() {
+  // Palette TwinsDev : verts d'accent, turquoise, et tuiles nuit à icône verte
+  const NIGHT = "linear-gradient(150deg,#132a22,#06080f)";
   const apps = [
-    { Icon: FolderKanban, bg: "linear-gradient(150deg,#38bdf8,#0369a1)" },
-    { Icon: Globe, bg: "linear-gradient(150deg,#2dd4bf,#0f766e)" },
+    { Icon: FolderKanban, bg: "linear-gradient(150deg,#2dd4bf,#0f766e)" },
+    { Icon: Globe, bg: "linear-gradient(150deg,#34d399,#047857)" },
     { Icon: Mail, bg: "linear-gradient(150deg,#4ade80,#15803d)", open: true },
     { Icon: MessageCircle, bg: "linear-gradient(150deg,#86efac,#16a34a)" },
-    { Icon: Calendar, bg: "linear-gradient(150deg,#f8fafc,#cbd5e1)", dark: true },
-    { Icon: CodeXml, bg: "linear-gradient(150deg,#334155,#0f172a)" },
-    { Icon: Settings, bg: "linear-gradient(150deg,#94a3b8,#475569)" },
+    { Icon: Calendar, bg: NIGHT, green: true },
+    { Icon: CodeXml, bg: NIGHT, green: true },
+    { Icon: Settings, bg: NIGHT, green: true },
   ];
   return (
     <div aria-hidden className="relative z-20 hidden justify-center pb-3 sm:flex">
-      <div className="flex items-end gap-2 rounded-[20px] border border-white/20 bg-white/15 px-2.5 py-2 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-        {apps.map(({ Icon, bg, open, dark }, i) => (
+      <div className="flex items-end gap-2 rounded-[20px] border border-emerald-200/20 bg-[#06080f]/35 px-2.5 py-2 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+        {apps.map(({ Icon, bg, open, green }, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
             <span
-              className={`grid h-10 w-10 place-items-center rounded-[11px] shadow-[0_4px_10px_-4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-200 hover:-translate-y-1.5 hover:scale-110 lg:h-11 lg:w-11 ${
-                dark ? "text-slate-700" : "text-white"
+              className={`grid h-10 w-10 place-items-center rounded-[11px] shadow-[0_4px_10px_-4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.22)] transition-transform duration-200 hover:-translate-y-1.5 hover:scale-110 lg:h-11 lg:w-11 ${
+                green ? "text-accent-strong ring-1 ring-inset ring-emerald-300/20" : "text-[#03140c]"
               }`}
               style={{ background: bg }}
             >
