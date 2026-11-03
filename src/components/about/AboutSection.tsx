@@ -20,11 +20,6 @@ export default async function AboutSection() {
           >
             Deux frères, <span className="text-glow">un seul binôme</span>
           </h2>
-          <p className="max-w-[36em] text-[1.05rem] leading-relaxed text-muted sm:text-[1.12rem]">
-            Jumeaux et ingénieurs IT, on travaille à deux sur chaque projet : l&apos;un conçoit ce que vous voyez,
-            l&apos;autre construit ce qui tourne derrière. Chaque ligne de code est relue par l&apos;autre avant
-            d&apos;être livrée.
-          </p>
         </div>
 
         {team.map((twin, index) => (
