@@ -105,8 +105,8 @@ export default function ServicesSection() {
             {...reveal(0)}
             className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(150deg,rgba(34,197,94,0.08),rgba(255,255,255,0.015)_45%,rgba(45,212,191,0.06))] p-6 sm:p-8 lg:p-10"
           >
-            <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-accent/15 blur-[80px]" />
-            <div aria-hidden className="pointer-events-none absolute -bottom-28 right-0 h-72 w-72 rounded-full bg-teal-400/10 blur-[80px]" />
+            <div aria-hidden className="pointer-events-none absolute -left-40 -top-40 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(closest-side,rgba(34,197,94,0.15),transparent)]" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-44 -right-16 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(closest-side,rgba(45,212,191,0.1),transparent)]" />
             <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(190,255,220,0.14)_1px,transparent_1.4px)] [background-size:24px_24px] opacity-40 [mask-image:radial-gradient(60%_80%_at_20%_20%,#000,transparent)]" />
 
             <div className="relative">

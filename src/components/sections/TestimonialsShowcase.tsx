@@ -84,8 +84,8 @@ export default function TestimonialsShowcase({ testimonials }: { testimonials: T
         className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015)_55%)] shadow-[0_40px_100px_-45px_rgba(34,197,94,0.45)]"
       >
         {/* Lueurs d'ambiance */}
-        <div aria-hidden className="pointer-events-none absolute -left-32 -top-40 h-96 w-96 rounded-full bg-accent/20 blur-[90px]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-40 right-10 h-80 w-80 rounded-full bg-teal-400/10 blur-[90px]" />
+        <div aria-hidden className="pointer-events-none absolute -left-52 -top-60 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(closest-side,rgba(34,197,94,0.2),transparent)]" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-60 -right-10 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(closest-side,rgba(45,212,191,0.1),transparent)]" />
         <div aria-hidden className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
 
         <AnimatePresence mode="wait" initial={false}>
@@ -93,7 +93,7 @@ export default function TestimonialsShowcase({ testimonials }: { testimonials: T
             key={t.id}
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(4px)" }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10 }}
             transition={{ duration: 0.45, ease: EXPO_OUT }}
             className="relative grid gap-8 p-7 sm:p-10 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] md:gap-0"
           >
@@ -201,8 +201,8 @@ function Words({ text }: { text: string }) {
         <motion.span
           key={`${i}-${word}`}
           className="inline-block"
-          initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EXPO_OUT, delay: 0.1 + i * step }}
         >
           {word}

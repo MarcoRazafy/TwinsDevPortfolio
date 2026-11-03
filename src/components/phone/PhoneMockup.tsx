@@ -158,7 +158,7 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
       {/* Halo derrière l'appareil : s'intensifie une fois allumé, bouge en parallaxe */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[120%] w-[140%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[120%] w-[140%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(34,197,94,0.2),rgba(34,197,94,0.08)_55%,transparent)]"
         style={{ x: glowX, y: glowY }}
         animate={{ opacity: state === "on" ? 0.9 : 0.35, scale: state === "on" ? 1.05 : 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}

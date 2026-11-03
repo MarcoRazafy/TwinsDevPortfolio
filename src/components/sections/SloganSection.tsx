@@ -41,7 +41,7 @@ export default function SloganSection() {
       {/* Halo et trame */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[620px] w-[min(1100px,120vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(34,197,94,0.22),rgba(45,212,191,0.08)_55%,transparent)] blur-2xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[620px] w-[min(1100px,120vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(34,197,94,0.22),rgba(45,212,191,0.08)_55%,transparent)]"
       />
       <div
         aria-hidden
