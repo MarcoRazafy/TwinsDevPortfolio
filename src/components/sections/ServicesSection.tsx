@@ -2,7 +2,7 @@
 
 import type { CSSProperties, PointerEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS } from "@/lib/services";
 import SectionHead from "./SectionHead";
 
@@ -138,13 +138,6 @@ export default function ServicesSection() {
                 <p className="text-[15px] leading-relaxed text-muted">
                   Ces compétences, ce sont nos clients qui nous les ont apportées, projet après projet.
                 </p>
-                <a
-                  href="#contact"
-                  className="group/cta mt-2 inline-flex w-fit items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-[14px] font-semibold text-[#052e16] shadow-[0_10px_30px_-10px_rgba(34,197,94,0.8)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070c]"
-                >
-                  Parlons de votre projet
-                  <ArrowRight size={16} aria-hidden className="transition-transform group-hover/cta:translate-x-0.5" />
-                </a>
               </div>
 
               <ul className="grid gap-3 sm:grid-cols-2">
