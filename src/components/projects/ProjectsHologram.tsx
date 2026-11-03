@@ -198,7 +198,8 @@ export default function ProjectsHologram({ projects, categories }: Props) {
       const narrow = w < 640;
       const r = narrow ? Math.min(w * 0.27, h * 0.27) : Math.min(w * 0.21, h * 0.29);
       const cardW = narrow ? Math.max(92, w * 0.26) : Math.max(118, Math.min(w * 0.17, 230));
-      const rx = narrow ? w / 2 - cardW * 0.38 : Math.max(r * 1.4, Math.min(r * 2.3, w / 2 - cardW * 0.42));
+      // Jamais négatif : une scène encore masquée (largeur 0) ferait échouer ctx.ellipse()
+      const rx = Math.max(0, narrow ? w / 2 - cardW * 0.38 : Math.max(r * 1.4, Math.min(r * 2.3, w / 2 - cardW * 0.42)));
       Object.assign(size, { w, h, dpr, r, rx, ry: r * (narrow ? 1.3 : 0.84) });
       stage.style.setProperty("--card-w", `${cardW}px`);
       stage.style.setProperty("--globe-d", `${r * 2}px`);
@@ -214,7 +215,8 @@ export default function ProjectsHologram({ projects, categories }: Props) {
       const dt = last ? Math.min(ts - last, 50) : 16;
       last = ts;
       clock.current = ts;
-      if (!visible) return;
+      // Hors écran, ou scène pas encore mesurée (section masquée) : rien à dessiner
+      if (!visible || size.w < 40 || size.h < 40) return;
 
       const { autoplay: moving, reduce: still, category: chosen } = live.current;
       const { w, h, dpr, r, rx, ry } = size;

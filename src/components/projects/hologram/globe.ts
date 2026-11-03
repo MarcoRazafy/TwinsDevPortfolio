@@ -313,7 +313,7 @@ export function drawGlobe(ctx: CanvasRenderingContext2D, v: View, time: number, 
 
 /** Anneau d'orbite (ellipse pointillée) : moitié arrière ou avant, selon `half`. */
 export function drawOrbit(ctx: CanvasRenderingContext2D, cx: number, cy: number, rx: number, ry: number, half: "back" | "front", alpha: number) {
-  if (alpha <= 0.01) return;
+  if (alpha <= 0.01 || rx <= 0 || ry <= 0) return;
   ctx.save();
   ctx.beginPath();
   if (half === "back") ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, Math.PI * 2);
