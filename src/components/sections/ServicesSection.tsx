@@ -1,19 +1,12 @@
 "use client";
 
-import type { CSSProperties, PointerEvent } from "react";
+import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Check } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS } from "@/lib/services";
 import SectionHead from "./SectionHead";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-
-/** Halo qui suit le pointeur : on publie sa position dans la carte (variables CSS, sans re-rendu). */
-const followPointer = (e: PointerEvent<HTMLElement>) => {
-  const r = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
-  e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
-};
 
 /** Repère de partie : « 01 — Ce qu'on fait ». */
 function Kicker({ index, children }: { index: string; children: React.ReactNode }) {
@@ -58,27 +51,14 @@ export default function ServicesSection() {
               <motion.article
                 key={service.slug}
                 {...reveal((i % 3) * 0.08)}
-                onPointerMove={followPointer}
                 style={{ "--accent-card": service.accent } as CSSProperties}
                 className="group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-white/20 sm:p-7"
               >
-                {/* Halo qui suit le pointeur */}
+                {/* Lueur d'angle, permanente (dégradé seul, sans filtre de flou : rien à recalculer au survol) */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{ background: "radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--accent-card) 11%, transparent), transparent 45%)" }}
-                />
-                {/* Liseré lumineux qui suit le pointeur */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-[inherit] p-px opacity-0 transition-opacity duration-300 [mask-composite:exclude] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] group-hover:opacity-100"
-                  style={{ background: "radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--accent-card), transparent 60%)" }}
-                />
-                {/* Lueur d'angle, permanente */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full opacity-35 blur-3xl"
-                  style={{ background: `radial-gradient(closest-side, ${service.accent}66, transparent)` }}
+                  className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full opacity-35"
+                  style={{ background: `radial-gradient(closest-side, ${service.accent}55, transparent)` }}
                 />
 
                 <div className="relative flex items-start justify-between">
