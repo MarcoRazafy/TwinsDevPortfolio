@@ -108,14 +108,13 @@ export default function TwinProfile({ twin, index }: Props) {
 
       {/* ── Texte ── */}
       <div className={`flex min-w-0 flex-col gap-5 ${flipped ? "lg:order-1" : ""}`}>
-        <motion.p {...reveal(0.1)} className="flex items-center gap-3 font-mono text-[13px] tracking-wide text-accent-strong">
-          /{twin.slug}
-          {twin.example && (
+        {twin.example && (
+          <motion.p {...reveal(0.1)} className="flex items-center gap-3 font-mono text-[13px] tracking-wide">
             <span className="rounded-full border border-dashed border-amber-300/60 px-2.5 py-0.5 text-[10.5px] text-amber-200">
               texte à personnaliser
             </span>
-          )}
-        </motion.p>
+          </motion.p>
+        )}
         <motion.h3
           {...reveal(0.15)}
           id={`${twin.slug}-nom`}

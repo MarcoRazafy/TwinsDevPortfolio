@@ -148,7 +148,6 @@ export default function ContactSection() {
     <section id="contact" aria-labelledby="contact-titre" className="relative scroll-mt-24 px-4 py-24 sm:px-8 lg:py-32">
       <div className="mx-auto w-full max-w-[1180px]">
         <SectionHead
-          path="/contact"
           id="contact-titre"
           title={
             <>

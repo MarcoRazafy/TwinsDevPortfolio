@@ -12,7 +12,6 @@ export default async function ProjectsSection() {
     >
       <div className="mx-auto w-full max-w-[1180px]">
         <div className="mx-auto mb-10 flex max-w-[680px] flex-col items-center gap-4 text-center">
-          <p className="font-mono text-[13px] tracking-wide text-accent-strong">/projets</p>
           <h2
             id="projets-titre"
             className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.1rem)] font-semibold leading-[1.1] tracking-[-0.025em] text-balance"

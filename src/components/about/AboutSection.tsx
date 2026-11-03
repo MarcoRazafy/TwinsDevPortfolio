@@ -13,7 +13,6 @@ export default async function AboutSection() {
 
       <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-20 lg:gap-32">
         <div className="flex max-w-[680px] flex-col gap-4">
-          <p className="font-mono text-[13px] tracking-wide text-accent-strong">/a-propos</p>
           <h2
             id="apropos-titre"
             className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.1rem)] font-semibold leading-[1.1] tracking-[-0.025em] text-balance"

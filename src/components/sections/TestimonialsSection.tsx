@@ -11,7 +11,6 @@ export default async function TestimonialsSection() {
     <section id="avis" aria-labelledby="avis-titre" className="relative scroll-mt-24 px-4 py-24 sm:px-8 lg:py-32">
       <div className="mx-auto w-full max-w-[1180px]">
         <SectionHead
-          path="/avis"
           id="avis-titre"
           title={
             <>

@@ -40,7 +40,6 @@ export default function ServicesSection() {
     <section id="services" aria-labelledby="services-titre" className="relative scroll-mt-24 px-4 py-24 sm:px-8 lg:py-32">
       <div className="mx-auto w-full max-w-[1180px]">
         <SectionHead
-          path="/services"
           id="services-titre"
           title={
             <>

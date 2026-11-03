@@ -12,7 +12,6 @@ export default function FaqSection() {
     >
       <div className="mx-auto w-full max-w-[1180px]">
         <SectionHead
-          path="/faq"
           id="faq-titre"
           title={
             <>
