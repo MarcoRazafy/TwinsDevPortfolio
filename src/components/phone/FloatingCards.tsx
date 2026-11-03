@@ -78,7 +78,7 @@ export default function FloatingCards({ visible }: Props) {
           <span className="min-w-0 flex-1 leading-tight">
             <span className="flex items-baseline justify-between gap-2">
               <span className="text-[13px] font-semibold">TwinsDev</span>
-              <span className="text-[10px] text-white/45">maintenant</span>
+              <span className="text-[10px] text-white/70">maintenant</span>
             </span>
             <span className="block truncate text-[12px] text-white/65">Nouveau message</span>
           </span>

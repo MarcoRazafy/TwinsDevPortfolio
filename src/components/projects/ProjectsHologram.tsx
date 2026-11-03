@@ -31,6 +31,10 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const easeOutBack = (t: number) => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2;
 const easeInCubic = (t: number) => t * t * t;
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+/** Écrit un style seulement s'il change : une écriture inutile relance le calcul des styles à chaque image. */
+const setStyle = (el: HTMLElement, prop: "zIndex" | "pointerEvents", value: string) => {
+  if (el.style[prop] !== value) el.style[prop] = value;
+};
 /** Écart d'angle ramené dans ]-π, π]. */
 const angleDiff = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
@@ -55,6 +59,9 @@ export default function ProjectsHologram({ projects, categories }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cardEls = useRef(new Map<string, HTMLElement>());
   const labelEls = useRef(new Map<ProjectCategory, HTMLElement>());
+  // Taille des légendes, tenue à jour par un ResizeObserver (jamais lue dans la boucle d'animation)
+  const labelSizes = useRef(new WeakMap<HTMLElement, { w: number; h: number }>());
+  const labelObserver = useRef<ResizeObserver | null>(null);
   const timing = useRef(new Map<string, Timing>());
   const current = useRef<string[]>([]); // clés en orbite (hors départs), dans l'ordre des emplacements
   const generation = useRef(0);
@@ -191,7 +198,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
     const resize = () => {
       const w = stage.clientWidth;
       const h = stage.clientHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // au-delà, le coût de dessin grimpe sans gain visible
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       // Petit écran : globe plus grand, images plus petites, orbite plus haute (au-dessus / au-dessous du globe)
@@ -207,6 +214,14 @@ export default function ProjectsHologram({ projects, categories }: Props) {
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(stage);
+    const lro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const b = e.borderBoxSize[0];
+        labelSizes.current.set(e.target as HTMLElement, { w: b.inlineSize, h: b.blockSize });
+      }
+    });
+    labelObserver.current = lro;
+    labelEls.current.forEach((el) => lro.observe(el));
 
     type Placed = { key: string; x: number; y: number; depth: number; k: number };
 
@@ -242,13 +257,14 @@ export default function ProjectsHologram({ projects, categories }: Props) {
         anchors.push([key, a]);
         const el = labelEls.current.get(key);
         if (!el) continue;
-        const lw = el.offsetWidth;
-        const lh = el.offsetHeight;
+        // Taille mémorisée (ResizeObserver) : la relire ici forcerait un recalcul de mise en page à chaque image
+        const box = labelSizes.current.get(el);
+        if (!box) continue;
         const right = a.tx >= a.bx;
-        const x = Math.min(w - lw - 4, Math.max(4, right ? a.tx + 6 : a.tx - 6 - lw));
-        el.style.transform = `translate3d(${x.toFixed(1)}px, ${(a.ty - lh / 2).toFixed(1)}px, 0)`;
+        const x = Math.min(w - box.w - 4, Math.max(4, right ? a.tx + 6 : a.tx - 6 - box.w));
+        el.style.transform = `translate3d(${x.toFixed(1)}px, ${(a.ty - box.h / 2).toFixed(1)}px, 0)`;
         el.style.opacity = (0.3 + 0.7 * a.vis).toFixed(3);
-        el.style.zIndex = a.vis > 0.5 ? "35" : "26";
+        setStyle(el, "zIndex", a.vis > 0.5 ? "35" : "26");
       }
 
       // Anneau : rotation, ou animation vers une image choisie
@@ -287,8 +303,8 @@ export default function ProjectsHologram({ projects, categories }: Props) {
         const scale = (0.56 + 0.44 * near) * (0.2 + 0.8 * Math.min(k, 1));
         el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) rotateY(${(-Math.cos(theta) * 24).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
         el.style.opacity = (clamp01(k * 1.4) * (0.32 + 0.68 * near)).toFixed(3);
-        el.style.zIndex = depth > 0 ? "30" : "10";
-        el.style.pointerEvents = k > 0.6 && t.leave === null ? "auto" : "none";
+        setStyle(el, "zIndex", depth > 0 ? "30" : "10");
+        setStyle(el, "pointerEvents", k > 0.6 && t.leave === null ? "auto" : "none");
         placed.push({ key, x, y, depth, k: Math.min(k, 1) });
         if (t.leave === null) {
           maxK = Math.max(maxK, Math.min(k, 1));
@@ -321,6 +337,8 @@ export default function ProjectsHologram({ projects, categories }: Props) {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      lro.disconnect();
+      labelObserver.current = null;
       io.disconnect();
     };
   }, []);
@@ -397,8 +415,10 @@ export default function ProjectsHologram({ projects, categories }: Props) {
               <button
                 key={key}
                 ref={(el) => {
-                  if (el) labelEls.current.set(key, el);
-                  else labelEls.current.delete(key);
+                  if (el) {
+                    labelEls.current.set(key, el);
+                    labelObserver.current?.observe(el);
+                  } else labelEls.current.delete(key);
                 }}
                 type="button"
                 onClick={() => select(key)}
@@ -407,22 +427,23 @@ export default function ProjectsHologram({ projects, categories }: Props) {
                 onFocus={() => (labelHovered.current = true)}
                 onBlur={() => (labelHovered.current = false)}
                 aria-pressed={active}
-                aria-label={`${label} : ${counts[key]} projet${counts[key] > 1 ? "s" : ""}`}
                 disabled={counts[key] === 0}
                 style={{ opacity: 0 }}
                 className="group absolute left-0 top-0 rounded-md transition-[filter] will-change-transform hover:brightness-125 focus-visible:outline-none disabled:cursor-not-allowed"
               >
                 <span
-                  className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.12em] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-emerald-300 sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] ${
+                  className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.12em] transition-[background-color,border-color,box-shadow,color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-emerald-300 sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] ${
                     active
                       ? "border-emerald-300/80 bg-emerald-400/15 text-white shadow-[0_0_28px_-4px_rgba(52,211,153,0.85)]"
-                      : "border-emerald-300/30 bg-[#0a0f1f]/70 text-emerald-50/90 shadow-[0_0_18px_-8px_rgba(52,211,153,0.7)]"
+                      : "border-emerald-300/30 bg-[#0a0f1f]/85 text-emerald-50/90 shadow-[0_0_18px_-8px_rgba(52,211,153,0.7)]"
                   }`}
                 >
                   {!category && <span aria-hidden className="holo-invite pointer-events-none absolute inset-0 rounded-md" />}
                   <Icon size={13} aria-hidden className="shrink-0 text-emerald-300" />
                   {label}
                   <span className="tabular-nums text-emerald-300">{String(counts[key]).padStart(2, "0")}</span>
+                  {/* Nom lu par les lecteurs d'écran : le texte affiché (« Site 09 »), complété par « projets » */}
+                  <span className="sr-only"> projet{counts[key] > 1 ? "s" : ""}</span>
                 </span>
               </button>
             );
@@ -479,7 +500,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
                     <Image src={project.image} alt="" fill sizes="240px" draggable={false} className="object-cover" />
                   )}
                   {/* Lignes de balayage et reflet : l'image a l'air projetée */}
-                  <span aria-hidden className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,rgba(125,211,252,0.07)_0_1px,transparent_1px_3px)] mix-blend-screen" />
+                  <span aria-hidden className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,rgba(125,211,252,0.07)_0_1px,transparent_1px_3px)]" />
                   <span aria-hidden className="absolute inset-0 bg-[linear-gradient(125deg,rgba(186,230,253,0.22),transparent_38%,transparent_70%,rgba(56,189,248,0.18))]" />
                 </span>
               </span>
@@ -504,7 +525,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) panelFocused.current = false;
         }}
       >
-        <div className="relative flex flex-wrap items-center gap-3 overflow-hidden rounded-[22px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.75),rgba(5,11,24,0.85))] p-3 pl-4 shadow-[0_24px_60px_-30px_rgba(2,132,199,0.55)] backdrop-blur-md sm:flex-nowrap sm:p-3.5 sm:pl-5">
+        <div className="relative flex flex-wrap items-center gap-3 overflow-hidden rounded-[22px] border border-sky-300/15 bg-[linear-gradient(160deg,rgba(14,30,60,0.94),rgba(5,11,24,0.97))] p-3 pl-4 shadow-[0_24px_60px_-30px_rgba(2,132,199,0.55)] sm:flex-nowrap sm:p-3.5 sm:pl-5">
           <div aria-hidden className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

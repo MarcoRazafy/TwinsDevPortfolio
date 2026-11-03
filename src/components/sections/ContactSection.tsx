@@ -456,7 +456,7 @@ function Well({
             *
           </span>
         )}
-        {hint && <span className="font-normal text-white/35">· {hint}</span>}
+        {hint && <span className="font-normal text-white/60">· {hint}</span>}
       </label>
       <div className={`relative flex ${grow ? "flex-1" : ""}`}>
         {children}

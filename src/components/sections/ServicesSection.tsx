@@ -143,7 +143,7 @@ export default function ServicesSection() {
                     <motion.li
                       key={s.title}
                       {...reveal(0.05 + i * 0.05)}
-                      className={`group/sp flex items-start gap-4 rounded-2xl border border-white/10 bg-[#05070c]/55 p-4 backdrop-blur-sm transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-[#05070c]/75 ${span}`}
+                      className={`group/sp flex items-start gap-4 rounded-2xl border border-white/10 bg-[#070a10]/85 p-4 transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-[#05070c]/75 ${span}`}
                     >
                       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(150deg,#4ade80,#22c55e)] text-[#05070c] shadow-[0_6px_18px_-8px_rgba(34,197,94,0.8)] ring-1 ring-inset ring-white/25 transition-shadow duration-300 group-hover/sp:shadow-[0_0_24px_-4px_rgba(34,197,94,0.9)]">
                         <Icon size={19} strokeWidth={2.2} aria-hidden />

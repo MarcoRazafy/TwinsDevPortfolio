@@ -53,7 +53,10 @@ export default function DispersionBackground({ state }: BackgroundProps) {
     const gauss = () => (rand() + rand() + rand() + rand() - 2) / 2; // ≈ normale, entre -1 et 1
 
     // ── Particules (tableaux typés : aucune allocation par image) ──
-    const COUNT = 2400;
+    // Machine modeste (4 cœurs ou moins, 4 Go ou moins) : nuage allégé, pour garder la page fluide
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const lowPower = (nav.hardwareConcurrency || 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+    const COUNT = lowPower ? 1300 : 2400;
     const lane = new Uint8Array(COUNT);
     const side = new Int8Array(COUNT); // +1 vers la droite, -1 vers la gauche
     const sideRank = new Float32Array(COUNT); // part vers la gauche si inférieur à la part gauche courante
@@ -248,10 +251,18 @@ export default function DispersionBackground({ state }: BackgroundProps) {
         draw();
         return;
       }
-      if (document.hidden) return;
+      if (document.hidden || !onScreen) return;
       last = performance.now();
       frame = requestAnimationFrame(tick);
     };
+    // Accueil sorti de l'écran (on fait défiler le site) : l'animation s'arrête, elle reprend au retour
+    let onScreen = true;
+    const visibility = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      if (onScreen) start();
+      else stop();
+    });
+    visibility.observe(root);
 
     api.current = {
       setState(next) {
@@ -277,6 +288,7 @@ export default function DispersionBackground({ state }: BackgroundProps) {
     return () => {
       stop();
       observer.disconnect();
+      visibility.disconnect();
       document.removeEventListener("visibilitychange", start);
       motionQuery.removeEventListener("change", start);
       api.current = null;

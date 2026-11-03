@@ -21,6 +21,8 @@ export default function Home({ searchParams }: Props) {
 
   return (
     <main className="flex flex-1 flex-col">
+      {/* Titre principal de la page (lecteurs d'écran, moteurs de recherche) : l'accueil visible est le téléphone */}
+      <h1 className="sr-only">TwinsDev — Marco &amp; Loïc, développeurs web : sites, applications et serveurs sur mesure</h1>
       {/* À l'arrivée : le téléphone seul. Les sections passées en enfants n'apparaissent qu'une fois allumé. */}
       <PhoneStage background={background}>
         <SiteNav />
