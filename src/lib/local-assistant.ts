@@ -52,19 +52,31 @@ export function localReply(messages: Message[], projects: Project[], categories:
   }
 
   if (has(text, ["delai*", "temps", "quand", "rapide*", "vite", "urgen*", "semaine", "mois"])) {
-    return `${faq("Combien de temps")} Pour quand aimerais-tu que ce soit prêt ?`;
+    return `${faq("En combien de temps")} Pour quand aimerais-tu que ce soit prêt ?`;
+  }
+
+  if (has(text, ["google", "referencement", "seo", "visible", "visibilite", "mobile*", "smartphone*", "responsive"])) {
+    return `${faq("Mon site sera-t-il")} Tu vises plutôt des clients près de chez toi, ou partout ?`;
+  }
+
+  if (has(text, ["refonte", "refaire", "deja un site", "site existant", "ancien site", "moderniser", "ameliorer"])) {
+    return `${faq("J'ai déjà un site")} Tu peux nous envoyer son adresse ?`;
+  }
+
+  if (has(text, ["hebergement", "heberger", "hebergeur", "nom de domaine", "domaine"])) {
+    return `${faq("Je n'ai ni nom de domaine")} Tu as déjà une idée de nom ?`;
   }
 
   if (has(text, ["maintenance", "apres", "mise a jour", "maj", "sauvegarde*", "support"])) {
-    return `${faq("Et après")} Tu as déjà un site existant ?`;
+    return `${faq("Que se passe-t-il")} Tu as déjà un site existant ?`;
   }
 
   if (has(text, ["modifier", "admin*", "moi meme", "gerer", "back office", "cms"])) {
-    return faq("Est-ce que je pourrai");
+    return faq("Pourrai-je");
   }
 
   if (has(text, ["distance", "visio", "ou etes", "ou vous", "madagascar", "antananarivo", "tana", "pays", "ville"])) {
-    return faq("Vous travaillez");
+    return faq("Peut-on travailler");
   }
 
   if (has(text, ["realisation*", "portfolio", "exemple*", "reference*", "vos projets", "deja fait", "travaux"])) {
