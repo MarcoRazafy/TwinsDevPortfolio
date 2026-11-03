@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowDown, ArrowRight } from "lucide-react";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -142,29 +141,6 @@ export default function SloganSection() {
             </svg>
           </span>
         </h2>
-
-        <motion.div
-          className="mt-14 flex flex-wrap items-center justify-center gap-3"
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={inView}
-          transition={{ duration: 0.8, ease: EXPO_OUT, delay: 1.1 }}
-        >
-          <a
-            href="#projets"
-            className="group inline-flex h-12 items-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-[#052e16] shadow-[0_12px_34px_-12px_rgba(34,197,94,0.9)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070c]"
-          >
-            Voir nos réalisations
-            <ArrowDown size={17} aria-hidden className="transition-transform group-hover:translate-y-0.5" />
-          </a>
-          <a
-            href="#contact"
-            className="group inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 text-[15px] font-semibold text-white/85 transition-colors hover:border-accent/50 hover:bg-accent/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Nous contacter
-            <ArrowRight size={17} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
-          </a>
-        </motion.div>
       </div>
     </section>
   );
