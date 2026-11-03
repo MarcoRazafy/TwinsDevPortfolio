@@ -7,13 +7,12 @@ import {
   ArrowUpRight,
   Check,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   CircleAlert,
   FolderKanban,
   LoaderCircle,
   Mail,
   MessageCircle,
+  PenLine,
   RotateCcw,
   SendHorizontal,
 } from "lucide-react";
@@ -21,7 +20,8 @@ import { SITE } from "@/lib/site";
 import SectionHead from "./SectionHead";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-const TYPES = ["Site vitrine", "Boutique en ligne", "Application web ou mobile", "Refonte d'un site existant", "Autre"];
+/** Suggestions pour le type de projet ; le visiteur écrit ce qu'il veut. */
+const TYPE_IDEAS = ["Site vitrine", "Boutique en ligne", "Application web ou mobile", "Refonte d'un site existant", "Plateforme sur mesure"];
 
 /* Relief doux (neumorphisme) sur fond sombre : surface en relief, ou creusée */
 const SURFACE = "bg-[#0c1116]";
@@ -78,7 +78,6 @@ export default function ContactSection() {
   // Validation au départ du champ : erreur affichée sous le champ, coche quand il est valide et rempli
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [valid, setValid] = useState<Partial<Record<FieldName, boolean>>>({});
-  const [typeIndex, setTypeIndex] = useState(0);
 
   const reveal = (delay: number) => ({
     initial: reduce ? false : { opacity: 0, y: 28 },
@@ -101,7 +100,6 @@ export default function ContactSection() {
   const clear = () => {
     setErrors({});
     setValid({});
-    setTypeIndex(0);
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -142,8 +140,6 @@ export default function ContactSection() {
     onInput: (e: { currentTarget: Control }) => recheck(e.currentTarget),
   });
 
-  const stepType = (dir: 1 | -1) => setTypeIndex((i) => (i + dir + TYPES.length) % TYPES.length);
-
   return (
     <section id="contact" aria-labelledby="contact-titre" className="relative scroll-mt-24 px-4 py-24 sm:px-8 lg:py-32">
       <div className="mx-auto w-full max-w-[1180px]">
@@ -167,31 +163,35 @@ export default function ContactSection() {
           aria-label="Formulaire de contact"
           className="grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:grid-rows-[1fr_auto] lg:gap-7"
         >
-          <input type="hidden" name="type" value={TYPES[typeIndex]} />
-
           {/* ── Tableau de widgets (gauche) ── */}
           <motion.div {...reveal(0.05)} className={`order-1 flex flex-col gap-4 rounded-[36px] p-4 ${SURFACE} ${RAISED} lg:row-start-1`}>
             {/* Date, heure et type de projet */}
             <div className={`rounded-[28px] p-5 ${SURFACE} ${RAISED_SM}`}>
               <DateTime />
-              <div className={`mt-5 flex items-center gap-2 rounded-full py-2 pl-4 pr-2 ${INSET}`}>
+              {/* Type de projet : écrit par le visiteur (suggestions proposées pendant la saisie) */}
+              <div className={`mt-5 flex items-center gap-2 rounded-full py-2 pl-4 pr-2 transition-[box-shadow] focus-within:ring-2 focus-within:ring-accent/50 ${INSET}`}>
                 <div className="min-w-0 flex-1">
-                  <p id="type-libelle" className="text-[11.5px] text-white/50">
+                  <label htmlFor="c-type" className="block text-[11.5px] text-white/50">
                     Votre projet
-                  </p>
-                  <p aria-live="polite" className="flex items-center gap-2 truncate font-[family-name:var(--font-display)] text-[15px] font-semibold text-white">
-                    <span className="truncate">{TYPES[typeIndex]}</span>
-                    <span className="shrink-0 rounded-full bg-accent/15 px-2 py-0.5 font-mono text-[10.5px] font-medium text-accent-strong">
-                      {typeIndex + 1}/{TYPES.length}
-                    </span>
-                  </p>
+                  </label>
+                  <input
+                    id="c-type"
+                    name="type"
+                    list="c-type-idees"
+                    maxLength={60}
+                    autoComplete="off"
+                    placeholder="Site vitrine, boutique, application…"
+                    className="w-full bg-transparent font-[family-name:var(--font-display)] text-[15px] font-semibold text-white placeholder:font-normal placeholder:text-white/35 focus:outline-none"
+                  />
+                  <datalist id="c-type-idees">
+                    {TYPE_IDEAS.map((t) => (
+                      <option key={t} value={t} />
+                    ))}
+                  </datalist>
                 </div>
-                <RoundButton label="Type de projet précédent" onClick={() => stepType(-1)}>
-                  <ChevronLeft size={18} aria-hidden />
-                </RoundButton>
-                <RoundButton label="Type de projet suivant" onClick={() => stepType(1)}>
-                  <ChevronRight size={18} aria-hidden />
-                </RoundButton>
+                <span aria-hidden className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${SURFACE} ${RAISED_SM} text-accent-strong`}>
+                  <PenLine size={17} />
+                </span>
               </div>
             </div>
 
@@ -406,20 +406,6 @@ function AnalogClock({ reduce }: { reduce: boolean }) {
         <span aria-hidden className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-strong" />
       </div>
     </div>
-  );
-}
-
-function RoundButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className={`grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full ${SURFACE} ${RAISED_SM} text-white/70 transition-colors hover:text-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.6)]`}
-    >
-      {children}
-    </button>
   );
 }
 
