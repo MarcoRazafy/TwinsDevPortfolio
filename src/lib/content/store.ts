@@ -65,10 +65,6 @@ export async function getContent(): Promise<Content> {
   return readContent();
 }
 
-export async function getProjects() {
-  return (await getContent()).projects;
-}
-
 export async function getTeam() {
   return (await getContent()).team;
 }

@@ -150,7 +150,7 @@ export function TechPicker({
   );
 }
 
-export function TechIcon({ k }: { k: TechKey }) {
+function TechIcon({ k }: { k: TechKey }) {
   return (
     <svg aria-hidden viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" style={{ fill: techColor(k) }}>
       <path d={TECH[k].icon.path} />

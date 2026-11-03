@@ -130,7 +130,7 @@ export type View = { cx: number; cy: number; r: number; spin: number; tilt: numb
 
 /** Prépare la projection d'une vue (trigonométrie calculée une fois) : renvoie une fonction qui écrit
     dans `out` l'écran (x, y), la profondeur (z > 0 = face visible) et la distance au centre du disque. */
-export function projector(v: View) {
+function projector(v: View) {
   const cs = Math.cos(v.spin), ss = Math.sin(v.spin), ct = Math.cos(v.tilt), st = Math.sin(v.tilt);
   return (x: number, y: number, z: number, out: Float32Array) => {
     const x1 = x * cs + z * ss;

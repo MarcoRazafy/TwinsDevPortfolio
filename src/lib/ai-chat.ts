@@ -11,7 +11,7 @@ import "server-only";
  * Sans AI_*, les anciennes variables MISTRAL_API_KEY / MISTRAL_MODEL / MISTRAL_BASE_URL restent prises en compte.
  */
 
-export type ChatRole = "user" | "assistant";
+type ChatRole = "user" | "assistant";
 export type ChatMessage = { role: ChatRole; content: string };
 
 const MAX_TOKENS = 300;

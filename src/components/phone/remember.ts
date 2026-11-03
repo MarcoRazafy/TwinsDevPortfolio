@@ -4,7 +4,7 @@
  * Stockage local du navigateur : simple confort, propre à chaque visiteur.
  */
 
-export const PHONE_ON_KEY = "twinsdev:phone-on";
+const PHONE_ON_KEY = "twinsdev:phone-on";
 const SCROLL_KEY = "twinsdev:scroll";
 /** Feuille de style temporaire qui masque la scène pendant le rallumage (évite le flash de l'écran éteint). */
 export const RESTORE_STYLE_ID = "phone-restore";

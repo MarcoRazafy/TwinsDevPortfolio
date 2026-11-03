@@ -7,10 +7,10 @@ import { hasDb, query } from "@/lib/db";
 /** Images envoyées depuis l'administration : table `media` (base de données) ou data/uploads, servies par /media/[file]. */
 const DIR = path.join(process.cwd(), "data", "uploads");
 export const MEDIA_PREFIX = "/media/";
-export const MAX_UPLOAD = 5 * 1024 * 1024; // 5 Mo
+const MAX_UPLOAD = 5 * 1024 * 1024; // 5 Mo
 const NAME = /^[a-z0-9-]{1,80}\.(webp|png|jpg)$/;
 
-export const MEDIA_TYPES: Record<string, string> = { webp: "image/webp", png: "image/png", jpg: "image/jpeg" };
+const MEDIA_TYPES: Record<string, string> = { webp: "image/webp", png: "image/png", jpg: "image/jpeg" };
 
 /** Type réel du fichier, d'après ses premiers octets (on ne se fie ni au nom ni au type annoncé). */
 function sniff(bytes: Uint8Array): "webp" | "png" | "jpg" | null {

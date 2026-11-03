@@ -187,7 +187,7 @@ export type Tech = {
 
 /** Catégories du catalogue, dans l'ordre d'affichage. */
 export const TECH_GROUPS = ["Langages","Front-end","Back-end","Mobile","Bases de données","DevOps & cloud","Systèmes","Outils","Design","Tests","IA & données"] as const;
-export type TechGroup = (typeof TECH_GROUPS)[number];
+type TechGroup = (typeof TECH_GROUPS)[number];
 
 /**
  * Catalogue des technologies (icônes autour des jumeaux, étiquettes des projets, sélecteurs de l'admin).
