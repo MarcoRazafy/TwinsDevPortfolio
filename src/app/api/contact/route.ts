@@ -1,11 +1,25 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { isMailConfigured, sendContactMail } from "@/lib/mailer";
 
-/** Demandes reçues : une ligne JSON par demande, dans data/contacts.jsonl (dossier ignoré par git). */
+/** Demandes reçues : une ligne JSON par demande, dans data/contacts.jsonl (dossier ignoré par git), en plus de l'e-mail. */
 const FILE = path.join(process.cwd(), "data", "contacts.jsonl");
 const MAX = { name: 120, company: 120, phone: 30, email: 200, type: 60, message: 4000 };
 const PHONE = /^[+0-9 ().-]{6,20}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Anti-abus : 5 demandes par adresse IP toutes les 15 minutes (mémoire du serveur). */
+const WINDOW_MS = 15 * 60 * 1000;
+const LIMIT = 5;
+const recent = new Map<string, number[]>();
+function tooMany(ip: string) {
+  const now = Date.now();
+  const hits = (recent.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
+  hits.push(now);
+  recent.set(ip, hits);
+  if (recent.size > 5000) recent.clear();
+  return hits.length > LIMIT;
+}
 
 type Body = { name?: unknown; company?: unknown; phone?: unknown; email?: unknown; type?: unknown; message?: unknown; website?: unknown };
 
@@ -30,14 +44,37 @@ export async function POST(request: Request) {
   if (phone && !PHONE.test(phone)) return Response.json({ error: "Numéro de téléphone invalide : chiffres, espaces et + uniquement." }, { status: 400 });
   if (message.length < 10) return Response.json({ error: "Décrivez votre projet en quelques mots." }, { status: 400 });
 
-  const entry = { at: new Date().toISOString(), name, company, phone, email, type, message };
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
+  if (tooMany(ip)) {
+    return Response.json({ error: "Trop de messages envoyés d'affilée : réessayez dans quelques minutes." }, { status: 429 });
+  }
+
+  // 1. E-mail à l'équipe (si le SMTP est configuré)
+  let mailed = false;
+  if (isMailConfigured()) {
+    try {
+      await sendContactMail({ name, company, phone, email, type, message });
+      mailed = true;
+    } catch (error) {
+      console.error("[api/contact] envoi de l'e-mail impossible", error);
+    }
+  } else {
+    console.warn("[api/contact] SMTP non configuré (SMTP_HOST, SMTP_USER, SMTP_PASS) : demande seulement enregistrée");
+  }
+
+  // 2. Copie dans data/contacts.jsonl : rien n'est perdu si l'e-mail échoue
+  let saved = false;
   try {
     await mkdir(path.dirname(FILE), { recursive: true });
-    await appendFile(FILE, JSON.stringify(entry) + "\n", "utf8");
+    await appendFile(FILE, JSON.stringify({ at: new Date().toISOString(), name, company, phone, email, type, message, mailed }) + "\n", "utf8");
+    saved = true;
   } catch (error) {
     console.error("[api/contact] écriture impossible", error);
-    return Response.json({ error: "Impossible d'enregistrer la demande, réessayez dans un instant." }, { status: 500 });
   }
-  console.log(`[contact] nouvelle demande de ${name} <${email}> (${type})`);
+
+  if (!mailed && !saved) {
+    return Response.json({ error: "Impossible d'envoyer la demande, réessayez dans un instant." }, { status: 500 });
+  }
+  console.log(`[contact] nouvelle demande de ${name} <${email}> (${type})${mailed ? " — e-mail envoyé" : ""}`);
   return Response.json({ ok: true });
 }
