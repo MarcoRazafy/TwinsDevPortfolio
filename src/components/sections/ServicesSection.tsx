@@ -2,7 +2,7 @@
 
 import type { CSSProperties, PointerEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS } from "@/lib/services";
 import SectionHead from "./SectionHead";
 
@@ -114,20 +114,6 @@ export default function ServicesSection() {
                     </li>
                   ))}
                 </ul>
-
-                <div className="relative mt-auto flex items-center justify-between border-t border-white/10 pt-4">
-                  <span className="font-mono text-[12.5px]" style={{ color: service.accent }}>
-                    {service.pricing}
-                  </span>
-                  <a
-                    href="#contact"
-                    aria-label={`Parler de ${service.title.toLowerCase()}`}
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[13px] font-medium text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    En parler
-                    <ArrowUpRight size={14} aria-hidden className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                  </a>
-                </div>
               </motion.article>
             );
           })}
