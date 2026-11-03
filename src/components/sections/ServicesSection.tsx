@@ -130,27 +130,21 @@ export default function ServicesSection() {
             <div aria-hidden className="pointer-events-none absolute -bottom-28 right-0 h-72 w-72 rounded-full bg-teal-400/10 blur-[80px]" />
             <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(190,255,220,0.14)_1px,transparent_1.4px)] [background-size:24px_24px] opacity-40 [mask-image:radial-gradient(60%_80%_at_20%_20%,#000,transparent)]" />
 
-            <div className="relative grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,2fr)] lg:gap-12">
-              <div className="flex flex-col gap-4">
-                <h3 className="font-[family-name:var(--font-display)] text-[clamp(1.6rem,2.6vw,2.1rem)] font-semibold leading-[1.15] tracking-[-0.02em] text-balance">
-                  Ce qui fait la <span className="text-glow">différence</span>
-                </h3>
-                <p className="text-[15px] leading-relaxed text-muted">
-                  Ces compétences, ce sont nos clients qui nous les ont apportées, projet après projet.
-                </p>
-              </div>
-
-              <ul className="grid gap-3 sm:grid-cols-2">
+            <div className="relative">
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {SPECIALTIES.map((s, i) => {
                   const Icon = s.icon;
-                  const last = i === SPECIALTIES.length - 1 && SPECIALTIES.length % 2 === 1;
+                  // Dernière carte seule sur sa ligne : elle prend toute la largeur (2 colonnes, puis 3)
+                  const last = i === SPECIALTIES.length - 1;
+                  const span = [
+                    last && SPECIALTIES.length % 2 === 1 ? "sm:col-span-2" : "",
+                    last && SPECIALTIES.length % 3 === 1 ? "lg:col-span-3" : "lg:col-span-1",
+                  ].join(" ");
                   return (
                     <motion.li
                       key={s.title}
                       {...reveal(0.05 + i * 0.05)}
-                      className={`group/sp flex items-start gap-4 rounded-2xl border border-white/10 bg-[#05070c]/55 p-4 backdrop-blur-sm transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-[#05070c]/75 ${
-                        last ? "sm:col-span-2" : ""
-                      }`}
+                      className={`group/sp flex items-start gap-4 rounded-2xl border border-white/10 bg-[#05070c]/55 p-4 backdrop-blur-sm transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-[#05070c]/75 ${span}`}
                     >
                       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(150deg,#4ade80,#22c55e)] text-[#05070c] shadow-[0_6px_18px_-8px_rgba(34,197,94,0.8)] ring-1 ring-inset ring-white/25 transition-shadow duration-300 group-hover/sp:shadow-[0_0_24px_-4px_rgba(34,197,94,0.9)]">
                         <Icon size={19} strokeWidth={2.2} aria-hidden />
