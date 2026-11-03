@@ -23,7 +23,7 @@ export default function SiteFooter() {
                 title="LinkedIn"
                 className="flex min-h-11 items-center rounded-lg px-1 opacity-85 transition-[opacity,transform] duration-200 hover:-translate-y-0.5 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Image src="/brand/linkedin.webp" alt="" width={466} height={118} className="h-6 w-auto" />
+                <Image src="/brand/linkedin-logo.webp" alt="" width={466} height={118} className="h-6 w-auto" />
               </a>
             )}
           </div>
