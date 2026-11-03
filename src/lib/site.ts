@@ -2,7 +2,7 @@
 export const SITE = {
   name: "TwinsDev",
   email: "",
-  linkedin: "",
+  linkedin: "https://www.linkedin.com/in/twins-dev-a9a745445/",
   github: "",
   /** Ville / zone d'intervention, affichée dans le contact (facultatif). */
   location: "",
