@@ -451,19 +451,38 @@ export default function ProjectsHologram({ projects, categories }: Props) {
             style={{ opacity: 0 }}
             className="group absolute left-0 top-0 w-[var(--card-w)] rounded-2xl text-left will-change-transform focus-visible:outline-none"
           >
-            <span
-              className={`relative block aspect-[16/10] overflow-hidden rounded-xl border bg-[#050b18] transition-[border-color,box-shadow] duration-500 ${
-                key === activeKey
-                  ? "border-sky-300/70 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_0_40px_-6px_rgba(56,189,248,0.75)]"
-                  : "border-sky-300/20 shadow-[0_18px_40px_-14px_rgba(2,132,199,0.6)]"
-              } group-hover:border-sky-200/80 group-focus-visible:ring-2 group-focus-visible:ring-sky-300`}
-            >
-              {project.image && (
-                <Image src={project.image} alt="" fill sizes="240px" draggable={false} className="object-cover" />
-              )}
-              {/* Lignes de balayage et reflet : l'image a l'air projetée */}
-              <span aria-hidden className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,rgba(125,211,252,0.07)_0_1px,transparent_1px_3px)] mix-blend-screen" />
-              <span aria-hidden className="absolute inset-0 bg-[linear-gradient(125deg,rgba(186,230,253,0.22),transparent_38%,transparent_70%,rgba(56,189,248,0.18))]" />
+            {/* Satellite : l'image du projet est le corps, panneaux solaires de chaque côté, antenne au-dessus */}
+            <span className="relative block">
+              <SolarWing side="left" active={key === activeKey} />
+              <SolarWing side="right" active={key === activeKey} />
+              <span aria-hidden className="absolute bottom-full left-1/2 flex -translate-x-1/2 flex-col items-center">
+                <span
+                  className={`h-[5px] w-[5px] rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.95)] ${reduce ? "" : "animate-pulse"}`}
+                />
+                <span className="h-[calc(var(--card-w)*0.07)] w-px bg-gradient-to-b from-slate-200/80 to-slate-400/40" />
+                <span className="h-[3px] w-[calc(var(--card-w)*0.12)] rounded-t-sm bg-gradient-to-b from-slate-300/80 to-slate-500/70" />
+              </span>
+
+              {/* Corps : cadre métallique riveté autour de la capture */}
+              <span
+                className={`relative block rounded-[13px] bg-[linear-gradient(145deg,rgba(226,232,240,0.6),rgba(71,85,105,0.4)_42%,rgba(148,163,184,0.55)_68%,rgba(30,41,59,0.7))] p-[3px] transition-[box-shadow] duration-500 ${
+                  key === activeKey
+                    ? "shadow-[0_0_0_1px_rgba(125,211,252,0.45),0_0_40px_-6px_rgba(56,189,248,0.8)]"
+                    : "shadow-[0_18px_40px_-14px_rgba(2,132,199,0.6)]"
+                } group-hover:shadow-[0_0_0_1px_rgba(186,230,253,0.6),0_0_32px_-8px_rgba(56,189,248,0.8)] group-focus-visible:ring-2 group-focus-visible:ring-sky-300`}
+              >
+                {(["left-[5px] top-[5px]", "right-[5px] top-[5px]", "bottom-[5px] left-[5px]", "bottom-[5px] right-[5px]"] as const).map((pos) => (
+                  <span key={pos} aria-hidden className={`absolute z-10 h-[3px] w-[3px] rounded-full bg-slate-200/70 ${pos}`} />
+                ))}
+                <span className="relative block aspect-[16/10] overflow-hidden rounded-[10px] bg-[#050b18]">
+                  {project.image && (
+                    <Image src={project.image} alt="" fill sizes="240px" draggable={false} className="object-cover" />
+                  )}
+                  {/* Lignes de balayage et reflet : l'image a l'air projetée */}
+                  <span aria-hidden className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,rgba(125,211,252,0.07)_0_1px,transparent_1px_3px)] mix-blend-screen" />
+                  <span aria-hidden className="absolute inset-0 bg-[linear-gradient(125deg,rgba(186,230,253,0.22),transparent_38%,transparent_70%,rgba(56,189,248,0.18))]" />
+                </span>
+              </span>
             </span>
             <span className="mt-2 block truncate text-center font-mono text-[11px] tracking-wide text-sky-100/80">
               {project.title.split(",")[0]}
@@ -572,5 +591,43 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
     >
       {children}
     </button>
+  );
+}
+
+/** Panneau solaire d'un satellite : bras de liaison puis panneau quadrillé, accroché au flanc du corps. */
+function SolarWing({ side, active }: { side: "left" | "right"; active: boolean }) {
+  const left = side === "left";
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center ${left ? "right-full flex-row-reverse" : "left-full"}`}
+    >
+      {/* Bras */}
+      <span className="h-[3px] w-[calc(var(--card-w)*0.045)] bg-gradient-to-b from-slate-200/80 via-slate-400/70 to-slate-600/70" />
+      {/* Panneau : deux volets reliés par une charnière */}
+      <span className={`flex items-center ${left ? "flex-row-reverse" : ""}`}>
+        <Panel active={active} />
+        {/* Second volet : sur écran large seulement (sur mobile, les satellites sont serrés) */}
+        <span className={`hidden items-center sm:flex ${left ? "flex-row-reverse" : ""}`}>
+          <span className="h-[2px] w-[3px] bg-slate-300/60" />
+          <Panel active={active} />
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function Panel({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`relative block h-[calc(var(--card-w)*0.27)] w-[calc(var(--card-w)*0.14)] overflow-hidden rounded-[3px] border transition-[border-color,box-shadow] duration-500 ${
+        active ? "border-sky-300/70 shadow-[0_0_16px_-2px_rgba(56,189,248,0.7)]" : "border-slate-300/35"
+      } bg-[linear-gradient(160deg,#1d4f91_0%,#0b2a55_55%,#071b38_100%)]`}
+    >
+      {/* Cellules */}
+      <span className="absolute inset-0 bg-[linear-gradient(rgba(147,197,253,0.35)_1px,transparent_1px),linear-gradient(90deg,rgba(147,197,253,0.35)_1px,transparent_1px)] [background-size:50%_25%]" />
+      {/* Reflet */}
+      <span className="absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.28),transparent_40%,transparent_75%,rgba(125,211,252,0.18))]" />
+    </span>
   );
 }
