@@ -1,24 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   BatteryFull,
   Calendar,
-  Check,
-  CheckCircle2,
-  CircleAlert,
   CodeXml,
   FolderKanban,
   Globe,
-  LoaderCircle,
   Mail,
   MapPin,
   MessageCircle,
   Search,
-  SendHorizontal,
   Settings,
   Wifi,
 } from "lucide-react";
@@ -28,33 +23,8 @@ import { SITE } from "@/lib/site";
 import SectionHead from "./SectionHead";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-const TYPES = ["Site vitrine", "Boutique en ligne", "Application web ou mobile", "Refonte d'un site existant", "Autre"];
 
-type Status = { kind: "idle" } | { kind: "sending" } | { kind: "sent" } | { kind: "error"; message: string };
-type Control = HTMLInputElement | HTMLTextAreaElement;
-type FieldName = "name" | "company" | "phone" | "email" | "message";
-
-/** Message d'erreur d'un champ (cause + comment corriger), ou "" s'il est valide. */
-function problem(el: Control): string {
-  const v = el.validity;
-  if (v.valid) return "";
-  switch (el.name as FieldName) {
-    case "name":
-      return "Indiquez votre nom pour qu'on sache à qui répondre.";
-    case "email":
-      return v.valueMissing
-        ? "Indiquez votre e-mail : c'est par là qu'on vous répond."
-        : "Adresse incomplète : vérifiez le @ et le domaine (ex. nom@exemple.com).";
-    case "phone":
-      return "Numéro invalide : chiffres, espaces et + uniquement.";
-    case "message":
-      return "Décrivez votre projet en quelques mots (10 caractères minimum).";
-    default:
-      return "Champ invalide.";
-  }
-}
-
-/** Section « Contact » : grand titre, puis un ordinateur portable dont l'écran affiche le formulaire dans une fenêtre. */
+/** Section « Contact » : grand titre, puis un ordinateur portable qui affiche son bureau (fond d'écran, menu, dock). */
 export default function ContactSection() {
   const reduce = useReducedMotion() ?? false;
   const reveal = (delay: number) => ({
@@ -109,13 +79,11 @@ export default function ContactSection() {
 
         <motion.div {...reveal(0.12)}>
           <LaptopMockup>
-            {/* Bureau : fond d'écran, barre de menu, fenêtre « Nouveau message », dock */}
-            <div className="relative isolate flex min-h-[560px] flex-col">
+            {/* Bureau : fond d'écran, barre de menu, dock (écran au format 16:10) */}
+            <div className="relative isolate flex aspect-[16/10] flex-col">
               <DesktopWallpaper />
               <MenuBar />
-              <div className="relative z-10 flex flex-1 items-center justify-center px-3 pb-4 pt-3 sm:px-8 sm:pb-6 sm:pt-6 lg:px-14">
-                <ContactWindow reduce={reduce} />
-              </div>
+              <div className="flex-1" />
               <Dock />
             </div>
           </LaptopMockup>
@@ -200,281 +168,6 @@ function Dock() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-/* ── Fenêtre du formulaire ── */
-
-function ContactWindow({ reduce }: { reduce: boolean }) {
-  const [status, setStatus] = useState<Status>({ kind: "idle" });
-  // Validation au départ du champ : erreur affichée sous le champ, coche quand il est valide et rempli
-  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
-  const [valid, setValid] = useState<Partial<Record<FieldName, boolean>>>({});
-  const [type, setType] = useState(TYPES[0]);
-
-  const check = (el: Control) => {
-    const name = el.name as FieldName;
-    const message = problem(el);
-    setErrors((e) => ({ ...e, [name]: message }));
-    setValid((s) => ({ ...s, [name]: !message && el.value.trim() !== "" }));
-    return message;
-  };
-  // Une erreur déjà affichée disparaît dès que la saisie est corrigée (sans en afficher de nouvelle en cours de frappe)
-  const recheck = (el: Control) => {
-    if (errors[el.name as FieldName]) check(el);
-  };
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const controls = [...form.querySelectorAll<Control>("input[data-check], textarea[data-check]")];
-    const invalid = controls.filter((el) => check(el));
-    if (invalid.length) {
-      invalid[0].focus();
-      setStatus({ kind: "idle" });
-      return;
-    }
-
-    const data = Object.fromEntries(new FormData(form).entries());
-    setStatus({ kind: "sending" });
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
-      if (!res.ok || !json.ok) throw new Error(json.error ?? "Envoi impossible, réessayez dans un instant.");
-      form.reset();
-      setType(TYPES[0]);
-      setErrors({});
-      setValid({});
-      setStatus({ kind: "sent" });
-    } catch (error) {
-      setStatus({ kind: "error", message: error instanceof Error ? error.message : "Envoi impossible, réessayez dans un instant." });
-    }
-  };
-
-  const fieldProps = (name: FieldName) => ({
-    name,
-    "data-check": "",
-    "aria-invalid": errors[name] ? true : undefined,
-    "aria-describedby": errors[name] ? `c-${name}-erreur` : undefined,
-    onBlur: (e: { currentTarget: Control }) => check(e.currentTarget),
-    onInput: (e: { currentTarget: Control }) => recheck(e.currentTarget),
-  });
-
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, scale: 0.96, y: 16 }}
-      whileInView={{ opacity: 1, scale: 1, y: 0 }}
-      viewport={{ once: true, margin: "-15% 0px" }}
-      transition={{ duration: 0.7, ease: EXPO_OUT, delay: reduce ? 0 : 0.35 }}
-      className="w-full max-w-[980px] overflow-hidden rounded-2xl border border-white/15 bg-[#07110e]/80 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl"
-    >
-      {/* Barre de titre de la fenêtre */}
-      <div className="relative flex h-11 items-center border-b border-white/10 bg-white/[0.04] px-4">
-        <span aria-hidden className="flex gap-2">
-          <span className="h-3 w-3 rounded-full bg-[#ff5f57]/90" />
-          <span className="h-3 w-3 rounded-full bg-[#febc2e]/90" />
-          <span className="h-3 w-3 rounded-full bg-[#28c840]/90" />
-        </span>
-        <p className="absolute inset-x-20 truncate text-center text-[13px] font-medium text-white/80">
-          <Mail size={13} aria-hidden className="mr-1.5 inline -translate-y-px text-accent-strong" />
-          Nouveau message — TwinsDev
-        </p>
-      </div>
-
-      <form onSubmit={submit} noValidate aria-label="Formulaire de contact" aria-describedby="contact-aide" className="flex flex-col gap-3.5 p-3.5 sm:p-5">
-        <div className="grid gap-3.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          {/* Colonne gauche : qui vous êtes */}
-          <div className="grid content-start gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <FieldCard id="c-name" label="Nom" required error={errors.name} valid={valid.name}>
-              <input id="c-name" required autoComplete="name" placeholder="Votre nom et prénom" className={INPUT} {...fieldProps("name")} />
-            </FieldCard>
-            <FieldCard id="c-company" label="Entreprise" hint="facultatif" error={errors.company} valid={valid.company}>
-              <input
-                id="c-company"
-                autoComplete="organization"
-                maxLength={120}
-                placeholder="Laissez vide si vous êtes particulier"
-                className={INPUT}
-                {...fieldProps("company")}
-              />
-            </FieldCard>
-            <FieldCard id="c-phone" label="Téléphone" hint="facultatif" error={errors.phone} valid={valid.phone}>
-              <input
-                id="c-phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                pattern="[+0-9 \(\)\.\-]{6,20}"
-                placeholder="+261 34 00 000 00"
-                className={INPUT}
-                {...fieldProps("phone")}
-              />
-            </FieldCard>
-            <FieldCard id="c-email" label="E-mail" required error={errors.email} valid={valid.email}>
-              <input
-                id="c-email"
-                type="email"
-                inputMode="email"
-                required
-                autoComplete="email"
-                placeholder="vous@exemple.com"
-                className={INPUT}
-                {...fieldProps("email")}
-              />
-            </FieldCard>
-          </div>
-
-          {/* Colonne droite : le projet */}
-          <div className="flex min-w-0 flex-col gap-3">
-            <fieldset className={`${CARD} border-white/10 bg-white/[0.045] focus-within:border-accent/55`}>
-              <legend className="sr-only">Type de projet</legend>
-              <p aria-hidden className={LABEL}>
-                Type de projet
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {TYPES.map((t) => (
-                  <label key={t} className="cursor-pointer">
-                    <input type="radio" name="type" value={t} checked={type === t} onChange={() => setType(t)} className="peer sr-only" />
-                    <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.04] px-3 text-[13px] text-white/70 transition-colors hover:border-white/30 hover:text-white peer-checked:border-accent/70 peer-checked:bg-accent/20 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                      {type === t && <Check size={13} strokeWidth={2.6} aria-hidden className="text-accent-strong" />}
-                      {t}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <FieldCard id="c-message" label="Votre projet" required error={errors.message} valid={valid.message} grow>
-              <textarea
-                id="c-message"
-                required
-                minLength={10}
-                maxLength={4000}
-                rows={6}
-                placeholder="Ce que fait votre activité, ce que vous attendez du site, des exemples que vous aimez…"
-                className={`${INPUT} min-h-[150px] flex-1 resize-y leading-relaxed`}
-                {...fieldProps("message")}
-              />
-            </FieldCard>
-          </div>
-        </div>
-
-        {/* Champ piège pour les robots : invisible, doit rester vide */}
-        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-
-        <div className="flex flex-col-reverse gap-3 border-t border-white/10 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
-          <p id="contact-aide" className="max-w-[46ch] text-[12.5px] leading-relaxed text-white/55">
-            <span className="text-accent-strong">*</span> champs obligatoires. On vous répond par e-mail ; vos informations ne servent
-            qu&apos;à traiter votre demande.
-          </p>
-          <button
-            type="submit"
-            disabled={status.kind === "sending"}
-            className="group inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,#22c55e,#14b8a6)] pl-5 pr-4 text-[14.5px] font-semibold text-[#03140c] shadow-[0_14px_34px_-12px_rgba(20,184,166,0.8)] transition-[transform,filter,opacity] duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#07110e] active:translate-y-0 active:scale-[0.98] disabled:cursor-default disabled:opacity-60"
-          >
-            {status.kind === "sending" ? (
-              <>
-                Envoi en cours… <LoaderCircle size={17} aria-hidden className="animate-spin" />
-              </>
-            ) : (
-              <>
-                Envoyer le message
-                <SendHorizontal size={17} aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5" />
-              </>
-            )}
-          </button>
-        </div>
-
-        <div role="status" aria-live="polite" className="text-[14px] empty:hidden">
-          {status.kind === "sent" && (
-            <motion.p
-              initial={reduce ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-2 text-accent-strong"
-            >
-              <CheckCircle2 size={17} aria-hidden /> Message envoyé. On vous répond rapidement par e-mail.
-            </motion.p>
-          )}
-          {status.kind === "error" && (
-            <p className="inline-flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/10 px-3.5 py-2 text-red-200">
-              <CircleAlert size={17} aria-hidden /> {status.message}
-            </p>
-          )}
-        </div>
-      </form>
-    </motion.div>
-  );
-}
-
-/* Carte translucide d'un champ : libellé en petites capitales, champ plus clair à l'intérieur. */
-const CARD = "flex min-w-0 flex-col gap-2 rounded-xl border p-3 transition-colors duration-200";
-const LABEL = "flex items-center gap-1.5 px-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/65";
-const INPUT =
-  "w-full rounded-lg border border-transparent bg-white/[0.07] py-2.5 pl-3 pr-10 text-[14.5px] text-white placeholder:italic placeholder:text-white/40 transition-colors duration-200 hover:bg-white/[0.09] focus:border-accent/60 focus:bg-white/[0.11] focus:outline-none aria-[invalid=true]:border-red-400/60";
-
-function FieldCard({
-  id,
-  label,
-  required,
-  hint,
-  error,
-  valid,
-  grow,
-  children,
-}: {
-  id: string;
-  label: string;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  valid?: boolean;
-  grow?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={`${CARD} ${grow ? "flex-1" : ""} ${
-        error
-          ? "border-red-400/50 bg-red-500/[0.07]"
-          : valid
-            ? "border-accent/40 bg-white/[0.045]"
-            : "border-white/10 bg-white/[0.045] focus-within:border-accent/55"
-      }`}
-    >
-      <label htmlFor={id} className={LABEL}>
-        {label}
-        {required && (
-          <span aria-hidden className="text-accent-strong">
-            *
-          </span>
-        )}
-        {hint && <span className="normal-case tracking-normal text-white/35">· {hint}</span>}
-      </label>
-      <div className={`relative flex ${grow ? "flex-1" : ""}`}>
-        {children}
-        {/* Coche quand le champ est valide, alerte quand il ne l'est pas (icône + texte, jamais la couleur seule) */}
-        {(valid || error) && (
-          <span aria-hidden className={`pointer-events-none absolute right-3 ${grow ? "top-3" : "top-1/2 -translate-y-1/2"}`}>
-            {error ? (
-              <CircleAlert size={18} className="text-red-300" />
-            ) : (
-              <span className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[#03140c]">
-                <Check size={13} strokeWidth={3} />
-              </span>
-            )}
-          </span>
-        )}
-      </div>
-      {error && (
-        <p id={`${id}-erreur`} className="px-0.5 text-[12.5px] leading-snug text-red-200">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
