@@ -1,6 +1,6 @@
 import { readUpload } from "@/lib/content/uploads";
 
-/** GET /media/<fichier> — images envoyées depuis l'administration (data/uploads). Noms uniques : cache long. */
+/** GET /media/<fichier> — images envoyées depuis l'administration (base de données ou data/uploads). Noms uniques : cache long. */
 export async function GET(_request: Request, { params }: { params: Promise<{ file: string }> }) {
   const { file } = await params;
   const upload = await readUpload(file);

@@ -1,8 +1,12 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { hasDb, query } from "@/lib/db";
 import { isMailConfigured, sendContactMail } from "@/lib/mailer";
 
-/** Demandes reçues : une ligne JSON par demande, dans data/contacts.jsonl (dossier ignoré par git), en plus de l'e-mail. */
+/**
+ * Demandes reçues, en plus de l'e-mail : table `contact_requests` (base de données),
+ * sinon une ligne JSON par demande dans data/contacts.jsonl (dossier ignoré par git).
+ */
 const FILE = path.join(process.cwd(), "data", "contacts.jsonl");
 const MAX = { name: 120, company: 120, phone: 30, email: 200, type: 60, message: 4000 };
 const PHONE = /^[+0-9 ().-]{6,20}$/;
@@ -62,11 +66,18 @@ export async function POST(request: Request) {
     console.warn("[api/contact] SMTP non configuré (SMTP_HOST, SMTP_USER, SMTP_PASS) : demande seulement enregistrée");
   }
 
-  // 2. Copie dans data/contacts.jsonl : rien n'est perdu si l'e-mail échoue
+  // 2. Copie dans la base (ou data/contacts.jsonl) : rien n'est perdu si l'e-mail échoue
   let saved = false;
   try {
-    await mkdir(path.dirname(FILE), { recursive: true });
-    await appendFile(FILE, JSON.stringify({ at: new Date().toISOString(), name, company, phone, email, type, message, mailed }) + "\n", "utf8");
+    if (hasDb()) {
+      await query(
+        "INSERT INTO contact_requests (name, company, phone, email, type, message, mailed) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [name, company, phone, email, type, message, mailed],
+      );
+    } else {
+      await mkdir(path.dirname(FILE), { recursive: true });
+      await appendFile(FILE, JSON.stringify({ at: new Date().toISOString(), name, company, phone, email, type, message, mailed }) + "\n", "utf8");
+    }
     saved = true;
   } catch (error) {
     console.error("[api/contact] écriture impossible", error);
