@@ -1,5 +1,5 @@
 import "server-only";
-import { FAQ } from "@/lib/faq";
+import { ASSISTANT_FAQ, FAQ } from "@/lib/faq";
 import type { Category, Project } from "@/lib/projects";
 import { SERVICES, SPECIALTIES } from "@/lib/services";
 
@@ -26,7 +26,9 @@ const has = (text: string, words: string[]) =>
   words.some((w) =>
     w.endsWith("*") ? new RegExp(`(^|\\s)${w.slice(0, -1)}`).test(text) : new RegExp(`(^|\\s)${w}s?(\\s|$)`).test(text),
   );
-const faq = (start: string) => FAQ.find((f) => normalize(f.question).startsWith(normalize(start)))?.answer ?? "";
+/** Réponse de la FAQ du site, ou des réponses réservées à l'assistant, dont la question commence par `start`. */
+const faq = (start: string) =>
+  [...FAQ, ...ASSISTANT_FAQ].find((f) => normalize(f.question).startsWith(normalize(start)))?.answer ?? "";
 const service = (slug: string) => SERVICES.find((s) => s.slug === slug);
 
 const CONTACT = "Le plus simple : laisse-nous ton besoin dans le formulaire de contact en bas de page, on te répond rapidement.";
@@ -45,6 +47,18 @@ export function localReply(messages: Message[], projects: Project[], categories:
 
   if (has(text, ["merci", "super", "parfait", "top", "genial", "cool"])) {
     return "Avec plaisir ! Si tu veux avancer sur ton projet, le formulaire de contact en bas de page est là pour ça.";
+  }
+
+  if (has(text, ["pourquoi vous", "pourquoi twinsdev", "pourquoi choisir", "vous choisir", "difference", "avantage*"])) {
+    return `${faq("Pourquoi vous")} Tu me parles un peu de ton projet ?`;
+  }
+
+  if (has(text, ["confiance", "serieux", "fiable*", "garanti*", "arnaque*", "rassur*"])) {
+    return `${faq("Comment peut-on vous faire confiance")} Tu veux qu'on t'envoie des exemples proches de ton projet ?`;
+  }
+
+  if (has(text, ["whatsapp", "echange*", "communiqu*", "suivre", "suivi", "joindre", "pendant le projet"])) {
+    return `${faq("Comment échange-t-on")} Tu préfères qu'on te contacte sur WhatsApp ?`;
   }
 
   if (has(text, ["prix", "cout*", "tarif*", "combien", "budget*", "devis", "cher", "chere"]) && !has(text, ["temps", "delai"])) {

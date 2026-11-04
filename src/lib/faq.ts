@@ -1,17 +1,36 @@
 export type Faq = { question: string; answer: string };
 
-/* Questions fréquentes, dans l'ordre où les clients les posent le plus souvent : à valider avec votre façon de travailler. */
+/* Questions fréquentes affichées sur le site, dans cet ordre : à valider avec votre façon de travailler. */
 export const FAQ: Faq[] = [
   {
-    question: "Combien coûte la création d'un site ?",
+    question: "Pourquoi vous ?",
+    answer:
+      "Parce qu'on est prêts à porter votre projet de A à Z. Vous travaillez avec deux jumeaux ingénieurs IT complémentaires : Marco conçoit des interfaces claires et soignées, Loïc construit tout ce qui tourne derrière (back-end, automatisations, serveurs et sécurité). Plus de 15 projets livrés pour des hôtels, des restaurants, des associations et des applications web : un seul interlocuteur pour la conception, le développement, l'hébergement et la maintenance, avec un suivi direct et réactif.",
+  },
+  {
+    question: "Comment échange-t-on pendant le projet ?",
+    answer:
+      "Sur WhatsApp, pour des échanges simples et rapides au quotidien : questions, validations, captures d'écran. Bientôt, vous pourrez aussi suivre votre projet depuis notre application de suivi : l'avancement, les étapes validées et les prochaines livraisons, au même endroit.",
+  },
+  {
+    question: "Comment peut-on vous faire confiance ?",
+    answer:
+      "Nos réalisations sont en ligne : vous pouvez les voir autour du globe dans la section Projets et les visiter. Avant de commencer, vous recevez un plan clair avec les étapes, les délais et le devis. Pendant le projet, on vous montre l'avancement à chaque étape. À la livraison, on vous remet tous les accès.",
+  },
+  {
+    question: "Combien coûte un projet ?",
     answer:
       "Chaque projet est chiffré sur devis après un premier échange. Le prix dépend du nombre de pages, des fonctionnalités (paiement, réservation, espace membre…) et du délai souhaité.",
   },
   {
-    question: "En combien de temps mon site sera-t-il en ligne ?",
+    question: "En combien de temps mon projet sera-t-il prêt ?",
     answer:
       "Ça dépend de la taille du projet. On vous donne un calendrier précis avec le devis, étape par étape, et vous suivez l'avancement au fur et à mesure.",
   },
+];
+
+/* Réponses connues de l'assistant du téléphone, sans être affichées dans la FAQ du site. */
+export const ASSISTANT_FAQ: Faq[] = [
   {
     question: "Je n'ai ni nom de domaine ni hébergement, c'est un problème ?",
     answer:
@@ -40,6 +59,6 @@ export const FAQ: Faq[] = [
   {
     question: "Peut-on travailler ensemble à distance ?",
     answer:
-      "Oui. Les échanges se font par visio, e-mail ou messagerie, et vous suivez l'avancement du projet sur une adresse de test accessible à tout moment.",
+      "Oui. Les échanges se font sur WhatsApp ou en visio, et vous suivez l'avancement du projet sur une adresse de test accessible à tout moment.",
   },
 ];
