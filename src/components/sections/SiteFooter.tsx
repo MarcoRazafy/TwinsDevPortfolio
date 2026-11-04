@@ -48,9 +48,9 @@ export default function SiteFooter() {
                   <a
                     href={`tel:${p.tel}`}
                     aria-label={`Appeler le ${p.display}`}
-                    className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1.5 pr-4 text-[14.5px] font-medium tabular-nums tracking-wide text-white/85 transition-colors duration-200 hover:border-accent/50 hover:bg-accent/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border border-white/[0.06] bg-[#07090d] py-1 pl-1.5 pr-4 text-[14.5px] font-medium tabular-nums tracking-wide text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-colors duration-200 hover:border-white/15 hover:bg-[#0b0e13] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-accent/15 text-accent-strong transition-colors duration-200 group-hover:bg-accent group-hover:text-[#03140c]">
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-white/[0.05] text-accent-strong/80 transition-colors duration-200 group-hover:bg-accent/15 group-hover:text-accent-strong">
                       <Phone size={15} strokeWidth={2.2} aria-hidden />
                     </span>
                     {p.display}
