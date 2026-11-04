@@ -299,7 +299,8 @@ export default function ChatScreen({ onPowerOff, onBack, onConversationStart }: 
                     }`}
                   >
                     <span className="sr-only">{mine ? "Vous : " : `${CONTACT.name} : `}</span>
-                    {m.text}
+                    {/* Le modèle met parfois du gras Markdown (**…**) : on n'affiche pas les astérisques */}
+                    {mine ? m.text : m.text.replace(/\*\*|__/g, "")}
                   </p>
                   {/* Heure et accusé de lecture, sous le dernier message du groupe */}
                   {!sameNext && (

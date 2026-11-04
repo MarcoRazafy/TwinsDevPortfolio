@@ -1,7 +1,10 @@
 import "server-only";
+import { teamSkills } from "@/lib/assistant-context";
 import { ASSISTANT_FAQ, FAQ } from "@/lib/faq";
 import type { Category, Project } from "@/lib/projects";
 import { SERVICES, SPECIALTIES } from "@/lib/services";
+import type { Twin } from "@/lib/team";
+import { techLabel } from "@/lib/tech";
 
 /*
  * Assistant de secours, gratuit et sans service externe : répond à partir des contenus du site
@@ -34,7 +37,7 @@ const service = (slug: string) => SERVICES.find((s) => s.slug === slug);
 const CONTACT = "Le plus simple : laisse-nous ton besoin dans le formulaire de contact en bas de page, on te répond rapidement.";
 
 /** Réponse au dernier message du visiteur. */
-export function localReply(messages: Message[], projects: Project[], categories: Category[]): string {
+export function localReply(messages: Message[], projects: Project[], categories: Category[], team: Twin[] = []): string {
   const last = messages.at(-1)?.content ?? "";
   const text = normalize(last);
   const firstTurn = messages.filter((m) => m.role === "user").length <= 1;
@@ -67,6 +70,17 @@ export function localReply(messages: Message[], projects: Project[], categories:
 
   if (has(text, ["whatsapp", "echange*", "communiqu*", "suivre", "suivi", "joindre", "pendant le projet"])) {
     return `${faq("Comment échange-t-on")} Tu préfères qu'on te contacte sur WhatsApp ?`;
+  }
+
+  // « Combien de projets ? » : avant la règle des prix (qui réagit aussi à « combien »)
+  const real = projects.filter((p) => !p.example);
+  if (has(text, ["projet*", "realisation*", "site*", "application*"]) && has(text, ["combien", "nombre"])) {
+    const perCat = categories
+      .map((c) => ({ label: c.label.toLowerCase(), n: real.filter((p) => p.categories.includes(c.key)).length }))
+      .filter((c) => c.n > 0)
+      .map((c) => `${c.n} ${c.label}${c.n > 1 ? "s" : ""}`)
+      .join(", ");
+    return `On a réalisé ${real.length} projets (${perCat}), tous visibles autour du globe dans la section Projets. Tu as un projet en tête ?`;
   }
 
   if (has(text, ["prix", "cout*", "tarif*", "combien", "budget*", "devis", "cher", "chere"]) && !has(text, ["temps", "delai"])) {
@@ -102,13 +116,16 @@ export function localReply(messages: Message[], projects: Project[], categories:
   }
 
   if (has(text, ["realisation*", "portfolio", "exemple*", "reference*", "vos projets", "deja fait", "travaux"])) {
-    const names = projects.slice(0, 3).map((p) => p.title.split(",")[0]);
+    const names = real.slice(0, 3).map((p) => p.title.split(",")[0]);
     const cats = categories.map((c) => c.label.toLowerCase()).join(", ");
-    return `On a notamment réalisé ${names.join(", ")}. Tu peux tous les voir autour du globe dans la section Projets (${cats}). Ton projet ressemble à l'un d'eux ?`;
+    return `On a réalisé ${real.length} projets, dont ${names.join(", ")}. Tu peux tous les voir autour du globe dans la section Projets (${cats}). Ton projet ressemble à l'un d'eux ?`;
   }
 
-  if (has(text, ["techno*", "stack", "langage*", "framework*", "react", "next*", "laravel", "php", "python", "node*", "wordpress"])) {
-    return "On travaille surtout avec React, Next.js et Tailwind côté interface, et Node.js, Laravel, Python et PostgreSQL côté serveur, selon ce qui convient le mieux au projet. Tu as une contrainte technique particulière ?";
+  if (has(text, ["techno*", "stack", "langage*", "framework*", "competence*", "outil*", "react", "next*", "laravel", "php", "python", "node*", "wordpress"])) {
+    // Compétences réelles de l'équipe (profils de l'administration), sans les attribuer à l'un ou à l'autre
+    const { stack } = teamSkills({ team });
+    const list = stack.length ? stack.slice(0, 10).map(techLabel).join(", ") : "React, Next.js, Node.js et PostgreSQL";
+    return `On travaille notamment avec ${list}, selon ce qui convient le mieux au projet. Tu as une contrainte technique particulière ?`;
   }
 
   // Spécialités (plus précises que les services : testées d'abord)

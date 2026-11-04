@@ -1,5 +1,5 @@
 import { AiError, hasApiKey, streamChat, type ChatMessage } from "@/lib/ai-chat";
-import { ASSISTANT_PROMPT } from "@/lib/assistant-prompt";
+import { buildAssistantPrompt } from "@/lib/assistant-context";
 import { getContent } from "@/lib/content/store";
 import { localReply } from "@/lib/local-assistant";
 
@@ -30,8 +30,8 @@ const TEXT_HEADERS = { "Content-Type": "text/plain; charset=utf-8", "Cache-Contr
 /** Réponse de l'assistant de secours (gratuit, sans service externe) à partir des contenus du site. */
 async function fallback(messages: ChatMessage[], reason: string) {
   console.warn(`[api/chat] assistant local utilisé : ${reason}`);
-  const { projects, categories } = await getContent();
-  const reply = localReply(messages, projects, categories);
+  const { projects, categories, team } = await getContent();
+  const reply = localReply(messages, projects, categories, team);
   return new Response(reply, { headers: { ...TEXT_HEADERS, "X-Assistant": "local" } });
 }
 
@@ -46,7 +46,9 @@ export async function POST(request: Request) {
   if (!hasApiKey()) return fallback(messages, "aucune clé d'API");
 
   try {
-    const stream = await streamChat(ASSISTANT_PROMPT, messages, request.signal);
+    // Consignes + données actuelles du portfolio (contenu en cache, invalidé à chaque modification de l'admin)
+    const prompt = buildAssistantPrompt(await getContent());
+    const stream = await streamChat(prompt, messages, request.signal);
     return new Response(stream, { headers: { ...TEXT_HEADERS, "X-Assistant": "ai" } });
   } catch (error) {
     if (request.signal.aborted) return new Response(null, { status: 499 });
