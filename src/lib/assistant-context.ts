@@ -3,6 +3,7 @@ import { ASSISTANT_PROMPT } from "@/lib/assistant-prompt";
 import type { Content } from "@/lib/content/store";
 import { ASSISTANT_FAQ, FAQ } from "@/lib/faq";
 import { SERVICES, SPECIALTIES, STEPS } from "@/lib/services";
+import { SITE } from "@/lib/site";
 import { techLabel, type TechKey } from "@/lib/tech";
 
 /*
@@ -82,6 +83,7 @@ ${features.join("\n")}
 
 === ÉQUIPE ===
 Marco et Loïc, qui portent chaque projet ensemble.
+Téléphone (appel ou WhatsApp) : ${SITE.phones.map((p) => p.display).join(" ou ")}, aussi affichés en bas du site.
 Savoir-faire : ${savoirFaire.join(" ; ")}.
 Compétences : ${[...groups].map(([g, items]) => `${g} : ${techs(items)}`).join(" | ")}.
 Technologies principales : ${techs(stack)}.

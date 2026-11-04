@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Phone } from "lucide-react";
 import { SECTIONS, SITE } from "@/lib/site";
 import Year from "./Year";
 
@@ -35,6 +36,30 @@ export default function SiteFooter() {
             ))}
           </nav>
         </div>
+        {/* Téléphones : un appui lance l'appel (lien tel: au format international) */}
+        {SITE.phones.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <p id="footer-telephone" className="text-[13.5px] text-muted">
+              Appelez-nous
+            </p>
+            <ul aria-labelledby="footer-telephone" className="flex flex-wrap gap-2.5">
+              {SITE.phones.map((p) => (
+                <li key={p.tel}>
+                  <a
+                    href={`tel:${p.tel}`}
+                    aria-label={`Appeler le ${p.display}`}
+                    className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1.5 pr-4 text-[14.5px] font-medium tabular-nums tracking-wide text-white/85 transition-colors duration-200 hover:border-accent/50 hover:bg-accent/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-accent/15 text-accent-strong transition-colors duration-200 group-hover:bg-accent group-hover:text-[#03140c]">
+                      <Phone size={15} strokeWidth={2.2} aria-hidden />
+                    </span>
+                    {p.display}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 pt-6 text-[13px] text-muted">
           <Link href="/mentions-legales" className="transition-colors hover:text-white">
             Mentions légales
