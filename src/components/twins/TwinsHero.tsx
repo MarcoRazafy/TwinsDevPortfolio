@@ -112,7 +112,7 @@ export default function TwinsHero({ visible }: Props) {
         >
           <Image
             src={TWINS_SRC}
-            alt="Les jumeaux de TwinsDev"
+            alt="L'équipe TwinsDev"
             width={1800}
             height={1099}
             sizes="(min-width: 1280px) 640px, (min-width: 1024px) 560px, 400px"

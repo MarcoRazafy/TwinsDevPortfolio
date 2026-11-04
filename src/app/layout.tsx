@@ -23,7 +23,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "TwinsDev — Marco & Loïc, développeurs web",
   description:
-    "Deux jumeaux ingénieurs qui conçoivent et développent des sites vitrines, des boutiques en ligne et des applications web sur mesure.",
+    "Une équipe de développeurs web qui conçoit et développe des sites vitrines, des boutiques en ligne et des applications web sur mesure.",
 };
 
 export const viewport: Viewport = {

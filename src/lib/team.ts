@@ -40,7 +40,7 @@ export const TEAM: Twin[] = [
     tagline: "Il dessine les interfaces et les fait vivre à l'écran.",
     bio: [
       "Marco s'occupe de tout ce que vous voyez : la maquette, l'interface, les animations. Son objectif : un site clair, rapide, agréable à utiliser, sur ordinateur comme sur téléphone.",
-      "Ingénieur IT de formation, il a commencé à coder avec son frère, et n'a jamais arrêté. Il aime les détails qui font la différence : une transition fluide, un bouton bien placé, une page qui s'affiche instantanément.",
+      "Il a commencé à coder avec son frère, et n'a jamais arrêté. Il aime les détails qui font la différence : une transition fluide, un bouton bien placé, une page qui s'affiche instantanément.",
     ],
     does: ["Maquettes et identité visuelle", "Interfaces web et mobiles", "Animations et performance"],
     stack: ["react", "nextjs", "tailwind", "typescript", "figma"],

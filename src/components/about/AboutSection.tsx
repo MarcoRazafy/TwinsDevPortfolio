@@ -17,7 +17,7 @@ export default async function AboutSection() {
             id="apropos-titre"
             className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.1rem)] font-semibold leading-[1.1] tracking-[-0.025em] text-balance"
           >
-            Deux frères, <span className="text-glow">un seul binôme</span>
+            L&apos;équipe derrière <span className="text-glow">vos projets</span>
           </h2>
         </div>
 

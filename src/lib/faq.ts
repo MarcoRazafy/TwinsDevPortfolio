@@ -5,7 +5,7 @@ export const FAQ: Faq[] = [
   {
     question: "Pourquoi vous ?",
     answer:
-      "Parce qu'on est prêts à porter votre projet de A à Z. Vous travaillez avec deux jumeaux ingénieurs IT complémentaires : Marco conçoit des interfaces claires et soignées, Loïc construit tout ce qui tourne derrière (back-end, automatisations, serveurs et sécurité). Plus de 15 projets livrés pour des hôtels, des restaurants, des associations et des applications web : un seul interlocuteur pour la conception, le développement, l'hébergement et la maintenance, avec un suivi direct et réactif.",
+      "Parce qu'on est prêts à porter votre projet de A à Z. Une équipe soudée qui maîtrise toute la chaîne : des interfaces claires et soignées, et tout ce qui tourne derrière (back-end, automatisations, serveurs et sécurité). Plus de 15 projets livrés pour des hôtels, des restaurants, des associations et des applications web : un seul interlocuteur pour la conception, le développement, l'hébergement et la maintenance, avec un suivi direct et réactif.",
   },
   {
     question: "Comment échange-t-on pendant le projet ?",
