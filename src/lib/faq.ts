@@ -18,6 +18,20 @@ export const FAQ: Faq[] = [
       "Nos réalisations sont en ligne : vous pouvez les voir autour du globe dans la section Projets et les visiter. Avant de commencer, vous recevez un plan clair avec les étapes, les délais et le devis. Pendant le projet, on vous montre l'avancement à chaque étape. À la livraison, on vous remet tous les accès.",
   },
   {
+    question: "Avec quels clients travaillez-vous ?",
+    answer:
+      "Avec tout le monde, partout dans le monde : entrepreneurs, commerces, hôtels et restaurants, associations, start-up ou particuliers. Tout se fait à distance, quel que soit votre pays : il suffit d'une connexion et d'une idée de projet.",
+  },
+  {
+    question: "Comment être sûr que le projet sera livré ?",
+    answer:
+      "Vous ne prenez aucun risque : on livre d'abord. Le projet est mis en ligne, on vous remet toutes les clés (accès, codes, hébergement), et c'est seulement ensuite que vous payez. Vous ne réglez donc rien avant d'avoir votre projet entre les mains.",
+  },
+];
+
+/* Réponses connues de l'assistant du téléphone, sans être affichées dans la FAQ du site. */
+export const ASSISTANT_FAQ: Faq[] = [
+  {
     question: "Combien coûte un projet ?",
     answer:
       "Chaque projet est chiffré sur devis après un premier échange. Le prix dépend du nombre de pages, des fonctionnalités (paiement, réservation, espace membre…) et du délai souhaité.",
@@ -27,10 +41,6 @@ export const FAQ: Faq[] = [
     answer:
       "Ça dépend de la taille du projet. On vous donne un calendrier précis avec le devis, étape par étape, et vous suivez l'avancement au fur et à mesure.",
   },
-];
-
-/* Réponses connues de l'assistant du téléphone, sans être affichées dans la FAQ du site. */
-export const ASSISTANT_FAQ: Faq[] = [
   {
     question: "Je n'ai ni nom de domaine ni hébergement, c'est un problème ?",
     answer:

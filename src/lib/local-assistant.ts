@@ -57,6 +57,14 @@ export function localReply(messages: Message[], projects: Project[], categories:
     return `${faq("Comment peut-on vous faire confiance")} Tu veux qu'on t'envoie des exemples proches de ton projet ?`;
   }
 
+  if (has(text, ["livr*", "payer apres", "paye apres", "quand payer", "quand je paie", "rembours*"])) {
+    return `${faq("Comment être sûr")} Tu veux qu'on commence par un premier échange sur ton projet ?`;
+  }
+
+  if (has(text, ["client*", "monde", "etranger", "international*", "pays", "france", "canada", "europe", "afrique"])) {
+    return `${faq("Avec quels clients")} Tu es basé où, et c'est pour quel genre de projet ?`;
+  }
+
   if (has(text, ["whatsapp", "echange*", "communiqu*", "suivre", "suivi", "joindre", "pendant le projet"])) {
     return `${faq("Comment échange-t-on")} Tu préfères qu'on te contacte sur WhatsApp ?`;
   }
