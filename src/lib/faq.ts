@@ -5,7 +5,7 @@ export const FAQ: Faq[] = [
   {
     question: "Pourquoi vous ?",
     answer:
-      "Parce qu'on est une équipe qui prend votre projet au sérieux. On vous livre toujours un rendu qui va au-delà de ce que vous imaginiez, et on est là pour vous surprendre.",
+      "Parce qu'on est une équipe qui prend votre projet au sérieux. On vous livre toujours un rendu qui va au-delà de ce que vous imaginiez, et on est là pour vous surprendre. On s'occupe de tout, du design jusqu'à la mise en ligne, avec un seul interlocuteur qui connaît votre projet par cœur. On reste disponibles et réactifs à chaque étape, et on ne s'arrête pas tant que le résultat ne vous plaît pas vraiment.",
   },
   {
     question: "Comment échange-t-on pendant le projet ?",
