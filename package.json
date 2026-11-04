@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx prisma migrate deploy",
+    "start": "next start",
     "lint": "eslint",
     "admin:password": "node scripts/admin-password.mjs",
     "db:import": "node --env-file=.env.local scripts/db-import.mjs"
