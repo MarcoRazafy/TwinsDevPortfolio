@@ -61,9 +61,6 @@ export default function SiteFooter() {
           </div>
         )}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 pt-6 text-[13px] text-muted">
-          <Link href="/mentions-legales" className="transition-colors hover:text-white">
-            Mentions légales
-          </Link>
           <Link href="/confidentialite" className="transition-colors hover:text-white">
             Politique de confidentialité
           </Link>
