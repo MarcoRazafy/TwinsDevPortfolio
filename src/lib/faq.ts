@@ -8,9 +8,9 @@ export const FAQ: Faq[] = [
       "Parce qu'on est une équipe qui prend votre projet au sérieux. On vous livre toujours un rendu qui va au-delà de ce que vous imaginiez, et on est là pour vous surprendre. On s'occupe de tout, du design jusqu'à la mise en ligne, avec un seul interlocuteur qui connaît votre projet par cœur. On reste disponibles et réactifs à chaque étape, et on ne s'arrête pas tant que le résultat ne vous plaît pas vraiment.",
   },
   {
-    question: "Comment échange-t-on pendant le projet ?",
+    question: "Avec quels clients travaillez-vous ?",
     answer:
-      "Sur WhatsApp, pour des échanges simples et rapides au quotidien : questions, validations, captures d'écran. Bientôt, vous pourrez aussi suivre votre projet depuis notre application de suivi : l'avancement, les étapes validées et les prochaines livraisons, au même endroit.",
+      "Avec tout le monde, partout dans le monde : entrepreneurs, commerces, hôtels et restaurants, associations, start-up ou particuliers. Tout se fait à distance, quel que soit votre pays : il suffit d'une connexion et d'une idée de projet.",
   },
   {
     question: "Comment peut-on vous faire confiance ?",
@@ -18,9 +18,9 @@ export const FAQ: Faq[] = [
       "Nos réalisations sont en ligne : vous pouvez les voir autour du globe dans la section Projets et les visiter. Avant de commencer, vous recevez un plan clair avec les étapes, les délais et le devis. Pendant le projet, on vous montre l'avancement à chaque étape. À la livraison, on vous remet tous les accès.",
   },
   {
-    question: "Avec quels clients travaillez-vous ?",
+    question: "Comment échange-t-on pendant le projet ?",
     answer:
-      "Avec tout le monde, partout dans le monde : entrepreneurs, commerces, hôtels et restaurants, associations, start-up ou particuliers. Tout se fait à distance, quel que soit votre pays : il suffit d'une connexion et d'une idée de projet.",
+      "Sur WhatsApp, pour des échanges simples et rapides au quotidien : questions, validations, captures d'écran. Bientôt, vous pourrez aussi suivre votre projet depuis notre application de suivi : l'avancement, les étapes validées et les prochaines livraisons, au même endroit.",
   },
   {
     question: "Comment être sûr que le projet sera livré ?",
