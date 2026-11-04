@@ -82,8 +82,12 @@ export default function ProjectEditor({ project, categories, defaultCategory, on
         <Field label="Secteur · type de projet" htmlFor="p-kind">
           <input id="p-kind" name="kind" maxLength={80} defaultValue={p?.kind} className={inputClass} placeholder="Restauration · site vitrine" />
         </Field>
-        <Field label="Description" htmlFor="p-problem" hint="Une ou deux phrases : le besoin du client ou ce que fait le projet.">
-          <textarea id="p-problem" name="problem" maxLength={400} rows={3} defaultValue={p?.problem} className={inputClass} />
+        <Field
+          label="Description"
+          htmlFor="p-problem"
+          hint="Sans limite de longueur. Sautez une ligne pour un nouveau paragraphe ; **texte** pour mettre en gras."
+        >
+          <textarea id="p-problem" name="problem" rows={6} defaultValue={p?.problem} className={`${inputClass} min-h-32 resize-y`} />
         </Field>
         <Field label="Ce qui a été livré" hint="Jusqu'à 3 points, affichés en pastilles.">
           {[0, 1, 2].map((i) => (

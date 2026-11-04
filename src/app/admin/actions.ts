@@ -139,7 +139,8 @@ export async function saveProject(_prev: ActionState, fd: FormData): Promise<Act
   const original = text(fd, "originalSlug", 60);
   const title = text(fd, "title", 120);
   const kind = text(fd, "kind", 80);
-  const problem = text(fd, "problem", 400);
+  // Description sans limite pratique (garde-fou contre un collage accidentel de plusieurs Mo)
+  const problem = text(fd, "problem", 200_000).replace(/\r\n?/g, "\n"); // retours à la ligne du navigateur (\r\n) normalisés
   const delivered = lines(fd, "delivered", 3, 120);
   const slug = text(fd, "slug", 60) || slugify(title);
   // Catégories cochées : vérifiées plus bas contre la liste enregistrée

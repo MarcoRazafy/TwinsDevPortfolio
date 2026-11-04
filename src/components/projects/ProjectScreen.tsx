@@ -186,7 +186,7 @@ function ScreenContent({
         <h2 id="ecran-projet-titre" className="font-[family-name:var(--font-display)] text-[1.3rem] font-semibold leading-tight tracking-[-0.015em] sm:text-[1.5rem]">
           {project.title}
         </h2>
-        {project.problem && <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{project.problem}</p>}
+        {project.problem && <Description key={project.slug} text={project.problem} />}
         {project.delivered.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-1.5">
             {project.delivered.map((line) => (
@@ -395,5 +395,55 @@ function RoundButton({ label, onClick, children }: { label: string; onClick: () 
     >
       {children}
     </button>
+  );
+}
+
+/** Au-delà de cette longueur, la description est repliée (bouton « Lire la suite »). */
+const LONG_DESCRIPTION = 360;
+
+/** « **texte** » → gras ; le reste tel quel. */
+function withBold(line: string) {
+  return line.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") && part.length > 4 ? (
+      <strong key={i} className="font-semibold text-white/90">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      part
+    ),
+  );
+}
+
+/** Description du projet : paragraphes (ligne vide), gras, et repli des textes longs. */
+function Description({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const long = text.length > LONG_DESCRIPTION;
+  const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  return (
+    <div className="mt-2">
+      <div
+        id="ecran-projet-description"
+        className={`relative flex flex-col gap-2 text-[14.5px] leading-relaxed text-muted ${
+          long && !open ? "max-h-[7.5em] overflow-hidden [mask-image:linear-gradient(to_bottom,#000_55%,transparent)]" : ""
+        }`}
+      >
+        {paragraphs.map((p, i) => (
+          <p key={i} className="whitespace-pre-line">
+            {withBold(p)}
+          </p>
+        ))}
+      </div>
+      {long && (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls="ecran-projet-description"
+          onClick={() => setOpen((o) => !o)}
+          className="mt-1.5 inline-flex min-h-9 items-center rounded-lg px-1 text-[13.5px] font-medium text-sky-200 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+        >
+          {open ? "Réduire" : "Lire la suite"}
+        </button>
+      )}
+    </div>
   );
 }

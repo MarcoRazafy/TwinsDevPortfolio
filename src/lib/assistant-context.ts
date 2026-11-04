@@ -45,7 +45,8 @@ export function buildAssistantPrompt(content: Content): string {
   const projects = real.map((p) => {
     const parts = [`- ${p.title} [${p.categories.map(label).join(", ")}]`];
     if (p.kind) parts.push(`${p.kind}.`);
-    if (p.problem) parts.push(p.problem);
+    // Description raccourcie pour le modèle : une description très longue alourdirait chaque conversation
+    if (p.problem) parts.push(p.problem.length > 900 ? `${p.problem.slice(0, 900).replace(/\*\*/g, "")}…` : p.problem.replace(/\*\*/g, ""));
     if (p.delivered.length) parts.push(`Livré : ${p.delivered.join(" ; ")}.`);
     if (!p.kind && !p.problem && !p.delivered.length) parts.push("(description non renseignée : n'en déduis aucune fonctionnalité)");
     if (p.stack.length) parts.push(`Technologies : ${techs(p.stack)}.`);
