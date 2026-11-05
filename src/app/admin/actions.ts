@@ -436,7 +436,7 @@ export async function saveTestimonial(_prev: ActionState, fd: FormData): Promise
   const company = text(fd, "company", 80);
   const quote = text(fd, "quote", 600);
   const author = text(fd, "author", 80);
-  const role = text(fd, "role", 100);
+  const role = ""; // poste ou service : plus demandé ni affiché
   const website = text(fd, "website", 300);
 
   if (!company) return fail("Le nom de l'entreprise est obligatoire.");

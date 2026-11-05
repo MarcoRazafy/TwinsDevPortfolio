@@ -140,7 +140,6 @@ export default function TestimonialsShowcase({ testimonials }: { testimonials: T
                 </span>
                 <span className="min-w-0 leading-tight">
                   <span className="block truncate text-[15px] font-semibold text-white">{t.author}</span>
-                  {t.role && <span className="block truncate text-[13px] text-muted">{t.role}</span>}
                 </span>
               </div>
             </figcaption>

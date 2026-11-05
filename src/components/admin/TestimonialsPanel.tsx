@@ -62,7 +62,6 @@ export default function TestimonialsPanel({ testimonials }: { testimonials: Test
                 <p className="truncate text-[14px] font-medium">{t.company}</p>
                 <p className="truncate text-[12px] text-white/45">
                   {t.author}
-                  {t.role && ` · ${t.role}`}
                   {t.example && " · exemple"}
                 </p>
               </div>
@@ -172,14 +171,9 @@ function TestimonialEditor({
         <Field label="Texte de l'avis *" htmlFor="t-quote" hint="Avec l'accord du client. 600 caractères maximum.">
           <textarea id="t-quote" name="quote" required maxLength={600} rows={5} defaultValue={t?.quote} className={inputClass} />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Nom du responsable *" htmlFor="t-author">
-            <input id="t-author" name="author" required maxLength={80} defaultValue={t?.example ? "" : t?.author} className={inputClass} placeholder="Prénom Nom" />
-          </Field>
-          <Field label="Poste ou service" htmlFor="t-role">
-            <input id="t-role" name="role" maxLength={100} defaultValue={t?.role} className={inputClass} placeholder="Directrice marketing" />
-          </Field>
-        </div>
+        <Field label="Nom du responsable *" htmlFor="t-author">
+          <input id="t-author" name="author" required maxLength={80} defaultValue={t?.example ? "" : t?.author} className={inputClass} placeholder="Prénom Nom" />
+        </Field>
       </Fieldset>
 
       <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-[#05070c]/95 px-1 py-4 backdrop-blur">
