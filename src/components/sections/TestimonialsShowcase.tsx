@@ -134,15 +134,6 @@ export default function TestimonialsShowcase({ testimonials }: { testimonials: T
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent/40 to-teal-400/20 text-[13px] font-semibold text-white ring-1 ring-white/15">
-                  {initials(t.author)}
-                </span>
-                <span className="min-w-0 leading-tight">
-                  <span className="block truncate text-[15px] font-semibold text-white">{t.author}</span>
-                  {t.role && <span className="block truncate text-[13px] text-muted">{t.role}</span>}
-                </span>
-              </div>
             </figcaption>
           </motion.figure>
         </AnimatePresence>
