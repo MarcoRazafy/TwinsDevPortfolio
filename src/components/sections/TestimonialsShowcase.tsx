@@ -206,7 +206,8 @@ function Words({ text }: { text: string }) {
 
 /** Logo de l'entreprise dans une tuile ; sans logo, un monogramme dégradé. */
 function Logo({ item, size, muted = false }: { item: Testimonial; size: "sm" | "lg"; muted?: boolean }) {
-  const box = size === "lg" ? "h-20 w-20 rounded-2xl" : "h-10 w-10 rounded-xl";
+  // Logo rond, image bord à bord (sans marge intérieure)
+  const box = size === "lg" ? "h-20 w-20 rounded-full" : "h-10 w-10 rounded-full";
   return (
     <span
       className={`relative grid shrink-0 place-items-center overflow-hidden border border-white/10 bg-white/[0.06] transition-[filter,opacity] duration-300 ${box} ${
@@ -214,7 +215,7 @@ function Logo({ item, size, muted = false }: { item: Testimonial; size: "sm" | "
       } ${size === "lg" ? "shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)]" : ""}`}
     >
       {item.logo ? (
-        <Image src={item.logo} alt={size === "lg" ? `Logo ${item.company}` : ""} fill sizes={size === "lg" ? "80px" : "40px"} className="object-contain p-[14%]" />
+        <Image src={item.logo} alt={size === "lg" ? `Logo ${item.company}` : ""} fill sizes={size === "lg" ? "80px" : "40px"} className="object-cover" />
       ) : (
         <span
           aria-hidden
