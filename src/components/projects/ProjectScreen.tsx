@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "motion/react";
-import { ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import type { GalleryImage, Project } from "@/lib/projects";
+import ImageViewer from "./ImageViewer";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 /** Écran incurvé : nombre de bandes verticales et angle total de la courbure. */
@@ -81,6 +82,7 @@ function ScreenContent({
   // À l'ouverture : la photo du projet ; en faisant défiler : les photos ajoutées au projet (sa galerie)
   const images: GalleryImage[] = [...(project.image ? [{ src: project.image, caption: "" }] : []), ...(project.gallery ?? [])];
   const [shown, setShown] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
   const current = images[shown];
 
   // Inclinaison qui suit le pointeur (légère)
@@ -138,7 +140,11 @@ function ScreenContent({
         imageKey={shown}
         onPrev={images.length > 1 ? () => step(-1) : undefined}
         onNext={images.length > 1 ? () => step(1) : undefined}
+        onOpen={current ? () => setFullscreen(true) : undefined}
       />
+      {fullscreen && (
+        <ImageViewer images={images} index={shown} title={project.title} onIndexChange={setShown} onClose={() => setFullscreen(false)} />
+      )}
 
       {/* Points + légende de l'image */}
       {/* Beaucoup d'images : un compteur plutôt qu'une rangée de points */}
@@ -235,6 +241,7 @@ function CurvedScreen({
   imageKey,
   onPrev,
   onNext,
+  onOpen,
 }: {
   image: GalleryImage | undefined;
   title: string;
@@ -244,6 +251,8 @@ function CurvedScreen({
   imageKey: number;
   onPrev?: () => void;
   onNext?: () => void;
+  /** Ouvre l'image en plein écran (zoom). */
+  onOpen?: () => void;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -358,6 +367,21 @@ function CurvedScreen({
       ].map((pos) => (
         <span key={pos} aria-hidden className={`pointer-events-none absolute -m-3 h-5 w-5 border-sky-300/60 ${pos}`} />
       ))}
+
+      {/* Appui sur l'image : plein écran avec zoom (sous les flèches, qui gardent leur rôle) */}
+      {onOpen && (
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={`Agrandir l'image en plein écran${image?.caption ? ` : ${image.caption}` : ""}`}
+          className="group/zoom absolute inset-0 z-[5] cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+        >
+          <span className="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-sky-300/30 bg-[#06101f]/85 px-2.5 py-1.5 text-[12px] font-medium text-sky-50/90 transition-colors group-hover/zoom:border-sky-300/70">
+            <Maximize2 size={13} aria-hidden />
+            Agrandir
+          </span>
+        </button>
+      )}
 
       {/* Flèches entre les images */}
       {onPrev && (
