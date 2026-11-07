@@ -7,7 +7,7 @@ import LoginForm from "@/components/admin/LoginForm";
 import { TECH, techColor } from "@/lib/tech";
 import StatusBar from "./StatusBar";
 
-const FASTAPI = techColor("fastapi");
+const KALI = techColor("kali");
 
 type Props = { onClose: () => void };
 
@@ -41,18 +41,15 @@ export default function AdminLoginScreen({ onClose }: Props) {
 
       <div className="flex flex-1 flex-col justify-center px-5 pb-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          {/* Logo FastAPI, dans sa couleur */}
-          <span
-            className="relative mb-4 grid h-14 w-14 place-items-center rounded-2xl"
-            style={{
-              background: `color-mix(in srgb, ${FASTAPI} 16%, transparent)`,
-              boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${FASTAPI} 45%, transparent), 0 0 40px -6px color-mix(in srgb, ${FASTAPI} 60%, transparent)`,
-            }}
+          {/* Logo Kali Linux, seul (sans cadre), avec un léger halo de sa couleur */}
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="mb-4 h-14 w-14"
+            style={{ fill: KALI, filter: `drop-shadow(0 0 14px color-mix(in srgb, ${KALI} 60%, transparent))` }}
           >
-            <svg aria-hidden viewBox="0 0 24 24" className="h-7 w-7" style={{ fill: FASTAPI }}>
-              <path d={TECH.fastapi.icon.path} />
-            </svg>
-          </span>
+            <path d={TECH.kali.icon.path} />
+          </svg>
           <h2 className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold tracking-[-0.01em]">Espace admin</h2>
           <p className="mt-1 text-[12px] text-white/55">Réservé à l&apos;équipe TwinsDev</p>
         </div>
