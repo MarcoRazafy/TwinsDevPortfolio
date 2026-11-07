@@ -32,7 +32,7 @@ const easeOutBack = (t: number) => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2;
 const easeInCubic = (t: number) => t * t * t;
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 /** Écrit un style seulement s'il change : une écriture inutile relance le calcul des styles à chaque image. */
-const setStyle = (el: HTMLElement, prop: "zIndex" | "pointerEvents", value: string) => {
+const setStyle = (el: HTMLElement, prop: "zIndex" | "pointerEvents" | "opacity", value: string) => {
   if (el.style[prop] !== value) el.style[prop] = value;
 };
 /** Écart d'angle ramené dans ]-π, π]. */
@@ -203,7 +203,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
       canvas.height = Math.round(h * dpr);
       // Petit écran : globe plus grand, images plus petites, orbite plus haute (au-dessus / au-dessous du globe)
       const narrow = w < 640;
-      const r = narrow ? Math.min(w * 0.27, h * 0.27) : Math.min(w * 0.21, h * 0.29);
+      const r = narrow ? Math.min(w * 0.3, h * 0.29) : Math.min(w * 0.235, h * 0.32);
       const cardW = narrow ? Math.max(92, w * 0.26) : Math.max(118, Math.min(w * 0.17, 230));
       // Jamais négatif : une scène encore masquée (largeur 0) ferait échouer ctx.ellipse()
       const rx = Math.max(0, narrow ? w / 2 - cardW * 0.38 : Math.max(r * 1.4, Math.min(r * 2.3, w / 2 - cardW * 0.42)));
@@ -263,8 +263,9 @@ export default function ProjectsHologram({ projects, categories }: Props) {
         const right = a.tx >= a.bx;
         const x = Math.min(w - box.w - 4, Math.max(4, right ? a.tx + 6 : a.tx - 6 - box.w));
         el.style.transform = `translate3d(${x.toFixed(1)}px, ${(a.ty - box.h / 2).toFixed(1)}px, 0)`;
-        el.style.opacity = (0.3 + 0.7 * a.vis).toFixed(3);
-        setStyle(el, "zIndex", a.vis > 0.5 ? "35" : "26");
+        // Toujours lisibles : pleine opacité et au premier plan, même quand leur point d'ancrage passe derrière le globe
+        setStyle(el, "opacity", "1");
+        setStyle(el, "zIndex", "35");
       }
 
       // Anneau : rotation, ou animation vers une image choisie
@@ -365,7 +366,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
       {/* ── Scène : globe (canvas) + images en orbite ── */}
       <div
         ref={stageRef}
-        className="relative mt-4 h-[clamp(440px,62vw,760px)] w-full [perspective:1400px]"
+        className="relative mt-4 h-[clamp(460px,64vw,800px)] w-full [perspective:1400px]"
         onPointerLeave={() => (hovered.current = false)}
       >
         <div
