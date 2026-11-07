@@ -16,6 +16,7 @@ import {
 import LockScreen from "./LockScreen";
 import BootScreen from "./BootScreen";
 import ChatScreen from "./ChatScreen";
+import HomeScreen from "./HomeScreen";
 import { useRouter } from "next/navigation";
 import { hasAdminSession } from "@/app/admin/actions";
 import AdminLoginScreen from "./AdminLoginScreen";
@@ -43,6 +44,18 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
   const [adminOpen, setAdminOpen] = useState(false);
   // Conversation commencée : les cartes décoratives s'écartent pour ne plus masquer les messages
   const [chatStarted, setChatStarted] = useState(false);
+  // Écran affiché une fois allumé : accueil (applications) ou TwinsChat ; le chat reste monté après sa première ouverture
+  const [view, setView] = useState<"home" | "chat">("home");
+  const [chatMounted, setChatMounted] = useState(false);
+
+  /** Extinction : retour à l'écran verrouillé, accueil et conversation réinitialisés. */
+  const powerOff = () => {
+    setAdminOpen(false);
+    setChatStarted(false);
+    setChatMounted(false);
+    setView("home");
+    onStateChange("locked");
+  };
   const router = useRouter();
   const checkingSession = useRef(false);
 
@@ -220,16 +233,31 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
                     <BootScreen key="boot" onDone={() => onStateChange("on")} />
                   )}
                   {state === "on" && (
-                    <ChatScreen
-                      key="chat"
-                      onPowerOff={() => {
-                        setAdminOpen(false);
-                        setChatStarted(false);
-                        onStateChange("locked");
-                      }}
-                      onBack={openAdmin}
-                      onConversationStart={() => setChatStarted(true)}
-                    />
+                    <motion.div key="on" className="absolute inset-0" exit={{ opacity: 0, transition: { duration: 0.25 } }}>
+                      {/* Le chat, une fois ouvert, reste monté : la conversation est gardée en revenant à l'accueil */}
+                      {chatMounted && (
+                        <div inert={view === "home"} className="absolute inset-0">
+                          <ChatScreen
+                            onPowerOff={powerOff}
+                            onBack={() => setView("home")}
+                            onConversationStart={() => setChatStarted(true)}
+                          />
+                        </div>
+                      )}
+                      <AnimatePresence>
+                        {view === "home" && (
+                          <HomeScreen
+                            key="home"
+                            onOpenChat={() => {
+                              setChatMounted(true);
+                              setView("chat");
+                            }}
+                            onOpenAdmin={openAdmin}
+                            onPowerOff={powerOff}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                   )}
                 </AnimatePresence>
                 <AnimatePresence>
@@ -240,7 +268,8 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
           </div>
 
           {/* ── Cartes de messagerie qui sortent de l'écran une fois allumé ── */}
-          <FloatingCards visible={state === "on" && !adminOpen && !chatStarted} />
+          {/* Seulement dans le chat : sur l'accueil, elles masqueraient les applications */}
+          <FloatingCards visible={state === "on" && view === "chat" && !adminOpen && !chatStarted} />
 
           {/* ── Volume : tranches, coins, boutons ── */}
           <PhoneSides />

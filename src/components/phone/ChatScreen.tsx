@@ -225,12 +225,12 @@ export default function ChatScreen({ onPowerOff, onBack, onConversationStart }: 
 
       {/* En-tête : contact + bouton d'extinction */}
       <header className="relative mt-3 flex items-center gap-2 border-b border-white/[0.08] bg-[#070b12]/40 px-3 pb-2.5 backdrop-blur-md">
-        {/* Flèche retour + icône TwinsDev : espace administrateur (directement si une session admin est ouverte) */}
+        {/* Flèche retour + icône TwinsDev : retour à l'écran d'accueil (applications) */}
         <button
           type="button"
           onClick={onBack}
-          aria-label="Espace administrateur"
-          title="Espace administrateur"
+          aria-label="Retour à l'accueil"
+          title="Retour à l'accueil"
           className="-ml-1 flex shrink-0 cursor-pointer items-center gap-1 rounded-full py-0.5 pr-0.5 text-accent-strong transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ChevronLeft size={22} aria-hidden />
