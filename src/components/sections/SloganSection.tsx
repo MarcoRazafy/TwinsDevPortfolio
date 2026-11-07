@@ -36,7 +36,7 @@ export default function SloganSection() {
     <section
       id="promesse"
       aria-labelledby="promesse-titre"
-      className="relative isolate flex min-h-[78vh] items-center overflow-hidden px-4 py-28 sm:px-8 lg:py-36"
+      className="relative isolate flex min-h-[60vh] items-center overflow-hidden px-4 pb-6 pt-28 sm:px-8 lg:pb-8 lg:pt-36"
     >
       {/* Halo et trame */}
       <div
@@ -73,7 +73,7 @@ export default function SloganSection() {
           transition={{ duration: 0.7, ease: EXPO_OUT }}
         >
           <span aria-hidden className="h-px w-8 bg-gradient-to-r from-transparent to-accent/70" />
-          Notre promesse
+          Nos projets
           <span aria-hidden className="h-px w-8 bg-gradient-to-l from-transparent to-accent/70" />
         </motion.p>
 

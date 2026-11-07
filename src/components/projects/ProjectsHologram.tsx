@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, MousePointerClick, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Pause, Play } from "lucide-react";
 import type { Category, Project, ProjectCategory } from "@/lib/projects";
 import { categoryIcon } from "./category-icons";
 import { anchorPoints, drawAnchor, drawBeam, drawGlobe, drawOrbit, type AnchorPoints } from "./hologram/globe";
@@ -362,28 +362,6 @@ export default function ProjectsHologram({ projects, categories }: Props) {
 
   return (
     <div className="flex flex-col items-center">
-      {/* ── Consigne : les catégories sont des légendes posées sur le globe ── */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.p
-          key={category ?? "aucune"}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.25 }}
-          className="flex min-h-6 items-center gap-2 text-center font-mono text-[12px] uppercase tracking-[0.14em] text-emerald-200/85"
-        >
-          <MousePointerClick size={14} aria-hidden className="shrink-0" />
-          {category ? (
-            <span>
-              {categories.find((c) => c.key === category)?.label} · {counts[category]} projet{counts[category] > 1 ? "s" : ""}
-              <span className="hidden sm:inline"> — touchez une autre légende pour changer</span>
-            </span>
-          ) : (
-            "Touchez une légende sur le globe"
-          )}
-        </motion.p>
-      </AnimatePresence>
-
       {/* ── Scène : globe (canvas) + images en orbite ── */}
       <div
         ref={stageRef}
