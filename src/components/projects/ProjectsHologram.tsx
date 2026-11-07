@@ -413,8 +413,8 @@ export default function ProjectsHologram({ projects, categories }: Props) {
                 <span
                   className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.12em] transition-[background-color,border-color,box-shadow,color] duration-300 group-focus-visible:ring-2 group-focus-visible:ring-emerald-300 sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] ${
                     active
-                      ? "border-emerald-300/80 bg-emerald-400/15 text-white shadow-[0_0_28px_-4px_rgba(52,211,153,0.85)]"
-                      : "border-emerald-300/30 bg-[#0a0f1f]/85 text-emerald-50/90 shadow-[0_0_18px_-8px_rgba(52,211,153,0.7)]"
+                      ? "border-emerald-300/80 bg-[#102c31] text-white shadow-[0_0_28px_-4px_rgba(52,211,153,0.85)]"
+                      : "border-emerald-300/30 bg-[#0a0f1f] text-emerald-50/90 shadow-[0_0_18px_-8px_rgba(52,211,153,0.7)]"
                   }`}
                 >
                   {!category && <span aria-hidden className="holo-invite pointer-events-none absolute inset-0 rounded-md" />}
