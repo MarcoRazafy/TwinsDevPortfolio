@@ -57,7 +57,25 @@ export default function HomeScreen({ onOpenChat, onOpenAdmin, onPowerOff }: Prop
       />
       <StatusBar time={clock?.time ?? null} className="relative" />
 
-      {/* Grille d'applications, en haut : une par section du site, puis Admin et l'Assistant */}
+      {/* Heure et date, bouton d'extinction (en haut) */}
+      <div className="relative mt-5 flex items-start justify-between px-6">
+        <div className="leading-none">
+          <p className="font-[family-name:var(--font-display)] text-[40px] font-semibold tabular-nums tracking-[-0.03em]">
+            {clock?.time ?? "--:--"}
+          </p>
+          <p className="mt-1.5 text-[12.5px] capitalize text-white/60">{clock?.date ?? " "}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onPowerOff}
+          aria-label="Éteindre le téléphone"
+          className="mt-1 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-red-500/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
+        >
+          <Power size={18} strokeWidth={2.2} aria-hidden />
+        </button>
+      </div>
+
+      {/* Grille d'applications, sous l'heure : une par section du site, puis Admin et l'Assistant */}
       <ul aria-label="Applications" className="relative mt-7 grid grid-cols-4 gap-x-2 gap-y-4 px-4">
         {SECTION_APPS.map((app, i) => (
           <motion.li key={app.href} {...appear(i)} className="flex justify-center">
@@ -90,23 +108,6 @@ export default function HomeScreen({ onOpenChat, onOpenAdmin, onPowerOff }: Prop
         </motion.li>
       </ul>
 
-      {/* Heure et date en bas, bouton d'extinction */}
-      <div className="relative mt-auto flex items-end justify-between px-6 pb-12">
-        <div className="leading-none">
-          <p className="font-[family-name:var(--font-display)] text-[40px] font-semibold tabular-nums tracking-[-0.03em]">
-            {clock?.time ?? "--:--"}
-          </p>
-          <p className="mt-1.5 text-[12.5px] capitalize text-white/60">{clock?.date ?? " "}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onPowerOff}
-          aria-label="Éteindre le téléphone"
-          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-red-500/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
-        >
-          <Power size={18} strokeWidth={2.2} aria-hidden />
-        </button>
-      </div>
     </motion.div>
   );
 }
