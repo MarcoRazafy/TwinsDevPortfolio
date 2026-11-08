@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform, type Variants } from "motion/react";
 import { Check } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS, type Service, type Specialty } from "@/lib/services";
+import { INSET, RAISED, RAISED_SM, SURFACE } from "./neumorphism";
 import SectionHead from "./SectionHead";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
@@ -12,6 +13,19 @@ const VIEWPORT = { once: true, margin: "-10% 0px" } as const;
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /* ── Animations d'entrée (transform + opacity uniquement, jouées une fois) ── */
+const cardIn: Variants = {
+  hidden: { opacity: 0, y: 44, scale: 0.96 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 90, damping: 16, delay: (i % 3) * 0.1 + Math.floor(i / 3) * 0.06 },
+  }),
+};
+const pillIn: Variants = {
+  hidden: { opacity: 0, x: -12 },
+  show: (d: number) => ({ opacity: 1, x: 0, transition: { duration: 0.6, ease: EXPO_OUT, delay: d } }),
+};
 const panelIn: Variants = {
   hidden: { opacity: 0, y: 36 },
   show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EXPO_OUT } },
@@ -71,55 +85,73 @@ function NumberChip({ value, className }: { value: string; className: string }) 
   );
 }
 
-/** Carte d'un service : icône dans un carré de sa couleur, numéro discret, lueur d'angle. */
+/**
+ * Carte d'un service en relief doux (même matière que les widgets du contact) : un panneau en relief avec
+ * l'icône dans un creux et son voyant, le numéro dans une pastille ronde, puis ce qui est inclus en pastilles creusées.
+ */
 function ServiceCard({ service, index, reduce }: { service: Service; index: number; reduce: boolean }) {
   const Icon = service.icon;
+  const base = 0.35 + (index % 3) * 0.1;
   return (
     <motion.article
-      initial={reduce ? false : { opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      variants={cardIn}
+      custom={index}
+      initial={reduce ? false : "hidden"}
+      whileInView="show"
       viewport={VIEWPORT}
-      transition={reduce ? { duration: 0.3 } : { duration: 0.8, ease: EXPO_OUT, delay: (index % 3) * 0.08 }}
       style={{ "--accent-card": service.accent } as CSSProperties}
-      className="group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-white/20 sm:p-7"
+      className={`group flex flex-col gap-4 rounded-[34px] p-4 ${SURFACE} ${RAISED}`}
     >
-      {/* Lueur d'angle, permanente (dégradé seul, sans filtre de flou : rien à recalculer au survol) */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full opacity-35"
-        style={{ background: `radial-gradient(closest-side, ${service.accent}55, transparent)` }}
-      />
+        className={`flex flex-1 flex-col rounded-[26px] p-5 ${SURFACE} ${RAISED_SM} transition-transform duration-300 ease-out group-hover:-translate-y-0.5`}
+      >
+        <div className="flex items-start justify-between">
+          {/* Icône dans un creux, éclairée de la couleur du service, avec un voyant allumé */}
+          <span
+            className={`relative grid h-14 w-14 place-items-center rounded-[18px] ${INSET}`}
+            style={{ background: `radial-gradient(circle at 30% 25%, color-mix(in srgb, ${service.accent} 24%, transparent), transparent 65%), #0a0f13` }}
+          >
+            <Icon
+              size={24}
+              strokeWidth={2}
+              aria-hidden
+              style={{ color: service.accent }}
+              className="drop-shadow-[0_0_8px_var(--accent-card)] transition-transform duration-300 ease-out group-hover:scale-110"
+            />
+            <span aria-hidden className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(74,222,128,0.9)]" />
+          </span>
+          {/* Numéro dans une pastille ronde en relief, qui s'éclaire au survol */}
+          <span
+            aria-hidden
+            className={`grid h-10 w-10 place-items-center rounded-full font-mono text-[12px] text-white/60 transition-colors duration-300 group-hover:text-accent-strong ${SURFACE} ${RAISED_SM}`}
+          >
+            {pad(index + 1)}
+          </span>
+        </div>
 
-      <div className="relative flex items-start justify-between">
-        <span
-          className="grid h-12 w-12 place-items-center rounded-2xl text-[#05070c] shadow-[0_8px_26px_-8px_var(--accent-card)] ring-1 ring-inset ring-white/25 transition-transform duration-300 group-hover:scale-105"
-          style={{ background: service.accent }}
-        >
-          <Icon size={22} strokeWidth={2.2} aria-hidden />
-        </span>
-        <span aria-hidden className="font-mono text-[12px] text-white/25">
-          {pad(index + 1)}
-        </span>
-      </div>
-
-      <div className="relative flex flex-col gap-2">
-        <h3 className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold leading-tight tracking-[-0.01em] text-balance">
+        <h3 className="mt-5 font-[family-name:var(--font-display)] text-[1.3rem] font-bold leading-tight tracking-[-0.02em] text-balance">
           {service.title}
         </h3>
-        <p className="text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
+        <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
       </div>
 
-      <ul className="relative flex flex-col gap-2 text-[14px] text-white/85">
-        {service.includes.map((line) => (
-          <li key={line} className="flex gap-2.5">
+      {/* Ce qui est inclus : pastilles creusées, coche dans un petit bouton rond en relief */}
+      <ul className="flex flex-col gap-2.5">
+        {service.includes.map((line, j) => (
+          <motion.li
+            key={line}
+            variants={pillIn}
+            custom={base + j * 0.08}
+            className={`flex items-center gap-3 rounded-full py-1.5 pl-1.5 pr-4 text-[14px] text-white/85 ${INSET}`}
+          >
             <span
-              className="mt-[3px] grid h-4 w-4 shrink-0 place-items-center rounded-full"
-              style={{ background: `${service.accent}26`, color: service.accent }}
+              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full transition-transform duration-300 ease-out group-hover:scale-105 ${SURFACE} ${RAISED_SM}`}
+              style={{ color: service.accent }}
             >
-              <Check size={11} strokeWidth={3} aria-hidden />
+              <Check size={13} strokeWidth={3} aria-hidden />
             </span>
             {line}
-          </li>
+          </motion.li>
         ))}
       </ul>
     </motion.article>
@@ -248,7 +280,7 @@ export default function ServicesSection() {
 
         {/* ── 01 · Ce qu'on fait ── */}
         <Kicker index="01">Ce qu&apos;on fait</Kicker>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service, i) => (
             <ServiceCard key={service.slug} service={service} index={i} reduce={reduce} />
           ))}
