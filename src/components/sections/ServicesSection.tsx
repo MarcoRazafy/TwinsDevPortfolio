@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useState } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS, type Service, type Specialty } from "@/lib/services";
 import { INSET, RAISED, RAISED_SM, SURFACE } from "./neumorphism";
 import SectionHead from "./SectionHead";
@@ -21,10 +21,6 @@ const cardIn: Variants = {
     scale: 1,
     transition: { type: "spring", stiffness: 90, damping: 16, delay: (i % 3) * 0.1 + Math.floor(i / 3) * 0.06 },
   }),
-};
-const pillIn: Variants = {
-  hidden: { opacity: 0, x: -12 },
-  show: (d: number) => ({ opacity: 1, x: 0, transition: { duration: 0.6, ease: EXPO_OUT, delay: d } }),
 };
 const panelIn: Variants = {
   hidden: { opacity: 0, y: 36 },
@@ -72,11 +68,10 @@ function Chip({ children, className }: { children: ReactNode; className: string 
 
 /**
  * Carte d'un service en relief doux (même matière que les widgets du contact) : un panneau en relief avec
- * l'icône dans un creux et son voyant, le numéro dans une pastille ronde, puis ce qui est inclus en pastilles creusées.
+ * l'icône dans un creux et son voyant, le numéro dans une pastille ronde, le titre et la description.
  */
 function ServiceCard({ service, index, reduce }: { service: Service; index: number; reduce: boolean }) {
   const Icon = service.icon;
-  const base = 0.35 + (index % 3) * 0.1;
   return (
     <motion.article
       variants={cardIn}
@@ -119,21 +114,6 @@ function ServiceCard({ service, index, reduce }: { service: Service; index: numb
         </h3>
         <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
       </div>
-
-      {/* Ce qui est inclus : liste simple, petite coche ronde de la couleur du service */}
-      <ul className="flex flex-col gap-2 px-3 pb-2 text-[14px] text-white/85">
-        {service.includes.map((line, j) => (
-          <motion.li key={line} variants={pillIn} custom={base + j * 0.08} className="flex gap-2.5">
-            <span
-              className="mt-[3px] grid h-4 w-4 shrink-0 place-items-center rounded-full"
-              style={{ background: `${service.accent}26`, color: service.accent }}
-            >
-              <Check size={11} strokeWidth={3} aria-hidden />
-            </span>
-            {line}
-          </motion.li>
-        ))}
-      </ul>
     </motion.article>
   );
 }
