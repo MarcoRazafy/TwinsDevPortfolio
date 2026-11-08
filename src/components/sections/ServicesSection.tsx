@@ -1,8 +1,8 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
-import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform, type Variants } from "motion/react";
+import { useState } from "react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS, type Service, type Specialty } from "@/lib/services";
 import { INSET, RAISED, RAISED_SM, SURFACE } from "./neumorphism";
@@ -46,9 +46,9 @@ const CHIP: CSSProperties = {
 };
 
 /** Repère de partie : « 01 — Ce qu'on fait ». */
-function Kicker({ index, children }: { index: string; children: ReactNode }) {
+function Kicker({ index, children, className = "" }: { index: string; children: ReactNode; className?: string }) {
   return (
-    <p className="mb-6 flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.16em] text-white/45">
+    <p className={`mb-6 flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.16em] text-white/45 ${className}`}>
       <span className="text-accent-strong">{index}</span>
       <span aria-hidden className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
       {children}
@@ -143,20 +143,6 @@ function ServiceCard({ service, index, reduce }: { service: Service; index: numb
   );
 }
 
-/** Compteur qui défile de 00 jusqu'à la valeur quand il entre à l'écran (texte mis à jour sans rendu React). */
-function CountUp({ to, reduce }: { to: number; reduce: boolean }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, VIEWPORT);
-  const value = useMotionValue(reduce ? to : 0);
-  const text = useTransform(value, (v) => pad(Math.round(v)));
-  useEffect(() => {
-    if (!inView) return;
-    const controls = animate(value, to, reduce ? { duration: 0 } : { duration: 1.6, ease: EXPO_OUT, delay: 0.3 });
-    return () => controls.stop();
-  }, [inView, reduce, to, value]);
-  return <motion.span ref={ref}>{text}</motion.span>;
-}
-
 /**
  * Un tiroir : la façade (icône, titre, poignée) s'ouvre sur l'intérieur creusé qui contient le texte.
  * Ouverture en douceur par la hauteur de grille (0fr → 1fr) ; le contenu fermé est inerte (ni lu, ni focalisable).
@@ -224,9 +210,8 @@ function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; ind
   );
 }
 
-/** Panneau « Nos spécialités » : grand compteur à gauche, tiroirs à droite (un seul ouvert à la fois). */
+/** Panneau « Nos spécialités » : titre et tiroirs au milieu (un seul tiroir ouvert à la fois). */
 function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
-  const count = SPECIALTIES.length;
   const [open, setOpen] = useState<number | null>(0);
   return (
     <motion.div
@@ -248,21 +233,11 @@ function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
         />
       )}
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.7fr)] lg:gap-12">
-        <div className="flex flex-col">
-          <Kicker index="02">Nos spécialités</Kicker>
-          <p className="font-[family-name:var(--font-display)] text-[clamp(4.5rem,10vw,8rem)] font-bold leading-[0.85] tracking-[-0.06em]">
-            <span aria-hidden className="text-glow">
-              <CountUp to={count} reduce={reduce} />
-            </span>
-            <span className="sr-only">{count} spécialités</span>
-          </p>
-          <p className="mt-5 max-w-[24ch] text-[15px] leading-relaxed text-muted">
-            Des savoir-faire précis, en complément de nos services.
-          </p>
-          <span aria-hidden className="mt-6 hidden h-px w-24 bg-gradient-to-r from-accent to-transparent lg:block" />
-        </div>
-
+      {/* Titre et tiroirs, au milieu du panneau */}
+      <div className="mx-auto w-full max-w-[760px]">
+        <Kicker index="02" className="justify-center">
+          Nos spécialités
+        </Kicker>
         <ul className="flex flex-col gap-3">
           {SPECIALTIES.map((s, i) => (
             <SpecialtyDrawer key={s.title} item={s} index={i} open={open === i} onToggle={() => setOpen((o) => (o === i ? null : i))} />
