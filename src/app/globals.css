@@ -127,6 +127,20 @@ body {
   color: transparent;
 }
 
+/* Services (carrousel) : anneau du socle qui tourne, photo qui dérive lentement (transform seule, compositeur) */
+@keyframes svc-spin {
+  to { transform: rotate(360deg); }
+}
+.svc-spin { animation: svc-spin 18s linear infinite; }
+@keyframes svc-drift {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+.svc-drift { animation: svc-drift 12s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  .svc-spin, .svc-drift { animation: none; }
+}
+
 /* Halo qui respire derrière un portrait (section À propos) */
 @keyframes aura-breathe {
   from { transform: scale(0.94); opacity: 0.75; }

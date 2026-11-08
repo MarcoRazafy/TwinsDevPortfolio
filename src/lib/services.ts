@@ -26,12 +26,15 @@ export type Service = {
   /** Mention tarifaire, ex. « Sur devis » ou « À partir de 900 € ». */
   pricing: string;
   accent: string;
+  /** Photo de la carte (dossier public/services). */
+  image: string;
 };
 
 /* Ce qu'on fait. Adapte les textes et, si tu as des prix de départ, indique-les : ça rassure et ça filtre. */
 export const SERVICES: Service[] = [
   {
     slug: "sites-web",
+    image: "/services/sites-web.webp",
     icon: Globe,
     title: "Sites web",
     pitch: "Site vitrine, boutique en ligne ou page de lancement : rapide, adapté au mobile et bien référencé.",
@@ -41,6 +44,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "plateformes",
+    image: "/services/plateformes.webp",
     icon: Layers,
     title: "Plateformes",
     pitch: "Espaces membres, portails clients, places de marché : des outils en ligne où vos utilisateurs se connectent.",
@@ -50,6 +54,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "applications",
+    image: "/services/applications.webp",
     icon: Smartphone,
     title: "Applications web & mobile",
     pitch: "Une application sur mesure pour votre équipe ou vos clients, dans le navigateur ou sur téléphone.",
@@ -59,6 +64,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "serveurs-vps",
+    image: "/services/serveurs-vps.webp",
     icon: Terminal,
     title: "Configuration de serveurs VPS",
     pitch: "Installation et configuration de votre serveur via SSH : sécurisé, optimisé, prêt pour la production.",
@@ -68,6 +74,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "hebergement",
+    image: "/services/hebergement.webp",
     icon: Server,
     title: "Hébergement",
     pitch: "On met en ligne et on héberge votre site ou votre application, sauvegardés et surveillés.",
@@ -77,6 +84,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "cloud",
+    image: "/services/cloud.webp",
     icon: Cloud,
     title: "Gestion cloud",
     pitch: "Mise en place et gestion de vos services cloud : stockage, bases de données, performance, coûts maîtrisés.",
