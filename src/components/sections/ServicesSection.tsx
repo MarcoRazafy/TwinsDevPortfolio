@@ -1,9 +1,9 @@
 "use client";
 
-import type { CSSProperties, PointerEvent, ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform, type Variants } from "motion/react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS, type Service, type Specialty } from "@/lib/services";
 import { INSET, RAISED, RAISED_SM, SURFACE } from "./neumorphism";
 import SectionHead from "./SectionHead";
@@ -34,31 +34,16 @@ const sweepIn: Variants = {
   hidden: { x: "0%" },
   show: { x: "420%", transition: { duration: 1.8, ease: [0.45, 0, 0.2, 1], delay: 0.35 } },
 };
-const tileIn: Variants = {
-  hidden: { opacity: 0, y: 22, scale: 0.96 },
-  show: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: EXPO_OUT, delay: 0.25 + i * 0.07 } }),
+/* Les tiroirs arrivent un à un depuis la droite, comme si on les rangeait */
+const drawerIn: Variants = {
+  hidden: { opacity: 0, x: 48 },
+  show: (i: number) => ({ opacity: 1, x: 0, transition: { duration: 0.7, ease: EXPO_OUT, delay: 0.25 + i * 0.07 } }),
 };
 
-/* ── Calques des tuiles de spécialités (dégradés seuls, sans filtre de flou ; la couleur vient de --accent-card) ── */
-const RISING_GLOW: CSSProperties = {
-  background: "radial-gradient(85% 75% at 50% 108%, color-mix(in srgb, var(--accent-card) 32%, transparent), transparent 72%)",
-};
-const INNER_SPOT: CSSProperties = {
-  background:
-    "radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--accent-card) 14%, transparent), transparent 62%)",
-};
+/* ── Carré numéroté (la couleur vient de --accent-card) ── */
 const CHIP: CSSProperties = {
   background: "linear-gradient(145deg, color-mix(in srgb, var(--accent-card) 45%, white), var(--accent-card) 58%, color-mix(in srgb, var(--accent-card) 70%, #0f766e))",
 };
-
-/** Halo qui suit la souris : position gardée dans des variables CSS (aucun rendu React). */
-function trackPointer(e: PointerEvent<HTMLElement>) {
-  if (e.pointerType !== "mouse") return;
-  const el = e.currentTarget;
-  const r = el.getBoundingClientRect();
-  el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-  el.style.setProperty("--my", `${e.clientY - r.top}px`);
-}
 
 /** Repère de partie : « 01 — Ce qu'on fait ». */
 function Kicker({ index, children }: { index: string; children: ReactNode }) {
@@ -172,44 +157,81 @@ function CountUp({ to, reduce }: { to: number; reduce: boolean }) {
   return <motion.span ref={ref}>{text}</motion.span>;
 }
 
-/** Tuile d'une spécialité : carré numéroté, icône, halo au survol. */
-function SpecialtyTile({ item, index, wide }: { item: Specialty; index: number; wide: boolean }) {
+/**
+ * Un tiroir : la façade (numéro, titre, icône, poignée) s'ouvre sur l'intérieur creusé qui contient le texte.
+ * Ouverture en douceur par la hauteur de grille (0fr → 1fr) ; le contenu fermé est inerte (ni lu, ni focalisable).
+ */
+function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; index: number; open: boolean; onToggle: () => void }) {
   const Icon = item.icon;
+  const id = `specialite-${index + 1}`;
   return (
     <motion.li
-      variants={tileIn}
+      variants={drawerIn}
       custom={index}
-      onPointerMove={trackPointer}
       style={{ "--accent-card": "#22c55e" } as CSSProperties}
-      className={`group relative isolate overflow-hidden rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,#0b0f17,#080b11)] p-5 transition-[border-color,translate] duration-300 hover:-translate-y-0.5 hover:border-accent/45 ${
-        wide ? "sm:col-span-2" : ""
-      }`}
+      className={`group rounded-[22px] transition-shadow duration-300 ${SURFACE} ${open ? RAISED : RAISED_SM}`}
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={INNER_SPOT} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={RISING_GLOW} />
+      <h4>
+        <button
+          type="button"
+          id={`${id}-facade`}
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-controls={`${id}-contenu`}
+          className="flex w-full cursor-pointer items-center gap-3.5 rounded-[22px] py-3 pl-3 pr-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-4 sm:pl-3.5"
+        >
+          <NumberChip value={pad(index + 1)} className="h-9 w-9 rounded-xl text-[12.5px]" />
+          <span
+            className={`min-w-0 flex-1 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug transition-colors duration-300 ${
+              open ? "text-white" : "text-white/80 group-hover:text-white"
+            }`}
+          >
+            {item.title}
+          </span>
+          <Icon
+            size={18}
+            strokeWidth={2}
+            aria-hidden
+            className={`shrink-0 transition-[color,scale] duration-300 ${open ? "scale-110 text-accent-strong" : "text-accent-strong/45 group-hover:text-accent-strong/80"}`}
+          />
+          {/* Poignée du tiroir : en relief, la flèche se retourne à l'ouverture */}
+          <span
+            aria-hidden
+            className={`grid h-8 w-12 shrink-0 place-items-center rounded-full transition-[color,box-shadow] duration-300 ${SURFACE} ${
+              open ? `${INSET} text-accent-strong` : `${RAISED_SM} text-white/55 group-hover:text-white`
+            }`}
+          >
+            <ChevronDown size={17} strokeWidth={2.4} className={`transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "rotate-180" : ""}`} />
+          </span>
+        </button>
+      </h4>
 
-      <div className="flex items-start gap-4">
-        <NumberChip value={pad(index + 1)} className="h-10 w-10 rounded-xl text-[13px]" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <h4 className="font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug">{item.title}</h4>
-            <Icon
-              size={18}
-              strokeWidth={2}
-              aria-hidden
-              className="mt-0.5 shrink-0 text-accent-strong/60 transition-[color,rotate,scale] duration-300 group-hover:-rotate-12 group-hover:scale-110 group-hover:text-accent-strong"
-            />
-          </div>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-muted">{item.text}</p>
+      <div
+        id={`${id}-contenu`}
+        role="region"
+        aria-labelledby={`${id}-facade`}
+        inert={!open}
+        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      >
+        <div className="overflow-hidden">
+          {/* Intérieur du tiroir, creusé */}
+          <p
+            className={`mx-3 mb-3 rounded-[16px] px-4 py-3.5 text-[14px] leading-relaxed text-muted transition-[opacity,translate] duration-500 ease-out ${INSET} ${
+              open ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+            }`}
+          >
+            {item.text}
+          </p>
         </div>
       </div>
     </motion.li>
   );
 }
 
-/** Panneau « Nos spécialités » : grand compteur à gauche, tuiles numérotées à droite. */
+/** Panneau « Nos spécialités » : grand compteur à gauche, tiroirs numérotés à droite (un seul ouvert à la fois). */
 function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
   const count = SPECIALTIES.length;
+  const [open, setOpen] = useState<number | null>(0);
   return (
     <motion.div
       variants={panelIn}
@@ -245,9 +267,9 @@ function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
           <span aria-hidden className="mt-6 hidden h-px w-24 bg-gradient-to-r from-accent to-transparent lg:block" />
         </div>
 
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="flex flex-col gap-3">
           {SPECIALTIES.map((s, i) => (
-            <SpecialtyTile key={s.title} item={s} index={i} wide={i === count - 1 && count % 2 === 1} />
+            <SpecialtyDrawer key={s.title} item={s} index={i} open={open === i} onToggle={() => setOpen((o) => (o === i ? null : i))} />
           ))}
         </ul>
       </div>
