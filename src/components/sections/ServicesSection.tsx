@@ -56,15 +56,15 @@ function Kicker({ index, children }: { index: string; children: ReactNode }) {
   );
 }
 
-/** Carré numéroté en dégradé, avec un reflet qui le traverse au survol de la carte. */
-function NumberChip({ value, className }: { value: string; className: string }) {
+/** Carré en dégradé (icône), avec un reflet qui le traverse au survol. */
+function Chip({ children, className }: { children: ReactNode; className: string }) {
   return (
     <span
       aria-hidden
       style={CHIP}
-      className={`relative grid shrink-0 place-items-center overflow-hidden font-[family-name:var(--font-display)] font-bold tracking-[-0.02em] text-[#03140c] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_12px_26px_-12px_var(--accent-card)] ${className}`}
+      className={`relative grid shrink-0 place-items-center overflow-hidden text-[#03140c] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_12px_26px_-12px_var(--accent-card)] ${className}`}
     >
-      {value}
+      {children}
       <span className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(100deg,transparent_25%,rgba(255,255,255,0.7)_50%,transparent_75%)] transition-transform duration-700 ease-out group-hover:translate-x-full" />
     </span>
   );
@@ -158,7 +158,7 @@ function CountUp({ to, reduce }: { to: number; reduce: boolean }) {
 }
 
 /**
- * Un tiroir : la façade (numéro, titre, icône, poignée) s'ouvre sur l'intérieur creusé qui contient le texte.
+ * Un tiroir : la façade (icône, titre, poignée) s'ouvre sur l'intérieur creusé qui contient le texte.
  * Ouverture en douceur par la hauteur de grille (0fr → 1fr) ; le contenu fermé est inerte (ni lu, ni focalisable).
  */
 function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; index: number; open: boolean; onToggle: () => void }) {
@@ -180,7 +180,9 @@ function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; ind
           aria-controls={`${id}-contenu`}
           className="flex w-full cursor-pointer items-center gap-3.5 rounded-[22px] py-3 pl-3 pr-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-4 sm:pl-3.5"
         >
-          <NumberChip value={pad(index + 1)} className="h-9 w-9 rounded-xl text-[12.5px]" />
+          <Chip className="h-9 w-9 rounded-xl">
+            <Icon size={18} strokeWidth={2.2} aria-hidden className={`transition-transform duration-300 ${open ? "scale-110" : ""}`} />
+          </Chip>
           <span
             className={`min-w-0 flex-1 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug transition-colors duration-300 ${
               open ? "text-white" : "text-white/80 group-hover:text-white"
@@ -188,12 +190,6 @@ function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; ind
           >
             {item.title}
           </span>
-          <Icon
-            size={18}
-            strokeWidth={2}
-            aria-hidden
-            className={`shrink-0 transition-[color,scale] duration-300 ${open ? "scale-110 text-accent-strong" : "text-accent-strong/45 group-hover:text-accent-strong/80"}`}
-          />
           {/* Poignée du tiroir : en relief, la flèche se retourne à l'ouverture */}
           <span
             aria-hidden
@@ -228,7 +224,7 @@ function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; ind
   );
 }
 
-/** Panneau « Nos spécialités » : grand compteur à gauche, tiroirs numérotés à droite (un seul ouvert à la fois). */
+/** Panneau « Nos spécialités » : grand compteur à gauche, tiroirs à droite (un seul ouvert à la fois). */
 function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
   const count = SPECIALTIES.length;
   const [open, setOpen] = useState<number | null>(0);
