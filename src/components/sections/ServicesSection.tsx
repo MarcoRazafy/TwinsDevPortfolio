@@ -12,27 +12,6 @@ const VIEWPORT = { once: true, margin: "-10% 0px" } as const;
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /* ── Animations d'entrée (transform + opacity uniquement, jouées une fois) ── */
-const cardIn: Variants = {
-  hidden: { opacity: 0, y: 44, rotateX: 14 },
-  show: (i: number) => ({ opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.95, ease: EXPO_OUT, delay: (i % 3) * 0.1 } }),
-};
-const chipIn: Variants = {
-  hidden: { opacity: 0, scale: 0.4, rotate: -24 },
-  show: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    rotate: 0,
-    transition: { type: "spring", stiffness: 320, damping: 16, delay: 0.3 + (i % 3) * 0.1 },
-  }),
-};
-const ruleIn: Variants = {
-  hidden: { scaleX: 0 },
-  show: (i: number) => ({ scaleX: 1, transition: { duration: 0.9, ease: EXPO_OUT, delay: 0.45 + (i % 3) * 0.1 } }),
-};
-const lineIn: Variants = {
-  hidden: { opacity: 0, x: -14 },
-  show: (d: number) => ({ opacity: 1, x: 0, transition: { duration: 0.6, ease: EXPO_OUT, delay: d } }),
-};
 const panelIn: Variants = {
   hidden: { opacity: 0, y: 36 },
   show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EXPO_OUT } },
@@ -46,14 +25,7 @@ const tileIn: Variants = {
   show: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: EXPO_OUT, delay: 0.25 + i * 0.07 } }),
 };
 
-/* ── Calques des cartes (dégradés seuls, sans filtre de flou ; la couleur vient de --accent-card) ── */
-const BORDER: CSSProperties = {
-  background:
-    "linear-gradient(165deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.03) 62%, color-mix(in srgb, var(--accent-card) 65%, transparent))",
-};
-const BORDER_SPOT: CSSProperties = {
-  background: "radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), var(--accent-card), transparent 70%)",
-};
+/* ── Calques des tuiles de spécialités (dégradés seuls, sans filtre de flou ; la couleur vient de --accent-card) ── */
 const RISING_GLOW: CSSProperties = {
   background: "radial-gradient(85% 75% at 50% 108%, color-mix(in srgb, var(--accent-card) 32%, transparent), transparent 72%)",
 };
@@ -77,9 +49,9 @@ function trackPointer(e: PointerEvent<HTMLElement>) {
 /** Repère de partie : « 01 — Ce qu'on fait ». */
 function Kicker({ index, children }: { index: string; children: ReactNode }) {
   return (
-    <p className="mb-7 flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.18em] text-white/55">
+    <p className="mb-6 flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.16em] text-white/45">
       <span className="text-accent-strong">{index}</span>
-      <span aria-hidden className="h-px w-10 bg-gradient-to-r from-accent/70 to-transparent" />
+      <span aria-hidden className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
       {children}
     </p>
   );
@@ -99,74 +71,57 @@ function NumberChip({ value, className }: { value: string; className: string }) 
   );
 }
 
-/** Carte d'un service : bordure dégradée, lueur qui monte du bas, carré numéroté et halo qui suit la souris. */
+/** Carte d'un service : icône dans un carré de sa couleur, numéro discret, lueur d'angle. */
 function ServiceCard({ service, index, reduce }: { service: Service; index: number; reduce: boolean }) {
   const Icon = service.icon;
   return (
     <motion.article
-      variants={cardIn}
-      custom={index}
-      initial={reduce ? false : "hidden"}
-      whileInView="show"
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
-      onPointerMove={trackPointer}
-      style={{ "--accent-card": service.accent, transformPerspective: 900 } as CSSProperties}
-      className="group relative isolate h-full rounded-[26px] p-px transition-[translate] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5"
+      transition={reduce ? { duration: 0.3 } : { duration: 0.8, ease: EXPO_OUT, delay: (index % 3) * 0.08 }}
+      style={{ "--accent-card": service.accent } as CSSProperties}
+      className="group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-white/20 sm:p-7"
     >
-      {/* Bordure : dégradé fixe, puis un éclat de la couleur du service sous la souris */}
-      <div aria-hidden className="absolute inset-0 -z-10 rounded-[26px]" style={BORDER} />
-      <div aria-hidden className="absolute inset-0 -z-10 rounded-[26px] opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={BORDER_SPOT} />
+      {/* Lueur d'angle, permanente (dégradé seul, sans filtre de flou : rien à recalculer au survol) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full opacity-35"
+        style={{ background: `radial-gradient(closest-side, ${service.accent}55, transparent)` }}
+      />
 
-      <div className="relative flex h-full flex-col overflow-hidden rounded-[25px] bg-[linear-gradient(180deg,#0b0f17,#070a10)] p-6 sm:p-7">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100" style={RISING_GLOW} />
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={INNER_SPOT} />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(65%_55%_at_100%_0%,#000,transparent)]"
-        />
+      <div className="relative flex items-start justify-between">
+        <span
+          className="grid h-12 w-12 place-items-center rounded-2xl text-[#05070c] shadow-[0_8px_26px_-8px_var(--accent-card)] ring-1 ring-inset ring-white/25 transition-transform duration-300 group-hover:scale-105"
+          style={{ background: service.accent }}
+        >
+          <Icon size={22} strokeWidth={2.2} aria-hidden />
+        </span>
+        <span aria-hidden className="font-mono text-[12px] text-white/25">
+          {pad(index + 1)}
+        </span>
+      </div>
 
-        <div className="relative flex items-start justify-between">
-          <motion.span variants={chipIn} custom={index} className="inline-grid">
-            <NumberChip value={pad(index + 1)} className="h-12 w-12 rounded-[14px] text-[15px]" />
-          </motion.span>
-          <span
-            className="grid h-11 w-11 place-items-center rounded-full border transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-12 group-hover:scale-110"
-            style={{
-              color: service.accent,
-              borderColor: `color-mix(in srgb, ${service.accent} 40%, transparent)`,
-              background: `color-mix(in srgb, ${service.accent} 10%, transparent)`,
-            }}
-          >
-            <Icon size={20} strokeWidth={2} aria-hidden />
-          </span>
-        </div>
-
-        <h3 className="relative mt-7 font-[family-name:var(--font-display)] text-[1.3rem] font-semibold leading-tight tracking-[-0.015em] text-balance">
+      <div className="relative flex flex-col gap-2">
+        <h3 className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold leading-tight tracking-[-0.01em] text-balance">
           {service.title}
         </h3>
-        <p className="relative mt-2 text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
-
-        <motion.span
-          aria-hidden
-          variants={ruleIn}
-          custom={index}
-          className="relative my-5 block h-px origin-left bg-gradient-to-r from-white/20 via-white/[0.07] to-transparent"
-        />
-
-        <ul className="relative mt-auto flex flex-col gap-2.5 text-[14px] text-white/85">
-          {service.includes.map((line, j) => (
-            <motion.li key={line} variants={lineIn} custom={0.5 + (index % 3) * 0.1 + j * 0.08} className="flex items-center gap-2.5">
-              <span
-                className="grid h-5 w-5 shrink-0 place-items-center rounded-md"
-                style={{ background: `color-mix(in srgb, ${service.accent} 16%, transparent)`, color: service.accent }}
-              >
-                <Check size={12} strokeWidth={3} aria-hidden />
-              </span>
-              {line}
-            </motion.li>
-          ))}
-        </ul>
+        <p className="text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
       </div>
+
+      <ul className="relative flex flex-col gap-2 text-[14px] text-white/85">
+        {service.includes.map((line) => (
+          <li key={line} className="flex gap-2.5">
+            <span
+              className="mt-[3px] grid h-4 w-4 shrink-0 place-items-center rounded-full"
+              style={{ background: `${service.accent}26`, color: service.accent }}
+            >
+              <Check size={11} strokeWidth={3} aria-hidden />
+            </span>
+            {line}
+          </li>
+        ))}
+      </ul>
     </motion.article>
   );
 }
@@ -293,7 +248,7 @@ export default function ServicesSection() {
 
         {/* ── 01 · Ce qu'on fait ── */}
         <Kicker index="01">Ce qu&apos;on fait</Kicker>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service, i) => (
             <ServiceCard key={service.slug} service={service} index={i} reduce={reduce} />
           ))}
