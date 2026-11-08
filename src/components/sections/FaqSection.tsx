@@ -1,8 +1,9 @@
 import { Plus } from "lucide-react";
 import { FAQ } from "@/lib/faq";
+import AskAssistant from "./AskAssistant";
 import SectionHead from "./SectionHead";
 
-/** Section « FAQ » : questions dépliables (balise details, sans JavaScript). */
+/** Section « FAQ » : questions dépliables (balise details, sans JavaScript), puis un accès à l'assistant. */
 export default function FaqSection() {
   return (
     <section
@@ -32,6 +33,7 @@ export default function FaqSection() {
             </details>
           ))}
         </div>
+        <AskAssistant />
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import {
   AnimatePresence,
   animate,
@@ -23,6 +23,7 @@ import AdminLoginScreen from "./AdminLoginScreen";
 import FloatingCards from "./FloatingCards";
 import PhoneBack from "./PhoneBack";
 import PhoneSides from "./PhoneSides";
+import { OPEN_ASSISTANT_EVENT } from "./assistant-bridge";
 import CameraPlateau from "./CameraPlateau";
 import { HALF_DEPTH } from "./geometry";
 import type { PhoneState } from "./types";
@@ -92,6 +93,23 @@ export default function PhoneMockup({ state, onStateChange }: Props) {
   const rotateY = useTransform(() => tiltY.get() + spin.get());
   const spinAnim = useRef<AnimationPlaybackControls | null>(null);
   const drag = useRef<DragState | null>(null);
+
+  // Un bouton de la page (ex. sous la FAQ) demande l'assistant : le téléphone revient de face et ouvre TwinsChat
+  useEffect(() => {
+    const openChat = () => {
+      if (state !== "on") return;
+      setAdminOpen(false);
+      setChatMounted(true);
+      setView("chat");
+      const front = Math.round(spin.get() / 360) * 360;
+      if (Math.abs(spin.get() - front) > 1) {
+        spinAnim.current?.stop();
+        spinAnim.current = animate(spin, front, { type: "spring", stiffness: 110, damping: 18 });
+      }
+    };
+    window.addEventListener(OPEN_ASSISTANT_EVENT, openChat);
+    return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, openChat);
+  }, [state, spin]);
 
   useMotionValueEvent(spin, "change", (v) => {
     const n = ((v % 360) + 360) % 360;
