@@ -108,11 +108,6 @@ export default function TestimonialsShowcase({ testimonials }: { testimonials: T
               <blockquote className="relative pt-10 font-[family-name:var(--font-display)] text-[clamp(1.15rem,2.1vw,1.55rem)] font-medium leading-[1.55] tracking-[-0.01em] text-white/90 text-pretty">
                 {reduce ? t.quote : <Words text={t.quote} />}
               </blockquote>
-              {t.example && (
-                <span className="mt-5 inline-block rounded-full border border-dashed border-amber-300/60 px-2.5 py-0.5 font-mono text-[10.5px] text-amber-200">
-                  avis exemple
-                </span>
-              )}
             </div>
 
             {/* Entreprise et responsable */}
