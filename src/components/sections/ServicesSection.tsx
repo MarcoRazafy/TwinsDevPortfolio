@@ -120,20 +120,15 @@ function ServiceCard({ service, index, reduce }: { service: Service; index: numb
         <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{service.pitch}</p>
       </div>
 
-      {/* Ce qui est inclus : pastilles creusées, coche dans un petit bouton rond en relief */}
-      <ul className="flex flex-col gap-2.5">
+      {/* Ce qui est inclus : liste simple, petite coche ronde de la couleur du service */}
+      <ul className="flex flex-col gap-2 px-3 pb-2 text-[14px] text-white/85">
         {service.includes.map((line, j) => (
-          <motion.li
-            key={line}
-            variants={pillIn}
-            custom={base + j * 0.08}
-            className={`flex items-center gap-3 rounded-full py-1.5 pl-1.5 pr-4 text-[14px] text-white/85 ${INSET}`}
-          >
+          <motion.li key={line} variants={pillIn} custom={base + j * 0.08} className="flex gap-2.5">
             <span
-              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full transition-transform duration-300 ease-out group-hover:scale-105 ${SURFACE} ${RAISED_SM}`}
-              style={{ color: service.accent }}
+              className="mt-[3px] grid h-4 w-4 shrink-0 place-items-center rounded-full"
+              style={{ background: `${service.accent}26`, color: service.accent }}
             >
-              <Check size={13} strokeWidth={3} aria-hidden />
+              <Check size={11} strokeWidth={3} aria-hidden />
             </span>
             {line}
           </motion.li>
