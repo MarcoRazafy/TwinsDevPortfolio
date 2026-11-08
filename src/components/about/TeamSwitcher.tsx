@@ -12,7 +12,7 @@ const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 
 /* Pile de portraits : la personne choisie devant ; l'autre derrière, en haut à droite, plus petite et dans l'ombre */
 const FRONT = { x: "0%", y: "0%", scale: 1, opacity: 1, filter: "brightness(1) saturate(1)" };
-const BACK = { x: "24%", y: "-6%", scale: 0.78, opacity: 0.75, filter: "brightness(0.45) saturate(0.7)" };
+const BACK = { x: "34%", y: "-6%", scale: 0.78, opacity: 0.8, filter: "brightness(0.5) saturate(0.75)" };
 
 /* Le texte sort du côté opposé au geste, le suivant arrive de l'autre côté */
 const slide: Variants = {
@@ -117,7 +117,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
           dragElastic={0.25}
           dragMomentum={false}
           onDragEnd={onDragEnd}
-          className="relative mx-auto w-full max-w-[420px] cursor-grab active:cursor-grabbing lg:max-w-[480px]"
+          className="relative mx-auto w-full max-w-[420px] cursor-grab active:cursor-grabbing lg:ml-0 lg:max-w-[460px]"
         >
           <div className="relative aspect-square">
             {team.map((t, j) => {
@@ -147,10 +147,19 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
                 onPointerDown={(e) => e.stopPropagation()}
                 aria-label={`Voir ${team[(index + 1) % count].name}`}
                 title={`Voir ${team[(index + 1) % count].name}`}
-                className="group absolute right-1 top-[44%] z-[3] grid h-12 w-12 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-[#0c1116]/90 text-accent-strong shadow-[0_0_26px_-4px_rgba(34,197,94,0.75),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-accent/50 transition-[background-color,color,scale] duration-200 hover:scale-110 hover:bg-accent hover:text-[#03140c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 lg:-right-[6%]"
+                className="group absolute right-1 top-[44%] z-[3] grid h-12 w-12 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-transparent text-accent-strong ring-1 ring-accent/60 transition-[background-color,box-shadow,color] duration-300 ease-out hover:bg-accent/15 hover:text-white hover:shadow-[0_0_28px_-6px_rgba(34,197,94,0.85)] hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:bg-accent/25 lg:-right-[18%]"
               >
-                {!reduce && <span aria-hidden className="absolute inset-0 animate-ping rounded-full ring-2 ring-accent/40 [animation-duration:2.4s]" />}
-                <ChevronRight size={22} strokeWidth={2.4} aria-hidden className="relative transition-transform duration-200 group-hover:translate-x-0.5" />
+                {/* Second anneau, très fin, qui s'écarte au survol */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-1.5 rounded-full border border-accent/20 transition-[scale,border-color] duration-300 ease-out group-hover:scale-110 group-hover:border-accent/40"
+                />
+                <ChevronRight
+                  size={22}
+                  strokeWidth={2.2}
+                  aria-hidden
+                  className="relative transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-active:translate-x-1"
+                />
               </button>
             )}
           </div>
