@@ -41,49 +41,29 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
   const select = useCallback((j: number) => setState((p) => (p[0] === j ? p : [j, j > p[0] ? 1 : -1])), []);
   const step = useCallback((s: number) => setState(([i]) => [(i + s + count) % count, s]), [count]);
 
-  /* ── Défilement automatique : on passe à l'autre profil toutes les 5 s ── */
-  const [auto, setAuto] = useState(true);
+  /* ── Bascule automatique : 5 s après chaque changement, on passe à l'autre profil ──
+     Le minuteur repart de zéro quand le visiteur choisit lui-même, et ne tourne pas hors écran. */
   const [onScreen, setOnScreen] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
 
-  // Dès que le visiteur choisit lui-même un profil, le défilement s'arrête pour de bon
-  const stop = useCallback(() => setAuto(false), []);
-  const choose = useCallback(
-    (j: number) => {
-      stop();
-      select(j);
-    },
-    [select, stop],
-  );
-  const advance = useCallback(
-    (s: number) => {
-      stop();
-      step(s);
-    },
-    [step, stop],
-  );
-
-  // Hors écran, le minuteur est arrêté : rien ne tourne pendant qu'on lit une autre partie du site
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.25 });
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!auto || !onScreen || hovered || reduce || count < 2) return;
-    const id = window.setInterval(() => step(1), 5000);
-    return () => window.clearInterval(id);
-  }, [auto, onScreen, hovered, reduce, count, step]);
+    if (!onScreen || count < 2) return;
+    const id = window.setTimeout(() => setState([(index + 1) % count, 1]), 5000);
+    return () => window.clearTimeout(id);
+  }, [onScreen, count, index]);
 
   // Onglets : les flèches gauche / droite passent d'un profil à l'autre (motif « tabs » de l'ARIA)
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
     e.preventDefault();
-    stop();
     const next = (index + (e.key === "ArrowRight" ? 1 : -1) + count) % count;
     setState([next, e.key === "ArrowRight" ? 1 : -1]);
     tabs.current[next]?.focus();
@@ -101,8 +81,6 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
   return (
     <div
       ref={hostRef}
-      onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
       className="flex flex-col gap-10 lg:gap-14"
     >
       {/* ── Sélecteur ── */}
@@ -122,7 +100,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
                 aria-selected={on}
                 aria-controls={`${uid}-panel`}
                 tabIndex={on ? 0 : -1}
-                onClick={() => choose(j)}
+                onClick={() => select(j)}
                 className="group relative flex h-12 cursor-pointer items-center gap-2.5 rounded-full pl-1.5 pr-5 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {/* Pastille en relief qui glisse sous le nom choisi */}
@@ -160,7 +138,6 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.25}
           dragMomentum={false}
-          onDragStart={stop}
           onDragEnd={onDragEnd}
           className="relative mx-auto w-full max-w-[420px] cursor-grab active:cursor-grabbing lg:ml-0 lg:max-w-[460px]"
         >
@@ -172,7 +149,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
                   key={t.slug}
                   aria-hidden={!front}
                   title={front ? undefined : `Voir ${t.name}`}
-                  onClick={front ? undefined : () => choose(j)}
+                  onClick={front ? undefined : () => select(j)}
                   className={`absolute inset-0 ${front ? "" : "cursor-pointer"}`}
                   style={{ zIndex: front ? 2 : 1, transformOrigin: "50% 60%" }}
                   initial={false}
@@ -188,7 +165,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
             {count > 1 && (
               <button
                 type="button"
-                onClick={() => advance(1)}
+                onClick={() => step(1)}
                 onPointerDown={(e) => e.stopPropagation()}
                 aria-label={`Voir ${team[(index + 1) % count].name}`}
                 title={`Voir ${team[(index + 1) % count].name}`}
