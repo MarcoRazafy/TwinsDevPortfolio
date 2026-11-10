@@ -1,9 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useState } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { ChevronDown } from "lucide-react";
 import { SERVICES, SPECIALTIES, STEPS, type Service, type Specialty } from "@/lib/services";
 import { INSET, RAISED, RAISED_SM, SURFACE } from "./neumorphism";
 import SectionHead from "./SectionHead";
@@ -30,8 +28,8 @@ const sweepIn: Variants = {
   hidden: { x: "0%" },
   show: { x: "420%", transition: { duration: 1.8, ease: [0.45, 0, 0.2, 1], delay: 0.35 } },
 };
-/* Les tiroirs arrivent un à un depuis la droite, comme si on les rangeait */
-const drawerIn: Variants = {
+/* Les spécialités arrivent une à une depuis la droite */
+const rowIn: Variants = {
   hidden: { opacity: 0, x: 48 },
   show: (i: number) => ({ opacity: 1, x: 0, transition: { duration: 0.7, ease: EXPO_OUT, delay: 0.25 + i * 0.07 } }),
 };
@@ -118,76 +116,28 @@ function ServiceCard({ service, index, reduce }: { service: Service; index: numb
   );
 }
 
-/**
- * Un tiroir : la façade (icône, titre, poignée) s'ouvre sur l'intérieur creusé qui contient le texte.
- * Ouverture en douceur par la hauteur de grille (0fr → 1fr) ; le contenu fermé est inerte (ni lu, ni focalisable).
- */
-function SpecialtyDrawer({ item, index, open, onToggle }: { item: Specialty; index: number; open: boolean; onToggle: () => void }) {
+/** Une spécialité : ligne en relief avec l'icône dans le carré vert et le titre. */
+function SpecialtyRow({ item, index }: { item: Specialty; index: number }) {
   const Icon = item.icon;
-  const id = `specialite-${index + 1}`;
   return (
     <motion.li
-      variants={drawerIn}
+      variants={rowIn}
       custom={index}
       style={{ "--accent-card": "#22c55e" } as CSSProperties}
-      className={`group rounded-[22px] transition-shadow duration-300 ${SURFACE} ${open ? RAISED : RAISED_SM}`}
+      className={`group flex items-center gap-3.5 rounded-[22px] py-3 pl-3 pr-4 transition-transform duration-300 ease-out hover:-translate-y-0.5 sm:gap-4 sm:pl-3.5 ${SURFACE} ${RAISED_SM}`}
     >
-      <h4>
-        <button
-          type="button"
-          id={`${id}-facade`}
-          onClick={onToggle}
-          aria-expanded={open}
-          aria-controls={`${id}-contenu`}
-          className="flex w-full cursor-pointer items-center gap-3.5 rounded-[22px] py-3 pl-3 pr-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-4 sm:pl-3.5"
-        >
-          <Chip className="h-9 w-9 rounded-xl">
-            <Icon size={18} strokeWidth={2.2} aria-hidden className={`transition-transform duration-300 ${open ? "scale-110" : ""}`} />
-          </Chip>
-          <span
-            className={`min-w-0 flex-1 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug transition-colors duration-300 ${
-              open ? "text-white" : "text-white/80 group-hover:text-white"
-            }`}
-          >
-            {item.title}
-          </span>
-          {/* Poignée du tiroir : en relief, la flèche se retourne à l'ouverture */}
-          <span
-            aria-hidden
-            className={`grid h-8 w-12 shrink-0 place-items-center rounded-full transition-[color,box-shadow] duration-300 ${SURFACE} ${
-              open ? `${INSET} text-accent-strong` : `${RAISED_SM} text-white/55 group-hover:text-white`
-            }`}
-          >
-            <ChevronDown size={17} strokeWidth={2.4} className={`transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "rotate-180" : ""}`} />
-          </span>
-        </button>
+      <Chip className="h-9 w-9 rounded-xl">
+        <Icon size={18} strokeWidth={2.2} aria-hidden className="transition-transform duration-300 group-hover:scale-110" />
+      </Chip>
+      <h4 className="min-w-0 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug text-white/85 transition-colors duration-300 group-hover:text-white">
+        {item.title}
       </h4>
-
-      <div
-        id={`${id}-contenu`}
-        role="region"
-        aria-labelledby={`${id}-facade`}
-        inert={!open}
-        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
-      >
-        <div className="overflow-hidden">
-          {/* Intérieur du tiroir, creusé */}
-          <p
-            className={`mx-3 mb-3 rounded-[16px] px-4 py-3.5 text-[14px] leading-relaxed text-muted transition-[opacity,translate] duration-500 ease-out ${INSET} ${
-              open ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
-            }`}
-          >
-            {item.text}
-          </p>
-        </div>
-      </div>
     </motion.li>
   );
 }
 
-/** Panneau « Nos spécialités » : titre et tiroirs au milieu (un seul tiroir ouvert à la fois). */
+/** Panneau « Nos spécialités » : titre et liste des spécialités, au milieu. */
 function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
-  const [open, setOpen] = useState<number | null>(0);
   return (
     <motion.div
       variants={panelIn}
@@ -208,14 +158,14 @@ function SpecialtiesPanel({ reduce }: { reduce: boolean }) {
         />
       )}
 
-      {/* Titre et tiroirs, au milieu du panneau */}
+      {/* Titre et spécialités, au milieu du panneau */}
       <div className="mx-auto w-full max-w-[760px]">
         <Kicker index="02" className="justify-center">
           Nos spécialités
         </Kicker>
         <ul className="flex flex-col gap-3">
           {SPECIALTIES.map((s, i) => (
-            <SpecialtyDrawer key={s.title} item={s} index={i} open={open === i} onToggle={() => setOpen((o) => (o === i ? null : i))} />
+            <SpecialtyRow key={s.title} item={s} index={i} />
           ))}
         </ul>
       </div>
