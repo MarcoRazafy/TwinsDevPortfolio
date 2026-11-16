@@ -20,14 +20,19 @@ export default function Confidentialite() {
         ces conversations.
       </p>
       <h2>Combien de temps ?</h2>
-      <p>Les demandes de contact sont conservées [durée, ex. 12 mois] après le dernier échange, puis supprimées.</p>
+      <p>Les demandes de contact sont conservées 12 mois après le dernier échange, puis supprimées.</p>
       <h2>Qui y a accès ?</h2>
       <p>Uniquement {SITE.name} (Marco et Loïc). Aucune donnée n&apos;est vendue ni transmise à des fins publicitaires.</p>
       <h2>Cookies</h2>
-      <p>Ce site n&apos;utilise pas de cookies de suivi ni d&apos;outil de mesure d&apos;audience.</p>
+      <p>
+        Ce site n&apos;utilise pas de cookies de suivi ni d&apos;outil de mesure d&apos;audience. Votre navigateur garde
+        seulement deux informations techniques, qui ne sortent jamais de votre appareil : si le téléphone de l&apos;accueil
+        était allumé, et l&apos;endroit où vous en étiez dans la page. Aucun consentement n&apos;est donc nécessaire.
+      </p>
       <h2>Vos droits</h2>
       <p>
-        Vous pouvez demander l&apos;accès, la correction ou la suppression de vos données en écrivant à [e-mail]. Si vous
+        Vous pouvez demander l&apos;accès, la correction ou la suppression de vos données en écrivant à{" "}
+        <a href="mailto:twinsdev.next@gmail.com">twinsdev.next@gmail.com</a>. Si vous
         êtes en Europe, vous pouvez aussi saisir l&apos;autorité de protection des données de votre pays (en France, la
         CNIL).
       </p>

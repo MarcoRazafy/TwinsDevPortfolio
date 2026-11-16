@@ -1,6 +1,9 @@
 /* Coordonnées et liens du site. À compléter : tant que `email` est vide, la section Contact n'affiche que le formulaire. */
 export const SITE = {
   name: "TwinsDev",
+  /** Adresse publique du site, sans barre finale : sert au sitemap, au robots.txt et aux liens de partage.
+      Se règle à l'hébergement avec NEXT_PUBLIC_SITE_URL si le domaine change. */
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://twinsdev.ucan-mih.com").replace(/\/$/, ""),
   email: "",
   linkedin: "https://www.linkedin.com/in/twins-dev-a9a745445/",
   github: "",

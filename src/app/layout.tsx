@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Lato, Sora } from "next/font/google";
 import { RESTORE_SCRIPT } from "@/components/phone/remember";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 /* Police du texte (Lato n'existe qu'en graisses fixes : 500 et 600 prennent la plus proche) */
@@ -20,10 +21,28 @@ const sora = Sora({
   display: "swap",
 });
 
+const TITLE = "TwinsDev — Marco & Loïc, développeurs web";
+const DESCRIPTION =
+  "Une équipe de développeurs web qui conçoit et développe des sites vitrines, des boutiques en ligne et des applications web sur mesure.";
+
 export const metadata: Metadata = {
-  title: "TwinsDev — Marco & Loïc, développeurs web",
-  description:
-    "Une équipe de développeurs web qui conçoit et développe des sites vitrines, des boutiques en ligne et des applications web sur mesure.",
+  // Base des adresses : rend absolus le lien canonique et les images de partage
+  metadataBase: new URL(SITE.url),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  // Aperçu lors d'un partage (WhatsApp, LinkedIn, Facebook…)
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: SITE.name,
+    url: "/",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/brand/twinsdev-logo-v2.webp", alt: "TwinsDev" }],
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/brand/twinsdev-logo-v2.webp"] },
 };
 
 export const viewport: Viewport = {
