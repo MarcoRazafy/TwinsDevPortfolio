@@ -70,14 +70,14 @@
   top: 0;
   bottom: 0;
 }
+/* La ligne est dessinée en haut d'un calque pleine hauteur, que l'on fait glisser avec transform :
+   animer `top` obligeait le navigateur à recalculer la mise en page à chaque image. */
 .twinsHero-scan::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(167, 243, 208, 0.7) 50%, transparent);
+  inset: 0;
+  background: linear-gradient(to right, transparent, rgba(167, 243, 208, 0.7) 50%, transparent) top / 100% 2px no-repeat;
+  will-change: transform, opacity;
   animation: twinsHero-scan 7s linear infinite;
 }
 
@@ -154,10 +154,10 @@
   to { transform: skewX(var(--sway)) translateX(6%); opacity: 1; }
 }
 @keyframes twinsHero-scan {
-  0% { top: 0; opacity: 0; }
+  0% { transform: translateY(0); opacity: 0; }
   8% { opacity: 0.8; }
   92% { opacity: 0.8; }
-  100% { top: 100%; opacity: 0; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
 @keyframes twinsHero-float {
   0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }

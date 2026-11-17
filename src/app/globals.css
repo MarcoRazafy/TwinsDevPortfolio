@@ -127,6 +127,15 @@ body {
   color: transparent;
 }
 
+/* Fluidité : une section hors écran (attribut posé par PauseHorsEcran) fige ses animations en boucle.
+   Elles reprennent là où elles en étaient dès que la section revient à l'écran. */
+[data-pause],
+[data-pause] *,
+[data-pause] *::before,
+[data-pause] *::after {
+  animation-play-state: paused !important;
+}
+
 /* Halo qui respire derrière un portrait (section À propos) */
 @keyframes aura-breathe {
   from { transform: scale(0.94); opacity: 0.75; }

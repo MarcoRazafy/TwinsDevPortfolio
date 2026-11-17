@@ -189,6 +189,7 @@ export default function ProjectsHologram({ projects, categories }: Props) {
     let last = 0;
     let visible = true;
     let presence = 0;
+    let lastPaint = 0; // dernier dessin du canvas (limité à ~30 images/s, voir plus bas)
     let frontKey: string | null = null;
     const size = { w: 0, h: 0, dpr: 1, r: 0, rx: 0, ry: 0 };
 
@@ -320,6 +321,11 @@ export default function ProjectsHologram({ projects, categories }: Props) {
         frontKey = best;
         setActiveKey(best);
       }
+
+      // Le canvas est redessiné à ~30 images/s : c'est l'opération la plus coûteuse de la page, et sur une
+      // rotation lente l'œil ne voit pas la différence. Les cartes et légendes (DOM) restent à 60 images/s.
+      if (ts - lastPaint < 30) return;
+      lastPaint = ts;
 
       // Dessin : arrière de l'anneau, faisceaux arrière, globe, avant de l'anneau, faisceaux avant
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
