@@ -1,16 +1,18 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  AtSign,
   Boxes,
   Building2,
   Cloud,
   CreditCard,
   Globe,
   Layers,
-  ScreenShare,
+  MonitorSmartphone,
+  Search,
   Server,
+  ShieldCheck,
   Smartphone,
   Terminal,
+  Video,
   Webhook,
   Workflow,
 } from "lucide-react";
@@ -92,11 +94,29 @@ export type Specialty = { icon: LucideIcon; title: string; text: string };
 export const SPECIALTIES: Specialty[] = [
   { icon: Webhook, title: "API & intégrations", text: "Relier vos outils entre eux : API REST, webhooks, services tiers." },
   { icon: CreditCard, title: "Paiement en ligne", text: "Stripe et autres solutions : paiements, abonnements, factures." },
-  { icon: AtSign, title: "Noms de domaine", text: "Achat, renouvellement et configuration DNS de vos domaines." },
   { icon: Workflow, title: "Automatisation", text: "Workflows n8n, bots et tâches répétitives qui tournent toutes seules." },
-  { icon: ScreenShare, title: "Accès à distance", text: "Accès sécurisé à vos serveurs et à vos postes, où que vous soyez." },
   { icon: Building2, title: "ERP & CRM", text: "Clients, ventes, stocks : outils sur mesure ou intégration de l'existant." },
   { icon: Boxes, title: "SaaS", text: "Concevoir et lancer votre logiciel en ligne, vendu par abonnement." },
+  {
+    icon: Search,
+    title: "Indexation",
+    text: "Votre site trouvable sur Google : structure, mots-clés, données enrichies et suivi des positions.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Sécurisation (application et serveur)",
+    text: "HTTPS, pare-feu, accès limités, mots de passe chiffrés, sauvegardes et mises à jour suivies.",
+  },
+  {
+    icon: MonitorSmartphone,
+    title: "Responsive",
+    text: "Le même site, net et agréable sur téléphone, tablette et ordinateur, sans rien perdre au passage.",
+  },
+  {
+    icon: Video,
+    title: "WebRTC",
+    text: "Appels audio et vidéo, partage d'écran et messages en direct dans le navigateur, sans rien installer.",
+  },
 ];
 
 export type Step = { title: string; text: string };
