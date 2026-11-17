@@ -33,10 +33,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   /* Preuve que le site nous appartient, pour Google Search Console et Bing Webmaster Tools.
-     On colle le code donné par l'outil dans une variable d'environnement à l'hébergement :
-     NEXT_PUBLIC_GOOGLE_VERIFICATION et NEXT_PUBLIC_BING_VERIFICATION. Sans elles, rien n'est ajouté. */
+     Ces codes ne sont pas secrets : ils sont visibles dans la page pour tout le monde.
+     Celui de Bing s'ajoute à l'hébergement avec NEXT_PUBLIC_BING_VERIFICATION. */
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ?? "j5d0VK5quZi3sXCaalqf3Hfes0FMRcJ_1595U4dWrAU",
     other: process.env.NEXT_PUBLIC_BING_VERIFICATION
       ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
       : {},
