@@ -495,9 +495,12 @@ export async function saveTestimonial(_prev: ActionState, fd: FormData): Promise
 const QUOTE_MAX = 600;
 
 /**
- * Met en forme un avis à partir de ce que le client a réellement dit (notes, message vocal retranscrit,
- * phrases jetées en vrac). L'IA reformule, elle n'invente pas : sans notes, elle refuse.
- * Un avis inventé serait un faux avis — interdit par la loi et mauvais pour la réputation.
+ * Propose un texte d'avis : soit en mettant en forme les notes du client (ce qu'il a dit, même en vrac),
+ * soit, si le champ est vide, en rédigeant une proposition à partir du nom de l'entreprise et du projet.
+ *
+ * Dans les deux cas c'est un brouillon : il doit être relu et approuvé par le client avant publication.
+ * Publié sans cet accord, ce serait un faux avis attribué à une personne réelle — interdit par la loi.
+ * D'où la consigne ci-dessous : aucun chiffre, délai ni résultat inventé, qui rendrait le faux vérifiable.
  */
 export async function suggestTestimonial(input: {
   notes: string;
@@ -507,23 +510,26 @@ export async function suggestTestimonial(input: {
 }): Promise<{ texte: string } | { error: string }> {
   if (!(await getAdmin())) return { error: "Session expirée : reconnectez-vous." };
 
-  const notes = String(input?.notes ?? "").trim().slice(0, 1500);
-  if (notes.length < 15) {
-    return { error: "Écrivez d'abord ce que le client a dit, même en vrac : l'assistant met en forme, il n'invente pas." };
-  }
   if (!hasApiKey()) return { error: "Assistant indisponible : clé d'API absente." };
 
+  const notes = String(input?.notes ?? "").trim().slice(0, 1500);
   const company = String(input?.company ?? "").trim().slice(0, 80);
   const author = String(input?.author ?? "").trim().slice(0, 80);
   const role = String(input?.role ?? "").trim().slice(0, 100);
+  const aDesNotes = notes.length >= 15;
 
   const consigne = [
-    "Tu mets en forme l'avis d'un client d'une équipe de développeurs web (TwinsDev).",
-    "Tu reçois des notes brutes : ce que le client a réellement dit.",
-    "Réécris-les en un témoignage naturel, à la première personne, en français.",
-    "Règles : 2 à 3 phrases, 600 caractères maximum, ton sobre et crédible, pas de superlatifs vides",
-    "(« incroyable », « exceptionnel »), pas d'emoji, pas de guillemets autour du texte.",
-    "N'ajoute aucun fait absent des notes : ni chiffre, ni délai, ni nom d'outil, ni résultat commercial.",
+    "Tu rédiges l'avis d'un client d'une équipe de développeurs web appelée TwinsDev.",
+    "TwinsDev crée des sites vitrines, des boutiques en ligne, des plateformes et des applications web et",
+    "mobiles, configure des serveurs, héberge et gère le cloud. Elle est basée à Madagascar.",
+    aDesNotes
+      ? "Tu reçois des notes : ce que le client a dit. Réécris-les en un témoignage naturel, sans rien ajouter d'autre."
+      : "Tu n'as pas de notes : rédige une proposition de témoignage plausible, que le client relira et corrigera.",
+    "Règles : à la première personne, en français, 2 à 3 phrases, 600 caractères maximum.",
+    "Ton sobre et crédible : pas de superlatif vide (« incroyable », « exceptionnel »), pas d'emoji,",
+    "pas de guillemets autour du texte, pas de formule publicitaire.",
+    "N'invente aucun fait vérifiable : ni chiffre, ni pourcentage, ni délai, ni montant, ni nom d'outil,",
+    "ni résultat commercial. Reste sur le ressenti : écoute, clarté des échanges, sérieux, résultat livré.",
     "Réponds uniquement par le témoignage, sans introduction.",
     company && `Entreprise du client : ${company}.`,
     author && `Personne qui parle : ${author}${role ? `, ${role}` : ""}.`,
@@ -531,8 +537,12 @@ export async function suggestTestimonial(input: {
     .filter(Boolean)
     .join(" ");
 
+  const demande = aDesNotes
+    ? notes
+    : `Rédige une proposition d'avis pour ${company || "ce client"}${role ? `, signée par son ${role.toLowerCase()}` : ""}.`;
+
   try {
-    const flux = await streamChat(consigne, [{ role: "user", content: notes }]);
+    const flux = await streamChat(consigne, [{ role: "user", content: demande }]);
     const texte = (await new Response(flux).text()).trim().replace(/^["«\s]+|["»\s]+$/g, "");
     if (!texte) return { error: "L'assistant n'a rien renvoyé. Réessayez." };
     return { texte: texte.slice(0, QUOTE_MAX) };

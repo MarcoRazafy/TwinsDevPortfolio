@@ -173,7 +173,7 @@ function TestimonialEditor({
         <Field
           label="Texte de l'avis *"
           htmlFor="t-quote"
-          hint="Avec l'accord du client. 600 caractères maximum. Notez ce qu'il vous a dit, même en vrac : le bouton le met en forme."
+          hint="600 caractères maximum. Le bouton propose un texte, à partir de vos notes ou du nom de l'entreprise. À faire valider par le client avant publication."
         >
           <textarea
             ref={quoteRef}
@@ -258,10 +258,10 @@ function MettreEnForme({ onTexte }: { onTexte: (texte: string) => void }) {
         className="inline-flex h-9 items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 text-[13px] font-medium text-accent-strong transition-colors hover:bg-accent/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {occupe ? <LoaderCircle size={15} className="animate-spin" aria-hidden /> : <Sparkles size={15} aria-hidden />}
-        {occupe ? "Rédaction…" : "Mettre en forme"}
+        {occupe ? "Rédaction…" : "Proposer un texte"}
       </button>
-      <p role="status" className={`text-[12.5px] ${etat.erreur ? "text-red-300" : "text-white/50"}`}>
-        {etat.erreur ?? (etat.fait ? "Proposition insérée : relisez-la et faites-la valider par le client." : "")}
+      <p role="status" className={`text-[12.5px] ${etat.erreur ? "text-red-300" : "text-amber-200/80"}`}>
+        {etat.erreur ?? (etat.fait ? "Brouillon inséré. Envoyez-le au client : il doit l'approuver avant publication." : "")}
       </p>
     </div>
   );
