@@ -5,7 +5,7 @@ export const SITE = {
       Se règle à l'hébergement avec NEXT_PUBLIC_SITE_URL si le domaine change. */
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://twinsdev.ucan-mih.com").replace(/\/$/, ""),
   email: "",
-  linkedin: "https://www.linkedin.com/in/twins-dev-a9a745445/",
+  linkedin: "https://www.linkedin.com/in/twinsdev/",
   github: "",
   /** Ville / zone d'intervention, affichée dans le contact (facultatif). */
   location: "",
