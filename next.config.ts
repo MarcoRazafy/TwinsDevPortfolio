@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Image Docker légère : seul le serveur autonome et les fichiers utilisés partent en production.
+  output: "standalone",
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
