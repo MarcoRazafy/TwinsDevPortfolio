@@ -28,9 +28,10 @@ export default function SiteFooter() {
               </a>
             )}
           </div>
-          <nav aria-label="Pied de page" className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-muted">
+          {/* min-h-9 : une cible assez haute pour le doigt, même si le texte ne fait qu'une ligne */}
+          <nav aria-label="Pied de page" className="flex flex-wrap gap-x-5 gap-y-1 text-[14px] text-muted">
             {SECTIONS.map((s) => (
-              <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-white">
+              <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-9 items-center rounded-md px-1 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 {s.label}
               </a>
             ))}
@@ -61,7 +62,10 @@ export default function SiteFooter() {
           </div>
         )}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 pt-6 text-[13px] text-muted">
-          <Link href="/confidentialite" className="transition-colors hover:text-white">
+          <Link
+            href="/confidentialite"
+            className="inline-flex min-h-9 items-center rounded-md px-1 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             Politique de confidentialité
           </Link>
           <span className="ml-auto">

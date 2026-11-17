@@ -318,7 +318,12 @@ export default function ContactSection() {
               {SITE.linkedin && (
                 <>
                   {" "}
-                  <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 text-accent-strong hover:underline">
+                  <a
+                    href={SITE.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-9 items-center gap-0.5 rounded-md px-0.5 align-middle text-accent-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     LinkedIn <ArrowUpRight size={12} aria-hidden />
                   </a>
                 </>
