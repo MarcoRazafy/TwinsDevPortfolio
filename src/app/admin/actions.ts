@@ -525,7 +525,7 @@ export async function suggestTestimonial(input: {
     aDesNotes
       ? "Tu reçois des notes : ce que le client a dit. Réécris-les en un témoignage naturel, sans rien ajouter d'autre."
       : "Tu n'as pas de notes : rédige une proposition de témoignage plausible, que le client relira et corrigera.",
-    "Règles : à la première personne, en français, exactement 2 phrases, 300 caractères maximum.",
+    "Règles : à la première personne, en français, exactement 2 phrases, 200 caractères maximum.",
     "Ton sobre et crédible : pas de superlatif vide (« incroyable », « exceptionnel »), pas d'emoji,",
     "pas de guillemets autour du texte, pas de formule publicitaire.",
     "N'invente aucun fait vérifiable : ni chiffre, ni pourcentage, ni délai, ni montant, ni nom d'outil,",
