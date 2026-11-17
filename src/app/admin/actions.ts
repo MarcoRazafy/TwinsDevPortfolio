@@ -23,6 +23,7 @@ import {
   type Project,
 } from "@/lib/projects";
 import type { SkillGroup, Twin } from "@/lib/team";
+import { AiError, hasApiKey, streamChat } from "@/lib/ai-chat";
 import { TESTIMONIAL_MAX, type Testimonial } from "@/lib/testimonials";
 import { TECH, type TechKey } from "@/lib/tech";
 
@@ -488,6 +489,58 @@ export async function saveTestimonial(_prev: ActionState, fd: FormData): Promise
   await deleteUpload(replaced);
   updateTag(CONTENT_TAG);
   return { ok: true, message: original ? "Avis mis à jour." : "Avis ajouté." };
+}
+
+/** Longueur maximale du texte d'un avis, comme dans le formulaire. */
+const QUOTE_MAX = 600;
+
+/**
+ * Met en forme un avis à partir de ce que le client a réellement dit (notes, message vocal retranscrit,
+ * phrases jetées en vrac). L'IA reformule, elle n'invente pas : sans notes, elle refuse.
+ * Un avis inventé serait un faux avis — interdit par la loi et mauvais pour la réputation.
+ */
+export async function suggestTestimonial(input: {
+  notes: string;
+  company: string;
+  author: string;
+  role: string;
+}): Promise<{ texte: string } | { error: string }> {
+  if (!(await getAdmin())) return { error: "Session expirée : reconnectez-vous." };
+
+  const notes = String(input?.notes ?? "").trim().slice(0, 1500);
+  if (notes.length < 15) {
+    return { error: "Écrivez d'abord ce que le client a dit, même en vrac : l'assistant met en forme, il n'invente pas." };
+  }
+  if (!hasApiKey()) return { error: "Assistant indisponible : clé d'API absente." };
+
+  const company = String(input?.company ?? "").trim().slice(0, 80);
+  const author = String(input?.author ?? "").trim().slice(0, 80);
+  const role = String(input?.role ?? "").trim().slice(0, 100);
+
+  const consigne = [
+    "Tu mets en forme l'avis d'un client d'une équipe de développeurs web (TwinsDev).",
+    "Tu reçois des notes brutes : ce que le client a réellement dit.",
+    "Réécris-les en un témoignage naturel, à la première personne, en français.",
+    "Règles : 2 à 3 phrases, 600 caractères maximum, ton sobre et crédible, pas de superlatifs vides",
+    "(« incroyable », « exceptionnel »), pas d'emoji, pas de guillemets autour du texte.",
+    "N'ajoute aucun fait absent des notes : ni chiffre, ni délai, ni nom d'outil, ni résultat commercial.",
+    "Réponds uniquement par le témoignage, sans introduction.",
+    company && `Entreprise du client : ${company}.`,
+    author && `Personne qui parle : ${author}${role ? `, ${role}` : ""}.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  try {
+    const flux = await streamChat(consigne, [{ role: "user", content: notes }]);
+    const texte = (await new Response(flux).text()).trim().replace(/^["«\s]+|["»\s]+$/g, "");
+    if (!texte) return { error: "L'assistant n'a rien renvoyé. Réessayez." };
+    return { texte: texte.slice(0, QUOTE_MAX) };
+  } catch (e) {
+    // Les messages d'AiError sont écrits pour être lus (clé refusée, limite atteinte…) : on les reprend tels quels
+    const cause = e instanceof AiError ? e.message : "";
+    return { error: cause ? `Assistant indisponible : ${cause.toLowerCase()}.` : "L'assistant est momentanément indisponible. Réessayez dans un instant." };
+  }
 }
 
 export async function deleteTestimonial(id: string): Promise<ActionState> {

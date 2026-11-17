@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition, type MouseEvent } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowUp, LoaderCircle, Pencil, Plus, Save, Trash2, X } from "lucide-react";
-import { deleteTestimonial, moveTestimonial, saveTestimonial, type ActionState } from "@/app/admin/actions";
+import { ArrowDown, ArrowUp, LoaderCircle, Pencil, Plus, Save, Sparkles, Trash2, X } from "lucide-react";
+import { deleteTestimonial, moveTestimonial, saveTestimonial, suggestTestimonial, type ActionState } from "@/app/admin/actions";
 import { TESTIMONIAL_MAX, initials, type Testimonial } from "@/lib/testimonials";
 import { Field, Fieldset, ImageInput, Status, inputClass, keepValuesOnSubmit } from "./ui";
 
@@ -135,6 +135,7 @@ function TestimonialEditor({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
+  const quoteRef = useRef<HTMLTextAreaElement>(null);
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, fd) => {
     const result = await saveTestimonial(prev, fd);
     if (result?.ok) onSaved(result.message);
@@ -169,8 +170,29 @@ function TestimonialEditor({
       </Fieldset>
 
       <Fieldset legend="Avis">
-        <Field label="Texte de l'avis *" htmlFor="t-quote" hint="Avec l'accord du client. 600 caractères maximum.">
-          <textarea id="t-quote" name="quote" required maxLength={600} rows={5} defaultValue={t?.quote} className={inputClass} />
+        <Field
+          label="Texte de l'avis *"
+          htmlFor="t-quote"
+          hint="Avec l'accord du client. 600 caractères maximum. Notez ce qu'il vous a dit, même en vrac : le bouton le met en forme."
+        >
+          <textarea
+            ref={quoteRef}
+            id="t-quote"
+            name="quote"
+            required
+            maxLength={600}
+            rows={5}
+            defaultValue={t?.quote}
+            className={inputClass}
+          />
+          <MettreEnForme
+            onTexte={(texte) => {
+              const zone = quoteRef.current;
+              if (!zone) return;
+              zone.value = texte;
+              zone.focus();
+            }}
+          />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nom du responsable *" htmlFor="t-author">
@@ -194,6 +216,54 @@ function TestimonialEditor({
         </button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Met en forme l'avis à partir des notes déjà saisies : l'assistant reformule ce que le client a dit,
+ * il n'invente rien. Le texte obtenu reste modifiable et doit être relu par le client avant publication.
+ */
+function MettreEnForme({ onTexte }: { onTexte: (texte: string) => void }) {
+  const [etat, setEtat] = useState<{ erreur?: string; fait?: boolean }>({});
+  const [occupe, setOccupe] = useState(false);
+
+  const lancer = async (e: MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.form;
+    if (!form || occupe) return;
+    const valeur = (nom: string) => (form.elements.namedItem(nom) as HTMLInputElement | null)?.value ?? "";
+
+    setOccupe(true);
+    setEtat({});
+    const r = await suggestTestimonial({
+      notes: valeur("quote"),
+      company: valeur("company"),
+      author: valeur("author"),
+      role: valeur("role"),
+    });
+    setOccupe(false);
+
+    if ("error" in r) setEtat({ erreur: r.error });
+    else {
+      onTexte(r.texte);
+      setEtat({ fait: true });
+    }
+  };
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <button
+        type="button"
+        onClick={lancer}
+        disabled={occupe}
+        className="inline-flex h-9 items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 text-[13px] font-medium text-accent-strong transition-colors hover:bg-accent/20 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {occupe ? <LoaderCircle size={15} className="animate-spin" aria-hidden /> : <Sparkles size={15} aria-hidden />}
+        {occupe ? "Rédaction…" : "Mettre en forme"}
+      </button>
+      <p role="status" className={`text-[12.5px] ${etat.erreur ? "text-red-300" : "text-white/50"}`}>
+        {etat.erreur ?? (etat.fait ? "Proposition insérée : relisez-la et faites-la valider par le client." : "")}
+      </p>
+    </div>
   );
 }
 
