@@ -4,11 +4,11 @@ export const SITE = {
   /** Adresse publique du site, sans barre finale : sert au sitemap, au robots.txt et aux liens de partage.
       Se règle à l'hébergement avec NEXT_PUBLIC_SITE_URL si le domaine change. */
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://twinsdev.ucan-mih.com").replace(/\/$/, ""),
-  email: "",
+  email: "twinsdev.next@gmail.com",
   linkedin: "https://www.linkedin.com/in/twinsdev/",
   github: "",
   /** Ville / zone d'intervention, affichée dans le contact (facultatif). */
-  location: "",
+  location: "Madagascar",
   /** Téléphones, affichés dans le pied de page : `display` tel qu'écrit à Madagascar, `tel` au format international (lien d'appel). */
   phones: [
     { display: "034 38 517 75", tel: "+261343851775" },

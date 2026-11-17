@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import LegalPage from "@/components/sections/LegalPage";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = { title: `Politique de confidentialité — ${SITE.name}` };
+export const metadata: Metadata = {
+  title: `Politique de confidentialité — ${SITE.name}`,
+  description: `Quelles données ${SITE.name} collecte, combien de temps elles sont conservées, qui y a accès et comment demander leur suppression.`,
+  alternates: { canonical: "/confidentialite" },
+};
 
 /* Modèle à compléter. Il décrit ce que le site fait réellement aujourd'hui : formulaire de contact et assistant
    (conversations envoyées à Mistral AI pour générer les réponses). À mettre à jour si ça change. */

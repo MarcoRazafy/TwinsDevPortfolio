@@ -9,6 +9,7 @@ import SloganSection from "@/components/sections/SloganSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import PhoneStage from "@/components/phone/PhoneStage";
 import ProjectsSection from "@/components/projects/ProjectsSection";
+import StructuredData from "@/components/seo/StructuredData";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -21,8 +22,12 @@ export default function Home({ searchParams }: Props) {
 
   return (
     <main className="flex flex-1 flex-col">
+      {/* Données structurées : qui nous sommes, nos services et nos réponses, pour Google et les IA */}
+      <StructuredData />
       {/* Titre principal de la page (lecteurs d'écran, moteurs de recherche) : l'accueil visible est le téléphone */}
-      <h1 className="sr-only">TwinsDev — Marco &amp; Loïc, développeurs web : sites, applications et serveurs sur mesure</h1>
+      <h1 className="sr-only">
+        TwinsDev — Développeurs web à Madagascar : sites vitrines, boutiques en ligne, applications et serveurs sur mesure
+      </h1>
       {/* À l'arrivée : le téléphone seul. Les sections passées en enfants n'apparaissent qu'une fois allumé. */}
       <PhoneStage background={background}>
         <SiteNav />

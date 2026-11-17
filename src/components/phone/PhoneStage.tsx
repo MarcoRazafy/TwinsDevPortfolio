@@ -149,14 +149,15 @@ export default function PhoneStage({ background, children }: Props) {
         </motion.a>
       </section>
 
-      {/* Le reste du site n'existe qu'une fois le téléphone allumé */}
-      {on && (
-        <motion.div
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="relative isolate overflow-hidden bg-[#05070c]"
-        >
+      {/* Le reste du site est toujours présent dans la page : les moteurs et les IA doivent pouvoir le lire sans
+          allumer le téléphone. Il reste masqué et inerte tant qu'on n'a pas allumé, donc l'expérience ne change pas. */}
+      <motion.div
+        inert={!on}
+        initial={false}
+        animate={{ opacity: on ? 1 : 0 }}
+        transition={reduce ? { duration: 0 } : { duration: 0.8, delay: on ? 0.6 : 0 }}
+        className={`relative isolate overflow-hidden bg-[#05070c] ${on ? "" : "hidden"}`}
+      >
           {/* Un seul fond pour toutes les sections : trame de points et halos répartis sur la hauteur */}
           <div
             aria-hidden
@@ -166,9 +167,8 @@ export default function PhoneStage({ background, children }: Props) {
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,transparent,#000_10%)] bg-[radial-gradient(55%_18%_at_50%_4%,rgba(34,197,94,0.14),transparent_70%),radial-gradient(45%_14%_at_92%_22%,rgba(129,140,248,0.09),transparent_70%),radial-gradient(45%_14%_at_6%_46%,rgba(45,212,191,0.1),transparent_70%),radial-gradient(45%_12%_at_90%_64%,rgba(34,197,94,0.08),transparent_70%),radial-gradient(55%_16%_at_15%_92%,rgba(34,197,94,0.12),transparent_70%)]"
           />
-          {children}
-        </motion.div>
-      )}
+        {children}
+      </motion.div>
     </>
   );
 }

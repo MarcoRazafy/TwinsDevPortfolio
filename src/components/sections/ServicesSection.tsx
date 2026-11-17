@@ -129,9 +129,9 @@ function SpecialtyRow({ item, index }: { item: Specialty; index: number }) {
       <Chip className="h-9 w-9 rounded-xl">
         <Icon size={18} strokeWidth={2.2} aria-hidden className="transition-transform duration-300 group-hover:scale-110" />
       </Chip>
-      <h4 className="min-w-0 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug text-white/85 transition-colors duration-300 group-hover:text-white">
+      <h3 className="min-w-0 font-[family-name:var(--font-display)] text-[1.02rem] font-semibold leading-snug text-white/85 transition-colors duration-300 group-hover:text-white">
         {item.title}
-      </h4>
+      </h3>
     </motion.li>
   );
 }
@@ -193,7 +193,7 @@ export default function ServicesSection() {
               Ce qu&apos;on peut faire <span className="text-glow">pour vous</span>
             </>
           }
-          lede="Du site web au serveur : on conçoit, on développe, on héberge et on maintient. Chaque projet est chiffré sur devis, après un premier échange."
+          lede="TwinsDev est une équipe de développeurs web basée à Madagascar : Marco et Loïc. Du site web au serveur, on conçoit, on développe, on héberge et on maintient. Chaque projet est chiffré sur devis, après un premier échange."
         />
 
         {/* ── 01 · Ce qu'on fait ── */}
@@ -220,7 +220,7 @@ export default function ServicesSection() {
                   className="absolute -top-[7px] left-0 h-3 w-3 rounded-full bg-accent shadow-[0_0_0_5px_#05070c,0_0_18px_rgba(34,197,94,0.8)]"
                 />
                 <span className="font-mono text-[12.5px] text-accent">{pad(i + 1)}</span>
-                <h4 className="font-[family-name:var(--font-display)] text-[1.08rem] font-semibold">{step.title}</h4>
+                <h3 className="font-[family-name:var(--font-display)] text-[1.08rem] font-semibold">{step.title}</h3>
                 <p className="text-[14.5px] leading-relaxed text-muted">{step.text}</p>
               </motion.li>
             ))}

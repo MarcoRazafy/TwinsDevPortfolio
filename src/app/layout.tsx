@@ -21,9 +21,9 @@ const sora = Sora({
   display: "swap",
 });
 
-const TITLE = "TwinsDev — Marco & Loïc, développeurs web";
+const TITLE = "TwinsDev — Développeurs web à Madagascar";
 const DESCRIPTION =
-  "Une équipe de développeurs web qui conçoit et développe des sites vitrines, des boutiques en ligne et des applications web sur mesure.";
+  "Marco et Loïc, développeurs web à Madagascar : sites vitrines, boutiques en ligne, applications web et mobile, serveurs VPS, hébergement et cloud. Sur devis.";
 
 export const metadata: Metadata = {
   // Base des adresses : rend absolus le lien canonique et les images de partage
