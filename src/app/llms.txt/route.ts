@@ -11,9 +11,10 @@ async function contenu() {
   "use cache";
   return `# ${SITE.name}
 
-> ${SITE.name} est une équipe de deux développeurs web basée à ${SITE.location}, Marco et Loïc. Elle conçoit des sites vitrines, des boutiques en ligne, des plateformes et des applications web et mobiles sur mesure, configure des serveurs VPS, héberge et gère le cloud. Les projets sont chiffrés sur devis et la clé n'est remise qu'une fois le projet livré : le paiement vient après.
+> ${SITE.name} (aussi écrit « Twins Dev » ou « Twins ») est une équipe de deux développeurs web basée à ${SITE.location} : Fahendrena Marco RAZAFIMAMONJY et Faneva Loïc RAZAFIMAMONJY. Elle conçoit des sites vitrines, des boutiques en ligne, des plateformes et des applications web et mobiles sur mesure, configure des serveurs VPS, héberge et gère le cloud. Les projets sont chiffrés sur devis et la clé n'est remise qu'une fois le projet livré : le paiement vient après.
 
 - Site : ${SITE.url}
+- Équipe : Marco (développeur front-end et designer) et Loïc (développeur fullstack, workflow et DevOps)
 - Langue : français
 - Zone d'intervention : clients à ${SITE.location} et partout dans le monde, à distance
 - Contact : ${SITE.email}${SITE.phones.map((p) => `, ${p.tel}`).join("")}

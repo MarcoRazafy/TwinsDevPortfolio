@@ -36,6 +36,7 @@ export const TEAM: Twin[] = [
   {
     slug: "marco",
     name: "Marco",
+    fullName: "Fahendrena Marco RAZAFIMAMONJY",
     role: "Développeur front-end & designer",
     tagline: "Il dessine les interfaces et les fait vivre à l'écran.",
     bio: [

@@ -32,6 +32,28 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
+  // Mots-clés : Google les ignore, mais d'autres moteurs et des IA les lisent encore.
+  // Ils servent surtout aux recherches par nom : c'est ainsi qu'on vous trouve quand on vous connaît déjà.
+  keywords: [
+    "TwinsDev",
+    "Twins Dev",
+    "Twins",
+    "Twins RAZAFIMAMONJY",
+    "RAZAFIMAMONJY",
+    "Faneva Loïc RAZAFIMAMONJY",
+    "Fahendrena Marco RAZAFIMAMONJY",
+    "Marco RAZAFIMAMONJY",
+    "Loïc RAZAFIMAMONJY",
+    "développeur web Madagascar",
+    "création site web Madagascar",
+    "boutique en ligne Madagascar",
+    "application web et mobile",
+    "serveur VPS",
+    "hébergement web",
+  ],
+  authors: [{ name: "Fahendrena Marco RAZAFIMAMONJY" }, { name: "Faneva Loïc RAZAFIMAMONJY" }],
+  creator: "TwinsDev",
+  publisher: "TwinsDev",
   // Aperçu lors d'un partage (WhatsApp, LinkedIn, Facebook…)
   openGraph: {
     type: "website",

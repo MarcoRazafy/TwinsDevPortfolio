@@ -18,16 +18,32 @@ export default function StructuredData() {
         "@type": ["Organization", "ProfessionalService"],
         "@id": id,
         name: SITE.name,
-        alternateName: "Twins Dev",
+        // Les autres façons d'écrire le nom : c'est ce qui permet d'être trouvé quand on cherche « twins dev »
+        alternateName: ["Twins Dev", "Twins", "Twins RAZAFIMAMONJY", "TwinsDev Madagascar"],
         url: SITE.url,
         logo: `${SITE.url}/brand/twinsdev-logo-v2.webp`,
         image: `${SITE.url}/brand/twinsdev-logo-v2.webp`,
         description:
           "Équipe de développeurs web : sites vitrines, boutiques en ligne, plateformes et applications web et mobiles sur mesure, configuration de serveurs VPS, hébergement et gestion cloud.",
         slogan: "Notre objectif : vous surprendre.",
+        // Nom complet, prénom et nom de famille : une recherche sur le patronyme doit mener ici
         founder: [
-          { "@type": "Person", name: "Marco", jobTitle: "Développeur front-end & designer" },
-          { "@type": "Person", name: "Loïc", jobTitle: "Développeur fullstack · Workflow & DevOps" },
+          {
+            "@type": "Person",
+            name: "Fahendrena Marco RAZAFIMAMONJY",
+            alternateName: ["Marco", "Marco RAZAFIMAMONJY"],
+            givenName: "Fahendrena Marco",
+            familyName: "RAZAFIMAMONJY",
+            jobTitle: "Développeur front-end & designer",
+          },
+          {
+            "@type": "Person",
+            name: "Faneva Loïc RAZAFIMAMONJY",
+            alternateName: ["Loïc", "Loïc RAZAFIMAMONJY"],
+            givenName: "Faneva Loïc",
+            familyName: "RAZAFIMAMONJY",
+            jobTitle: "Développeur fullstack · Workflow & DevOps",
+          },
         ],
         address: { "@type": "PostalAddress", addressCountry: "MG" },
         areaServed: { "@type": "Place", name: "Monde entier" },
