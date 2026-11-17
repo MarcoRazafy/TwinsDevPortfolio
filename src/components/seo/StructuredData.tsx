@@ -21,8 +21,8 @@ export default function StructuredData() {
         // Les autres façons d'écrire le nom : c'est ce qui permet d'être trouvé quand on cherche « twins dev »
         alternateName: ["Twins Dev", "Twins", "Twins RAZAFIMAMONJY", "TwinsDev Madagascar"],
         url: SITE.url,
-        logo: `${SITE.url}/brand/twinsdev-logo-v2.webp`,
-        image: `${SITE.url}/brand/twinsdev-logo-v2.webp`,
+        logo: `${SITE.url}/brand/twinsdev-logo-v3.webp`,
+        image: `${SITE.url}/brand/twinsdev-logo-v3.webp`,
         description:
           "Équipe de développeurs web : sites vitrines, boutiques en ligne, plateformes et applications web et mobiles sur mesure, configuration de serveurs VPS, hébergement et gestion cloud.",
         slogan: "Notre objectif : vous surprendre.",

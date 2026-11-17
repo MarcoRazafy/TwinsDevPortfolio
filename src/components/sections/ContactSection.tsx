@@ -195,7 +195,7 @@ export default function ContactSection() {
               <AnalogClock reduce={reduce} />
               <div className="flex min-w-0 flex-col gap-3">
                 <div className={`relative grid aspect-square place-items-center overflow-hidden rounded-[22px] ${INSET} bg-[radial-gradient(circle_at_30%_25%,rgba(74,222,128,0.18),transparent_60%),#0a0f13]`}>
-                  <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-[62%] drop-shadow-[0_6px_18px_rgba(34,197,94,0.45)]" />
+                  <Image src="/brand/twinsdev-mark-v3.webp" alt="" width={747} height={382} className="h-auto w-[62%] drop-shadow-[0_6px_18px_rgba(34,197,94,0.45)]" />
                   <span aria-hidden className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent shadow-[0_0_10px_rgba(74,222,128,0.9)]" />
                 </div>
                 <p className="truncate px-1 text-[12px] text-white/55">TwinsDev · Marco &amp; Loïc</p>

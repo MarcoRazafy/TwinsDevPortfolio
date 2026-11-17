@@ -71,9 +71,10 @@ export const metadata: Metadata = {
     url: "/",
     title: TITLE,
     description: DESCRIPTION,
-    images: [{ url: "/brand/twinsdev-logo-v2.webp", alt: "TwinsDev" }],
+    // Format attendu par les réseaux sociaux : 1200 x 630, avec le fond (un logo détouré y serait illisible)
+    images: [{ url: "/brand/partage.png", width: 1200, height: 630, alt: "TwinsDev — développeurs web à Madagascar" }],
   },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/brand/twinsdev-logo-v2.webp"] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/brand/partage.png"] },
 };
 
 export const viewport: Viewport = {

@@ -18,7 +18,7 @@ type Message = {
   error?: boolean;
 };
 
-const CONTACT = { name: "TwinsDev", avatar: "/brand/twinsdev-mark-v2.webp" };
+const CONTACT = { name: "TwinsDev", avatar: "/brand/twinsdev-mark-v3.webp" };
 const MAX_INPUT = 500;
 /** Le compteur de caractères n'apparaît qu'à l'approche de la limite. */
 const COUNTER_FROM = 400;
@@ -37,7 +37,7 @@ const nowLabel = () => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit",
 function Avatar() {
   return (
     <span className="grid h-6 w-6 place-items-center rounded-full bg-[#0b1a14] ring-1 ring-white/15">
-      <Image src={CONTACT.avatar} alt="" width={480} height={244} sizes="16px" className="h-auto w-[14px]" />
+      <Image src={CONTACT.avatar} alt="" width={747} height={382} sizes="16px" className="h-auto w-[14px]" />
     </span>
   );
 }
@@ -212,10 +212,10 @@ export default function ChatScreen({ onPowerOff, onBack, onConversationStart }: 
       {/* Fond d'écran : logo TwinsDev, dans la partie haute (les messages s'empilent en bas) */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[22%] flex justify-center">
         <Image
-          src="/brand/twinsdev-logo-v2.webp"
+          src="/brand/twinsdev-logo-v3.webp"
           alt=""
-          width={1000}
-          height={761}
+          width={771}
+          height={475}
           sizes="240px"
           className="w-[70%] opacity-55 drop-shadow-[0_0_28px_rgba(255,255,255,0.14)]"
         />
@@ -235,7 +235,7 @@ export default function ChatScreen({ onPowerOff, onBack, onConversationStart }: 
         >
           <ChevronLeft size={22} aria-hidden />
           <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#0b1a14] ring-1 ring-white/15">
-            <Image src={CONTACT.avatar} alt="" width={480} height={244} sizes="24px" className="h-auto w-[22px]" />
+            <Image src={CONTACT.avatar} alt="" width={747} height={382} sizes="24px" className="h-auto w-[22px]" />
             {/* Pastille « en ligne » sur l'avatar */}
             <span aria-hidden className="absolute -bottom-px -right-px h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-[#0a1016]" />
           </span>

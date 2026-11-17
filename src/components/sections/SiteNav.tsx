@@ -18,7 +18,7 @@ export default function SiteNav() {
       {/* Sur mobile, liens plus serrés : les cinq sections tiennent sur la largeur, sans défilement caché */}
       <div className="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-white/10 bg-[#0a0f1a]/95 p-1 pl-2.5 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.9)] [scrollbar-width:none] sm:gap-1 sm:p-1.5 sm:pl-3">
         <a href="#accueil" aria-label="Haut de page" className="mr-0.5 flex min-h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mr-1">
-          <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-5 sm:w-6" />
+          <Image src="/brand/twinsdev-mark-v3.webp" alt="" width={747} height={382} className="h-auto w-5 sm:w-6" />
         </a>
         {SECTIONS.map((s) => (
           <a

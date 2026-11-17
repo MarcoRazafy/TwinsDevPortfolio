@@ -12,7 +12,7 @@ export default function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <a href="#accueil" className="flex items-center gap-2.5 font-[family-name:var(--font-display)] text-[17px] font-semibold">
-              <Image src="/brand/twinsdev-mark-v2.webp" alt="" width={480} height={244} className="h-auto w-7" />
+              <Image src="/brand/twinsdev-mark-v3.webp" alt="" width={747} height={382} className="h-auto w-7" />
               {SITE.name}
             </a>
             {SITE.linkedin && (
