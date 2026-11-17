@@ -32,6 +32,15 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
+  /* Preuve que le site nous appartient, pour Google Search Console et Bing Webmaster Tools.
+     On colle le code donné par l'outil dans une variable d'environnement à l'hébergement :
+     NEXT_PUBLIC_GOOGLE_VERIFICATION et NEXT_PUBLIC_BING_VERIFICATION. Sans elles, rien n'est ajouté. */
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_VERIFICATION
+      ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
+      : {},
+  },
   // Mots-clés : Google les ignore, mais d'autres moteurs et des IA les lisent encore.
   // Ils servent surtout aux recherches par nom : c'est ainsi qu'on vous trouve quand on vous connaît déjà.
   keywords: [
