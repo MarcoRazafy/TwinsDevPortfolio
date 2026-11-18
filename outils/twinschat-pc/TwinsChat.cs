@@ -24,6 +24,8 @@ using Microsoft.Win32;
 static class TwinsChat
 {
     const string URL = "https://twinschat.ucan-mih.com/";
+    // Page d'ouverture : retient que l'appli est installée (TwinsChat ne propose plus de la télécharger), puis ouvre TwinsChat
+    const string LANCEMENT = URL + "appli-windows.html";
     const string NOM = "TwinsChat";
     const string VERSION = "1.0.0";
     const string CLE_DESINSTALLATION = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\TwinsChat";
@@ -128,11 +130,11 @@ static class TwinsChat
         string navigateur = Trouver("msedge.exe", @"Microsoft\Edge\Application\msedge.exe") ?? Trouver("chrome.exe", @"Google\Chrome\Application\chrome.exe");
         if (navigateur != null)
         {
-            Process.Start(navigateur, "--app=" + URL);
+            Process.Start(navigateur, "--app=" + LANCEMENT);
         }
         else
         {
-            Process.Start(URL);
+            Process.Start(LANCEMENT);
         }
     }
 
