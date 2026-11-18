@@ -2,7 +2,8 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Power } from "lucide-react";
+import Image from "next/image";
+import { Download, Power } from "lucide-react";
 import { useClock } from "@/hooks/useClock";
 import { GREETING } from "@/lib/assistant-prompt";
 import { TECH, techColor, type TechKey } from "@/lib/tech";
@@ -17,6 +18,9 @@ const SECTION_APPS: { tech: TechKey; name: string; href: string }[] = [
   { tech: "python", name: "FAQ", href: "#faq" },
   { tech: "nodejs", name: "Contact", href: "#contact" },
 ];
+
+/** Notre messagerie TwinsChat : application web installable depuis son site. */
+const TWINSCHAT_URL = "https://twinschat.ucan-mih.com/";
 
 /** Pastille ronde des icônes (fond sombre, liseré clair, halo de la couleur de la techno). */
 const chip = (tint: string): CSSProperties => ({
@@ -105,6 +109,33 @@ export default function HomeScreen({ onOpenChat, onOpenAdmin, onPowerOff }: Prop
               </span>
             </span>
           </AppButton>
+        </motion.li>
+
+        {/* TwinsChat : notre messagerie, installable (PWA) depuis son site */}
+        <motion.li {...appear(SECTION_APPS.length + 2)} className="flex justify-center">
+          <a
+            href={TWINSCHAT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Télécharger TwinsChat (s'ouvre dans un nouvel onglet)"
+            title="Télécharger TwinsChat"
+            className={APP_CLASS}
+          >
+            <span className="relative grid transition-transform duration-200 group-hover:scale-110">
+              <span className="grid h-[52px] w-[52px] place-items-center overflow-hidden rounded-full" style={chip("#22c55e")}>
+                <Image src="/brand/twinschat.webp" alt="" width={407} height={330} className="h-auto w-[34px]" />
+              </span>
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-accent text-[#03140c] ring-2 ring-[#070a12]"
+              >
+                <Download size={11} strokeWidth={3} />
+              </span>
+            </span>
+            <span aria-hidden className={NAME_CLASS}>
+              TwinsChat
+            </span>
+          </a>
         </motion.li>
       </ul>
 
