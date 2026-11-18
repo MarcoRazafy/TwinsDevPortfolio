@@ -1,12 +1,13 @@
 "use client";
 
-import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { Download, Power } from "lucide-react";
 import { useClock } from "@/hooks/useClock";
 import { GREETING } from "@/lib/assistant-prompt";
 import { TECH, techColor, type TechKey } from "@/lib/tech";
+import { TWINSCHAT_FICHIERS, TWINSCHAT_URL, usePlateforme, type Plateforme } from "@/lib/twinschat";
 import StatusBar from "./StatusBar";
 
 /** Applications de l'écran d'accueil : une icône de langage par section du site (même style que les pastilles de l'accueil). */
@@ -19,25 +20,12 @@ const SECTION_APPS: { tech: TechKey; name: string; href: string }[] = [
   { tech: "nodejs", name: "Contact", href: "#contact" },
 ];
 
-/**
- * Notre messagerie TwinsChat : appli Android (APK) ou installateur Windows, servis depuis public/telechargements
- * (sources : outils/twinschat-pc pour Windows). Les autres systèmes (iPhone, Mac, Linux) n'ont pas de fichier
- * à installer : le lien ouvre le site, d'où on l'ajoute à l'écran d'accueil.
- */
-const TWINSCHAT = {
-  android: { href: "/telechargements/TwinsChat.apk", fichier: "TwinsChat.apk", label: "Télécharger TwinsChat pour Android" },
-  windows: { href: "/telechargements/TwinsChat-Setup.exe", fichier: "TwinsChat-Setup.exe", label: "Télécharger TwinsChat pour Windows" },
-  autre: { href: "https://twinschat.ucan-mih.com/", fichier: null, label: "Ouvrir TwinsChat (nouvel onglet)" },
-} as const;
-type Plateforme = keyof typeof TWINSCHAT;
-
-function detecterPlateforme(): Plateforme {
-  const ua = navigator.userAgent;
-  if (/Android/i.test(ua)) return "android";
-  if (/Windows/i.test(ua)) return "windows";
-  return "autre";
+/** Icône TwinsChat : télécharge l'appli du système (Android, Windows) ; ailleurs, ouvre l'application web. */
+function lienTwinsChat(plateforme: Plateforme) {
+  if (plateforme === "autre") return { href: TWINSCHAT_URL, fichier: null, label: "Ouvrir TwinsChat (nouvel onglet)" };
+  const f = TWINSCHAT_FICHIERS[plateforme];
+  return { href: f.href, fichier: f.fichier, label: `Télécharger TwinsChat pour ${f.systeme}` };
 }
-const pasDAbonnement = () => () => {};
 
 /** Pastille ronde des icônes (fond sombre, liseré clair, halo de la couleur de la techno). */
 const chip = (tint: string): CSSProperties => ({
@@ -58,8 +46,7 @@ type Props = {
 export default function HomeScreen({ onOpenChat, onOpenAdmin, onPowerOff }: Props) {
   const reduce = useReducedMotion() ?? false;
   const clock = useClock();
-  // Côté serveur : « autre » ; dans le navigateur, le système réel (sans écart d'hydratation)
-  const twinschat = TWINSCHAT[useSyncExternalStore(pasDAbonnement, detecterPlateforme, () => "autre" as const)];
+  const twinschat = lienTwinsChat(usePlateforme());
   const appear = (i: number) => ({
     initial: reduce ? false : { opacity: 0, y: 14, scale: 0.9 },
     animate: { opacity: 1, y: 0, scale: 1 },
