@@ -7,7 +7,7 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-rea
 import { initials, type Testimonial } from "@/lib/testimonials";
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-const DURATION = 8; // s par avis en lecture automatique
+const DURATION = 5; // s par avis en lecture automatique
 
 /**
  * Avis clients : rangée de logos (onglets) + grande carte mise en avant. Lecture automatique façon

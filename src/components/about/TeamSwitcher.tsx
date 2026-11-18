@@ -41,7 +41,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
   const select = useCallback((j: number) => setState((p) => (p[0] === j ? p : [j, j > p[0] ? 1 : -1])), []);
   const step = useCallback((s: number) => setState(([i]) => [(i + s + count) % count, s]), [count]);
 
-  /* ── Bascule automatique : 5 s après chaque changement, on passe à l'autre profil ──
+  /* ── Bascule automatique : 10 s après chaque changement, on passe à l'autre profil ──
      Le minuteur repart de zéro quand le visiteur choisit lui-même, et ne tourne pas hors écran. */
   const [onScreen, setOnScreen] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ export default function TeamSwitcher({ team }: { team: Twin[] }) {
 
   useEffect(() => {
     if (!onScreen || count < 2) return;
-    const id = window.setTimeout(() => setState([(index + 1) % count, 1]), 5000);
+    const id = window.setTimeout(() => setState([(index + 1) % count, 1]), 10000);
     return () => window.clearTimeout(id);
   }, [onScreen, count, index]);
 

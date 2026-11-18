@@ -115,7 +115,7 @@ body {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
-.testi-fill { animation: testi-fill 8s linear forwards; }
+.testi-fill { animation: testi-fill 5s linear forwards; }
 
 /* Les arrière-plans vivent dans src/components/backgrounds (un fichier par variante). */
 
