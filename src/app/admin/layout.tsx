@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 
+/* Page privée : elle ne reprend ni la description, ni le lien canonique, ni l'aperçu de partage de l'accueil. */
 export const metadata: Metadata = {
   title: "Administration — TwinsDev",
+  description: "Espace d'administration réservé à l'équipe TwinsDev.",
   robots: { index: false, follow: false },
+  alternates: { canonical: null },
+  openGraph: null,
+  twitter: null,
 };
 
 /** Espace d'administration : fond sombre uni, hors du décor du site public. */

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Lato, Sora } from "next/font/google";
 import { RESTORE_SCRIPT } from "@/components/phone/remember";
-import { SITE } from "@/lib/site";
+import { SITE, SHARE_IMAGE } from "@/lib/site";
 import "./globals.css";
 
 /* Police du texte (Lato n'existe qu'en graisses fixes : 500 et 600 prennent la plus proche) */
@@ -71,10 +71,9 @@ export const metadata: Metadata = {
     url: "/",
     title: TITLE,
     description: DESCRIPTION,
-    // Format attendu par les réseaux sociaux : 1200 x 630, avec le fond (un logo détouré y serait illisible)
-    images: [{ url: "/brand/partage.png", width: 1200, height: 630, alt: "TwinsDev — développeurs web à Madagascar" }],
+    images: [SHARE_IMAGE],
   },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/brand/partage.png"] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [SHARE_IMAGE.url] },
 };
 
 export const viewport: Viewport = {

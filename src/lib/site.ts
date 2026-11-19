@@ -16,6 +16,9 @@ export const SITE = {
   ],
 };
 
+/** Image d'aperçu lors d'un partage (WhatsApp, LinkedIn, Facebook…) : format attendu 1200 x 630, avec le fond. */
+export const SHARE_IMAGE = { url: "/brand/partage.png", width: 1200, height: 630, alt: "TwinsDev — développeurs web à Madagascar" };
+
 /** Sections de la page, dans l'ordre : sert au menu et au pied de page. */
 export const SECTIONS = [
   { id: "projets", label: "Projets" },

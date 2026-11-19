@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/sections/LegalPage";
-import { SITE } from "@/lib/site";
+import { SHARE_IMAGE, SITE } from "@/lib/site";
 
+const TITLE = `Politique de confidentialité — ${SITE.name}`;
+const DESCRIPTION = `Quelles données ${SITE.name} collecte, combien de temps elles sont conservées, qui y a accès et comment demander leur suppression.`;
+
+/* L'aperçu de partage est redéfini en entier : Next.js remplace le bloc openGraph du layout, il ne le complète pas. */
 export const metadata: Metadata = {
-  title: `Politique de confidentialité — ${SITE.name}`,
-  description: `Quelles données ${SITE.name} collecte, combien de temps elles sont conservées, qui y a accès et comment demander leur suppression.`,
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/confidentialite" },
+  openGraph: {
+    type: "article",
+    locale: "fr_FR",
+    siteName: SITE.name,
+    url: "/confidentialite",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [SHARE_IMAGE],
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [SHARE_IMAGE.url] },
 };
 
 /* Modèle à compléter. Il décrit ce que le site fait réellement aujourd'hui : formulaire de contact et assistant
